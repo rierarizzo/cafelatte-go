@@ -36,3 +36,7 @@ func (u *User) isValidEmail() bool {
 func (u *User) isValidPaymentMethod() bool {
 	return u.PaymentMethod == "E" || u.PaymentMethod == "T"
 }
+
+func (u *User) SetPassword(password string) {
+	u.Password = password
+}
