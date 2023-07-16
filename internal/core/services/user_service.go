@@ -28,9 +28,15 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 		return nil, err
 	}
 
+	token, err := utils.CreateJWTToken(*retrievedUser)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
 	authorizedUser := entities.AuthorizedUser{
 		UserInfo:    *retrievedUser,
-		AccessToken: "",
+		AccessToken: *token,
 	}
 
 	return &authorizedUser, nil
