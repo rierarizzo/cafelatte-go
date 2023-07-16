@@ -20,10 +20,6 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 		return nil, err
 	}
 
-	//$2a$10$RFardoww7/iYUhdRhbPOI.RAz8zVBPXmDsBn/sFsdY.GbarB3CjiW
-	//$2a$10$RFardoww7/iYUhdRhbPOI.RAz8zVBPXmDsBn/sFsdY.GbarB3CjiW
-	//$2a$10$RFardoww7/iYUhdRhbPOI.RAz8zVBPXmDsBn/sFsdY.GbarB3CjiW
-	//$2a$10$RFardoww7/iYUhdRhbPOI.RAz8zVBPXmDsBn/sFsdY.GbarB3CjiW
 	user.Password = hashedPassword
 
 	retrievedUser, err := us.userRepo.CreateUser(user)
