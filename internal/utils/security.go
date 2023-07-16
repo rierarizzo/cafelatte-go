@@ -57,11 +57,9 @@ func VerifyJWTToken(tokenString string) (*UserClaims, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	if !token.Valid {
 		return nil, errors.New("invalid token")
 	}
-
 	claims, ok := token.Claims.(UserClaims)
 	if !ok {
 		return nil, errors.New("error while getting claims")
