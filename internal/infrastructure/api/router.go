@@ -8,19 +8,19 @@ import (
 )
 
 func Router(userHandler *handlers.UserHandler) http.Handler {
-	r := gin.Default()
+	router := gin.Default()
 
-	authGroup := r.Group("/auth")
+	authGroup := router.Group("/auth")
 	{
 		authGroup.POST("/signup", userHandler.SignUp)
 		authGroup.POST("/signin", userHandler.SignIn)
 	}
 
-	usersGroup := r.Group("/users")
+	usersGroup := router.Group("/users")
 	{
 		usersGroup.GET("/find", userHandler.GetAllUsers)
 		usersGroup.GET("/find/:userID", userHandler.FindUser)
 	}
 
-	return r
+	return router
 }

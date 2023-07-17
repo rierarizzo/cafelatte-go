@@ -13,3 +13,10 @@ var (
 	ErrUnexpected     = errors.New("unexpected error")
 	ErrBadRequest     = errors.New("bad request")
 )
+
+// Token errors
+var (
+	ErrSignAlgorithmUnexpected = errors.New("sign algorithm unexpected")
+	ErrInvalidToken            = errors.New("invalid token")
+	ErrParsingClaims           = errors.New("parsing claims error")
+)

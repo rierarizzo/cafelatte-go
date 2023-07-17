@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"errors"
+	"github.com/rierarizzo/cafelatte/internal/core"
+	"github.com/sirupsen/logrus"
 	"os"
 	"time"
 
@@ -38,7 +39,8 @@ func CreateJWTToken(user entities.User) (*string, error) {
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		return nil, err
+		logrus.Errorf("error while getting token string: %v", err)
+		return nil, core.ErrUnexpected
 	}
 
 	return &tokenString, nil
@@ -49,20 +51,21 @@ func VerifyJWTToken(tokenString string) (*UserClaims, error) {
 
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("sign algorithm unexpected")
+			return nil, core.ErrSignAlgorithmUnexpected
 		}
 
-		return []byte(secret), nil
+		return secret, nil
 	})
 	if err != nil {
-		return nil, err
+		logrus.Errorf("error while getting token: %v", err)
+		return nil, core.ErrUnexpected
 	}
 	if !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, core.ErrInvalidToken
 	}
 	claims, ok := token.Claims.(UserClaims)
 	if !ok {
-		return nil, errors.New("error while getting claims")
+		return nil, core.ErrParsingClaims
 	}
 
 	return &claims, nil

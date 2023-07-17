@@ -67,6 +67,10 @@ func (us *UserService) FindUserById(id int) (*entities.User, error) {
 	return us.userRepo.GetUserById(id)
 }
 
+func (us *UserService) UpdateUser(userID int, user entities.User) error {
+	return us.userRepo.UpdateUser(userID, user)
+}
+
 func NewUserService(userRepo ports.IUserRepository) *UserService {
 	return &UserService{userRepo}
 }
