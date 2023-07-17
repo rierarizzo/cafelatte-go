@@ -10,14 +10,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	getUserErrorMsg    = "error while retrieving user from database: %v"
+	getUsersErrorMsg   = "error while retrieving users from database: %v"
+	insertUserErrorMsg = "error while inserting user to database: %v"
+)
+
 type UserRepository struct {
 	db *sqlx.DB
 }
-
-const (
-	getUserErrorMsg    = "error while retrieving user from database: %v"
-	insertUserErrorMsg = "error while inserting user to database: %v"
-)
 
 func (ur *UserRepository) GetAllUsers() ([]entities.User, error) {
 	userModel := []models.UserModel{}
@@ -25,6 +26,7 @@ func (ur *UserRepository) GetAllUsers() ([]entities.User, error) {
 	query := "SELECT * FROM user"
 	err := ur.db.Select(&userModel, query)
 	if err != nil {
+		logrus.Errorf(getUsersErrorMsg, err)
 		if err == sql.ErrNoRows {
 			var emptyUsers []entities.User
 			return emptyUsers, nil
