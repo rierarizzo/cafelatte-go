@@ -14,18 +14,18 @@ type UserService struct {
 func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
 	hashedPassword, err := utils.HashText(user.Password)
 	if err != nil {
-		return nil, core.Unexpected
+		return nil, core.ErrUnexpected
 	}
 	user.SetPassword(hashedPassword)
 
 	retrievedUser, err := us.userRepo.CreateUser(user)
 	if err != nil {
-		return nil, core.Unexpected
+		return nil, core.ErrUnexpected
 	}
 
 	token, err := utils.CreateJWTToken(*retrievedUser)
 	if err != nil {
-		return nil, core.Unexpected
+		return nil, core.ErrUnexpected
 	}
 
 	authorizedUser := entities.AuthorizedUser{
@@ -39,16 +39,16 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
 	retrievedUser, err := us.userRepo.GetUserByEmail(email)
 	if err != nil {
-		return nil, core.UnauthorizedUser
+		return nil, core.ErrUnauthorizedUser
 	}
 
 	if !utils.CheckTextHash(retrievedUser.Password, password) {
-		return nil, core.UnauthorizedUser
+		return nil, core.ErrUnauthorizedUser
 	}
 
 	token, err := utils.CreateJWTToken(*retrievedUser)
 	if err != nil {
-		return nil, core.UnauthorizedUser
+		return nil, core.ErrUnauthorizedUser
 	}
 
 	authorizedUser := entities.AuthorizedUser{

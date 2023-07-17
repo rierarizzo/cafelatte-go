@@ -92,9 +92,9 @@ func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error)
 func handleSQLError(sqlError error) error {
 	switch sqlError {
 	case sql.ErrNoRows:
-		return core.RecordNotFound
+		return core.ErrRecordNotFound
 	default:
-		return core.Unexpected
+		return core.ErrUnexpected
 	}
 }
 

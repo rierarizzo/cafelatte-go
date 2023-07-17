@@ -29,7 +29,7 @@ type UserHandler struct {
 func (uc *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	if err := c.BindJSON(&signUpRequest); err != nil {
-		utils.HTTPError(core.BadRequest, c)
+		utils.HTTPError(core.ErrBadRequest, c)
 		return
 	}
 
@@ -60,7 +60,7 @@ func (uc *UserHandler) SignUp(c *gin.Context) {
 func (uc *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	if err := c.BindJSON(&signInRequest); err != nil {
-		utils.HTTPError(core.BadRequest, c)
+		utils.HTTPError(core.ErrBadRequest, c)
 		return
 	}
 
@@ -96,7 +96,7 @@ func (uc *UserHandler) FindUser(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
-		utils.HTTPError(core.BadRequest, c)
+		utils.HTTPError(core.ErrBadRequest, c)
 		return
 	}
 
