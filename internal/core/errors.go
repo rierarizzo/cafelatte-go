@@ -11,4 +11,5 @@ var (
 var (
 	RecordNotFound = errors.New("record not found")
 	Unexpected     = errors.New("unexpected error")
+	BadRequest     = errors.New("bad request")
 )

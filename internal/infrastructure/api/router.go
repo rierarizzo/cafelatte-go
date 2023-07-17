@@ -18,6 +18,7 @@ func Router(userHandler *handlers.UserHandler) http.Handler {
 
 	usersGroup := r.Group("/users")
 	{
+		usersGroup.GET("/find", userHandler.GetAllUsers)
 		usersGroup.GET("/find/:userID", userHandler.FindUser)
 	}
 

@@ -11,6 +11,8 @@ import (
 func HTTPError(coreError error, c *gin.Context) {
 	logrus.Error(coreError)
 	switch coreError {
+	case core.BadRequest:
+		c.AbortWithStatusJSON(http.StatusBadRequest, coreError.Error())
 	case core.RecordNotFound:
 		c.AbortWithStatusJSON(http.StatusNotFound, coreError.Error())
 	case core.UnauthorizedUser:

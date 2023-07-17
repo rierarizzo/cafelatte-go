@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rierarizzo/cafelatte/internal/core"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/utils"
@@ -17,7 +18,7 @@ type UserHandler struct {
 func (uc *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	if err := c.BindJSON(&signUpRequest); err != nil {
-		utils.HTTPError(err, c)
+		utils.HTTPError(core.BadRequest, c)
 		return
 	}
 
@@ -29,13 +30,13 @@ func (uc *UserHandler) SignUp(c *gin.Context) {
 
 	var authResponse dto.AuthResponse
 	authResponse.LoadFromAuthorizedUserCore(*user)
-	c.JSON(http.StatusCreated, authResponse)
+	c.JSON(http.StatusOK, authResponse)
 }
 
 func (uc *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	if err := c.BindJSON(&signInRequest); err != nil {
-		utils.HTTPError(err, c)
+		utils.HTTPError(core.BadRequest, c)
 		return
 	}
 
@@ -47,14 +48,31 @@ func (uc *UserHandler) SignIn(c *gin.Context) {
 
 	var authResponse dto.AuthResponse
 	authResponse.LoadFromAuthorizedUserCore(*user)
-	c.JSON(http.StatusCreated, authResponse)
+	c.JSON(http.StatusOK, authResponse)
+}
+
+func (uc *UserHandler) GetAllUsers(c *gin.Context) {
+	users, err := uc.userService.GetAllUsers()
+	if err != nil {
+		utils.HTTPError(err, c)
+		return
+	}
+
+	var userResponse []dto.UserResponse
+	for _, k := range users {
+		var res dto.UserResponse
+		res.LoadFromUserCore(k)
+		userResponse = append(userResponse, res)
+	}
+
+	c.JSON(http.StatusOK, userResponse)
 }
 
 func (uc *UserHandler) FindUser(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
-		utils.HTTPError(err, c)
+		utils.HTTPError(core.BadRequest, c)
 		return
 	}
 

@@ -19,6 +19,28 @@ const (
 	insertUserErrorMsg = "error while inserting user to database: %v"
 )
 
+func (ur *UserRepository) GetAllUsers() ([]entities.User, error) {
+	userModel := []models.UserModel{}
+
+	query := "SELECT * FROM user"
+	err := ur.db.Select(&userModel, query)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			var emptyUsers []entities.User
+			return emptyUsers, nil
+		} else {
+			handleSQLError(err)
+		}
+	}
+
+	users := []entities.User{}
+	for _, k := range userModel {
+		users = append(users, *k.ToUserCore())
+	}
+
+	return users, nil
+}
+
 func (ur *UserRepository) GetUserById(id int) (*entities.User, error) {
 	userModel := models.UserModel{}
 

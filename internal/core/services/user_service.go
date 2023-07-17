@@ -46,12 +46,21 @@ func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser,
 		return nil, core.UnauthorizedUser
 	}
 
+	token, err := utils.CreateJWTToken(*retrievedUser)
+	if err != nil {
+		return nil, core.UnauthorizedUser
+	}
+
 	authorizedUser := entities.AuthorizedUser{
 		UserInfo:    *retrievedUser,
-		AccessToken: "",
+		AccessToken: *token,
 	}
 
 	return &authorizedUser, nil
+}
+
+func (us *UserService) GetAllUsers() ([]entities.User, error) {
+	return us.userRepo.GetAllUsers()
 }
 
 func (us *UserService) FindUserById(id int) (*entities.User, error) {
