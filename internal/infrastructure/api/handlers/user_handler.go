@@ -15,6 +15,17 @@ type UserHandler struct {
 	userService ports.IUserService
 }
 
+// SignUp es un handler para registrarse en el sistema.
+//
+// Recibe in SignUpRequest, que contiene toda la información del usuario, la
+// guarda en la base de datos, y finalmente retorna un JSON con el ID, nombre
+// apellido y el token JWT generado.
+//
+// Estados HTTP:
+//
+// 400: El SignUpRequest tiene un formato incorrecto.
+// 500: Ha ocurrido un error inesperado al registrar el usuario.
+// 201: El usuario ha sido creado con éxito.
 func (uc *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	if err := c.BindJSON(&signUpRequest); err != nil {
@@ -30,9 +41,22 @@ func (uc *UserHandler) SignUp(c *gin.Context) {
 
 	var authResponse dto.AuthResponse
 	authResponse.LoadFromAuthorizedUserCore(*user)
-	c.JSON(http.StatusOK, authResponse)
+	c.JSON(http.StatusCreated, authResponse)
 }
 
+// SignIn es un handler para iniciar sesión en el sistema.
+//
+// Recibe in SignInRequest, que contiene el correo y la contraseña del usuario, 
+// recupera al usuario de la base de datos usando el correo, valida si la
+// contraseña es correcta y finalmente retorna un JSON con el ID, nombre, apellido
+// y el token JWT generado.
+//
+// Estados HTTP:
+//
+// 400: El SignInRequest tiene un formato incorrecto.
+// 401: El usuario no se encuentra autorizado.
+// 500: Ha ocurrido un error inesperado al registrar el usuario.
+// 201: El usuario ha sido creado con éxito.
 func (uc *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	if err := c.BindJSON(&signInRequest); err != nil {
@@ -90,7 +114,7 @@ func (uc *UserHandler) FindUser(c *gin.Context) {
 		AccessToken: "",
 	}
 
-	c.JSON(http.StatusCreated, authResponse)
+	c.JSON(http.StatusOK, authResponse)
 }
 
 func NewUserHandler(userService ports.IUserService) *UserHandler {

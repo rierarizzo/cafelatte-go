@@ -14,18 +14,18 @@ type UserService struct {
 func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
 	hashedPassword, err := utils.HashText(user.Password)
 	if err != nil {
-		return nil, core.UnauthorizedUser
+		return nil, core.Unexpected
 	}
 	user.SetPassword(hashedPassword)
 
 	retrievedUser, err := us.userRepo.CreateUser(user)
 	if err != nil {
-		return nil, core.UnauthorizedUser
+		return nil, core.Unexpected
 	}
 
 	token, err := utils.CreateJWTToken(*retrievedUser)
 	if err != nil {
-		return nil, core.UnauthorizedUser
+		return nil, core.Unexpected
 	}
 
 	authorizedUser := entities.AuthorizedUser{
