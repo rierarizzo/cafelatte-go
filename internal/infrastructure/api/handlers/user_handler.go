@@ -46,7 +46,7 @@ func (uc *UserHandler) SignUp(c *gin.Context) {
 
 // SignIn es un handler para iniciar sesión en el sistema.
 //
-// Recibe in SignInRequest, que contiene el correo y la contraseña del usuario, 
+// Recibe in SignInRequest, que contiene el correo y la contraseña del usuario,
 // recupera al usuario de la base de datos usando el correo, valida si la
 // contraseña es correcta y finalmente retorna un JSON con el ID, nombre, apellido
 // y el token JWT generado.
