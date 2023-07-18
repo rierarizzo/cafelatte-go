@@ -1,11 +1,11 @@
 package handlers
 
 import (
+	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/internal/core"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/utils"
@@ -29,7 +29,7 @@ type UserHandler struct {
 func (uc *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	if err := c.BindJSON(&signUpRequest); err != nil {
-		utils.HTTPError(core.ErrBadRequest, c)
+		utils.HTTPError(errors.ErrBadRequest, c)
 		return
 	}
 
@@ -60,7 +60,7 @@ func (uc *UserHandler) SignUp(c *gin.Context) {
 func (uc *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	if err := c.BindJSON(&signInRequest); err != nil {
-		utils.HTTPError(core.ErrBadRequest, c)
+		utils.HTTPError(errors.ErrBadRequest, c)
 		return
 	}
 
@@ -96,7 +96,7 @@ func (uc *UserHandler) FindUser(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
-		utils.HTTPError(core.ErrBadRequest, c)
+		utils.HTTPError(errors.ErrBadRequest, c)
 		return
 	}
 

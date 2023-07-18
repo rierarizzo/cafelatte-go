@@ -2,9 +2,9 @@ package repositories
 
 import (
 	"database/sql"
+	"github.com/rierarizzo/cafelatte/internal/core/errors"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/rierarizzo/cafelatte/internal/core"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"github.com/sirupsen/logrus"
@@ -107,9 +107,9 @@ func (ur *UserRepository) UpdateUser(userID int, user entities.User) error {
 func handleSQLError(sqlError error) error {
 	switch sqlError {
 	case sql.ErrNoRows:
-		return core.ErrRecordNotFound
+		return errors.ErrRecordNotFound
 	default:
-		return core.ErrUnexpected
+		return errors.ErrUnexpected
 	}
 }
 

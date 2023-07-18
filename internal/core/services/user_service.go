@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/core"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
+	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
@@ -14,18 +14,18 @@ type UserService struct {
 func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
 	hashedPassword, err := utils.HashText(user.Password)
 	if err != nil {
-		return nil, core.ErrUnexpected
+		return nil, errors.ErrUnexpected
 	}
 	user.SetPassword(hashedPassword)
 
 	retrievedUser, err := us.userRepo.CreateUser(user)
 	if err != nil {
-		return nil, core.ErrUnexpected
+		return nil, errors.ErrUnexpected
 	}
 
 	token, err := utils.CreateJWTToken(*retrievedUser)
 	if err != nil {
-		return nil, core.ErrUnexpected
+		return nil, errors.ErrUnexpected
 	}
 
 	authorizedUser := entities.AuthorizedUser{
@@ -39,16 +39,16 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
 	retrievedUser, err := us.userRepo.GetUserByEmail(email)
 	if err != nil {
-		return nil, core.ErrUnauthorizedUser
+		return nil, errors.ErrUnauthorizedUser
 	}
 
 	if !utils.CheckTextHash(retrievedUser.Password, password) {
-		return nil, core.ErrUnauthorizedUser
+		return nil, errors.ErrUnauthorizedUser
 	}
 
 	token, err := utils.CreateJWTToken(*retrievedUser)
 	if err != nil {
-		return nil, core.ErrUnauthorizedUser
+		return nil, errors.ErrUnauthorizedUser
 	}
 
 	authorizedUser := entities.AuthorizedUser{

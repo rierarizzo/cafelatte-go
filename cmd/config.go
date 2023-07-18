@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/rierarizzo/cafelatte/internal/core/constants"
 	"os"
 )
 
@@ -11,7 +12,7 @@ type Config struct {
 
 func LoadConfig() *Config {
 	return &Config{
-		DSN:     os.Getenv("DSN"),
-		GinMode: os.Getenv("GIN_MODE"),
+		DSN:     os.Getenv(constants.EnvDSN),
+		GinMode: os.Getenv(constants.EnvGinMode),
 	}
 }

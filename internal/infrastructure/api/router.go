@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/middlewares"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,7 @@ func Router(userHandler *handlers.UserHandler) http.Handler {
 	}
 
 	usersGroup := router.Group("/users")
+	usersGroup.Use(middlewares.AuthenticateMiddleware())
 	{
 		usersGroup.GET("/find", userHandler.GetAllUsers)
 		usersGroup.GET("/find/:userID", userHandler.FindUser)

@@ -1,4 +1,4 @@
-package core
+package errors
 
 import "errors"
 
@@ -18,5 +18,5 @@ var (
 var (
 	ErrSignAlgorithmUnexpected = errors.New("sign algorithm unexpected")
 	ErrInvalidToken            = errors.New("invalid token")
-	ErrParsingClaims           = errors.New("parsing claims error")
+	ErrTokenNotPresent         = errors.New("token not present")
 )

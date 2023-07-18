@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/core"
+	"github.com/rierarizzo/cafelatte/internal/core/constants"
+	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/sirupsen/logrus"
 	"os"
 	"time"
@@ -20,7 +21,7 @@ type UserClaims struct {
 }
 
 func CreateJWTToken(user entities.User) (*string, error) {
-	secret := []byte(os.Getenv("SECRET_KEY"))
+	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &UserClaims{
 		ID:      user.ID,
@@ -39,8 +40,8 @@ func CreateJWTToken(user entities.User) (*string, error) {
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		logrus.Errorf("error while getting token string: %v", err)
-		return nil, core.ErrUnexpected
+		logrus.Errorf("error while getting token signed string: %v", err)
+		return nil, errors.ErrUnexpected
 	}
 
 	return &tokenString, nil
@@ -49,26 +50,28 @@ func CreateJWTToken(user entities.User) (*string, error) {
 func VerifyJWTToken(tokenString string) (*UserClaims, error) {
 	secret := []byte(os.Getenv("SECRET_KEY"))
 
-	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+	var userClaims UserClaims
+	token, err := jwt.ParseWithClaims(tokenString, &userClaims, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, core.ErrSignAlgorithmUnexpected
+			return nil, errors.ErrSignAlgorithmUnexpected
 		}
 
 		return secret, nil
 	})
 	if err != nil {
 		logrus.Errorf("error while getting token: %v", err)
-		return nil, core.ErrUnexpected
+		return nil, errors.ErrUnexpected
 	}
 	if !token.Valid {
-		return nil, core.ErrInvalidToken
-	}
-	claims, ok := token.Claims.(UserClaims)
-	if !ok {
-		return nil, core.ErrParsingClaims
+		return nil, errors.ErrInvalidToken
 	}
 
-	return &claims, nil
+	return &userClaims, nil
+}
+
+func JWTTokenIsValid(tokenString string) bool {
+	_, err := VerifyJWTToken(tokenString)
+	return err == nil
 }
 
 func HashText(text string) (string, error) {
