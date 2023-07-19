@@ -29,7 +29,7 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 	}
 
 	authorizedUser := entities.AuthorizedUser{
-		UserInfo:    *retrievedUser,
+		User:        *retrievedUser,
 		AccessToken: *token,
 	}
 
@@ -52,7 +52,7 @@ func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser,
 	}
 
 	authorizedUser := entities.AuthorizedUser{
-		UserInfo:    *retrievedUser,
+		User:        *retrievedUser,
 		AccessToken: *token,
 	}
 

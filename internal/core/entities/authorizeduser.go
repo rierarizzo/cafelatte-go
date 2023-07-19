@@ -1,6 +1,6 @@
 package entities
 
 type AuthorizedUser struct {
-	UserInfo    User
+	User        User
 	AccessToken string
 }

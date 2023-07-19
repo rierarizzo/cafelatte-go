@@ -4,25 +4,25 @@ import "strings"
 
 type User struct {
 	ID          int
+	Username    string
 	Name        string
 	Surname     string
 	PhoneNumber string
 	Email       string
 	Password    string
 	/* A: Administrador, E: Empleado, C: Cliente */
-	Role      string
-	Addresses []Address
-	/* E: Efectivo, T: Tarjeta */
-	PaymentMethod string
-	Card          PaymentCard
+	RoleCode        string
+	RoleDescription string
+	Addresses       []Address
+	PaymentCards    []PaymentCard
 }
 
 func (u *User) IsValidUser() bool {
-	return u.isValidRole() && u.isValidPhoneNumber() && u.isValidEmail() && u.isValidPaymentMethod()
+	return u.isValidRole() && u.isValidPhoneNumber() && u.isValidEmail()
 }
 
 func (u *User) isValidRole() bool {
-	return u.Role == "A" || u.Role == "E" || u.Role == "C"
+	return u.RoleCode == "A" || u.RoleCode == "E" || u.RoleCode == "C"
 }
 
 func (u *User) isValidPhoneNumber() bool {
@@ -31,10 +31,6 @@ func (u *User) isValidPhoneNumber() bool {
 
 func (u *User) isValidEmail() bool {
 	return strings.Contains(u.Email, "@")
-}
-
-func (u *User) isValidPaymentMethod() bool {
-	return u.PaymentMethod == "E" || u.PaymentMethod == "T"
 }
 
 func (u *User) SetPassword(password string) {

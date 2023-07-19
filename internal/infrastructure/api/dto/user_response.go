@@ -21,7 +21,7 @@ type AuthResponse struct {
 
 func (ar *AuthResponse) LoadFromAuthorizedUserCore(authorizedUser entities.AuthorizedUser) {
 	var userResponse UserResponse
-	userResponse.LoadFromUserCore(authorizedUser.UserInfo)
+	userResponse.LoadFromUserCore(authorizedUser.User)
 	ar.User = userResponse
 	ar.AccessToken = authorizedUser.AccessToken
 }
