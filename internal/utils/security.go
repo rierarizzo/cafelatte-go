@@ -48,7 +48,7 @@ func CreateJWTToken(user entities.User) (*string, error) {
 }
 
 func VerifyJWTToken(tokenString string) (*UserClaims, error) {
-	secret := []byte(os.Getenv("SECRET_KEY"))
+	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
 	var userClaims UserClaims
 	token, err := jwt.ParseWithClaims(tokenString, &userClaims, func(t *jwt.Token) (interface{}, error) {
