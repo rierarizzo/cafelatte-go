@@ -11,10 +11,9 @@ type User struct {
 	Email       string
 	Password    string
 	/* A: Administrador, E: Empleado, C: Cliente */
-	RoleCode        string
-	RoleDescription string
-	Addresses       []Address
-	PaymentCards    []PaymentCard
+	RoleCode     string
+	Addresses    []Address
+	PaymentCards []PaymentCard
 }
 
 func (u *User) IsValidUser() bool {

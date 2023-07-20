@@ -1,11 +1,10 @@
 package entities
 
 type Address struct {
-	ID           int
-	ProvinceID   int
-	ProvinceName string
-	CityID       int
-	CityName     string
-	PostalCode   string
-	Detail       string
+	ID         int
+	Type       string
+	ProvinceID int
+	CityID     int
+	PostalCode string
+	Detail     string
 }

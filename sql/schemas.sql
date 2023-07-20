@@ -69,32 +69,34 @@ VALUES (1, 2, 'SALINAS');
 INSERT INTO City (ID, ProvinceID, Name)
 VALUES (2, 2, 'SANTA ELENA');
 
+CREATE TABLE AddressType
+(
+    Code        CHAR,
+    Description VARCHAR(20),
+    PRIMARY KEY (Code)
+);
+
+INSERT INTO AddressType
+VALUES ('D', 'DOMICILIO');
+INSERT INTO AddressType
+VALUES ('T', 'TRABAJO');
+
 CREATE TABLE UserAddress
 (
     ID         INT AUTO_INCREMENT,
+    Type       CHAR         NOT NULL,
     UserID     INT          NOT NULL,
     ProvinceID INT          NOT NULL,
     CityID     INT          NOT NULL,
     PostalCode VARCHAR(10),
     Detail     VARCHAR(150) NOT NULL,
+    Enabled    BOOL DEFAULT TRUE,
     PRIMARY KEY (ID, UserID),
+    FOREIGN KEY (Type) REFERENCES AddressType (Code),
     FOREIGN KEY (UserID) REFERENCES User (ID),
     FOREIGN KEY (ProvinceID) REFERENCES Province (ID),
     FOREIGN KEY (CityID) REFERENCES City (ID)
 );
-
-CREATE TABLE PaymentMethod
-(
-    Code        CHAR        NOT NULL,
-    Description VARCHAR(20) NOT NULL,
-    Enabled     BOOL DEFAULT TRUE,
-    PRIMARY KEY (Code)
-);
-
-INSERT INTO PaymentMethod (Code, Description)
-VALUES ('E', 'EFECTIVO');
-INSERT INTO PaymentMethod (Code, Description)
-VALUES ('T', 'TARJETA');
 
 CREATE TABLE CardCompany
 (
@@ -140,31 +142,21 @@ VALUES ('C', 'CREDITO');
 INSERT INTO CardType (Code, Description)
 VALUES ('D', 'DEBITO');
 
-CREATE TABLE PaymentCard
+CREATE TABLE UserPaymentCard
 (
     ID             INT AUTO_INCREMENT,
     Type           CHAR         NOT NULL,
+    UserID         INT          NOT NULL,
     Company        INT          NOT NULL,
     Issuer         INT          NOT NULL,
     HolderName     VARCHAR(100) NOT NULL,
-    Number         varchar(50)  NOT NULL,
+    Number         VARCHAR(100) NOT NULL,
     ExpirationDate DATE         NOT NULL,
-    CVV            VARCHAR(50)  NOT NULL,
+    CVV            VARCHAR(100) NOT NULL,
     Enabled        BOOL DEFAULT TRUE,
     PRIMARY KEY (ID),
     FOREIGN KEY (Type) REFERENCES CardType (Code),
+    FOREIGN KEY (UserID) REFERENCES User (ID),
     FOREIGN KEY (Company) REFERENCES CardCompany (ID),
     FOREIGN KEY (Issuer) REFERENCES CardIssuer (ID)
-);
-
-CREATE TABLE UserPaymentMethod
-(
-    ID              INT AUTO_INCREMENT,
-    UserID          INT  NOT NULL,
-    PaymentMethodID CHAR NOT NULL,
-    PaymentCardID   INT,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (UserID) REFERENCES User (ID),
-    FOREIGN KEY (PaymentMethodID) REFERENCES PaymentMethod (Code),
-    FOREIGN KEY (PaymentCardID) REFERENCES PaymentCard (ID)
 );
