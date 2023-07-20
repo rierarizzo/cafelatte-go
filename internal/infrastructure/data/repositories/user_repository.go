@@ -61,11 +61,19 @@ func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error)
 	var userModel models.UserModel
 	userModel.LoadFromUserCore(user)
 
+	handleTXError := func(tx *sql.Tx, err error) (*entities.User, error) {
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			return nil, errors.ErrUnexpected
+		}
+
+		return nil, handleSQLError(err)
+	}
+
 	tx, err := ur.db.Begin()
 	if err != nil {
 		return nil, handleSQLError(err)
 	}
-	defer tx.Rollback()
 
 	r, err := tx.Exec(
 		`INSERT INTO User (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
@@ -73,7 +81,7 @@ func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error)
 		userModel.Username, userModel.Name, userModel.Surname, userModel.PhoneNumber,
 		userModel.Email, userModel.Password, userModel.RoleCode)
 	if err != nil {
-		return nil, handleSQLError(err)
+		return handleTXError(tx, err)
 	}
 
 	lastUserID, _ := r.LastInsertId()
@@ -82,7 +90,7 @@ func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error)
 		`INSERT INTO UserAddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
 			VALUES (?,?,?,?,?,?)`)
 	if err != nil {
-		return nil, handleSQLError(err)
+		return handleTXError(tx, err)
 	}
 
 	for _, v := range user.Addresses {
@@ -93,7 +101,7 @@ func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error)
 		_, err = addressStmt.Exec(addressModel.Type, addressModel.UserID, addressModel.ProvinceID,
 			addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
 		if err != nil {
-			return nil, handleSQLError(err)
+			return handleTXError(tx, err)
 		}
 	}
 	_ = addressStmt.Close()
@@ -102,7 +110,7 @@ func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error)
 		`INSERT INTO UserPaymentCard (Type, UserID, Company, Issuer, HolderName, Number, ExpirationDate, CVV) 
 			VALUES (?,?,?,?,?,?,?,?)`)
 	if err != nil {
-		return nil, handleSQLError(err)
+		return handleTXError(tx, err)
 	}
 
 	for _, v := range user.PaymentCards {
@@ -112,14 +120,14 @@ func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error)
 		_, err = paymentCardStmt.Exec(cardModel.Type, cardModel.UserID, cardModel.Company, cardModel.Issuer,
 			cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
 		if err != nil {
-			return nil, handleSQLError(err)
+			return handleTXError(tx, err)
 		}
 	}
 	_ = paymentCardStmt.Close()
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, handleSQLError(err)
+		return handleTXError(tx, err)
 	}
 
 	userModel.ID = int(lastUserID)
