@@ -2,11 +2,9 @@ package repositories
 
 import (
 	"database/sql"
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
-	"github.com/sirupsen/logrus"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
+	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
 
@@ -67,12 +65,7 @@ func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error)
 	if err != nil {
 		return nil, handleSQLError(err)
 	}
-	defer func(tx *sql.Tx) {
-		err = tx.Rollback()
-		if err != nil {
-			logrus.Error("error while rollback")
-		}
-	}(tx)
+	defer tx.Rollback()
 
 	r, err := tx.Exec(
 		`INSERT INTO User (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
@@ -83,50 +76,53 @@ func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error)
 		return nil, handleSQLError(err)
 	}
 
-	userLastID, _ := r.LastInsertId()
+	lastUserID, _ := r.LastInsertId()
 
-	var addressesModel []models.AddressModel
+	addressStmt, err := tx.Prepare(
+		`INSERT INTO UserAddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
+			VALUES (?,?,?,?,?,?)`)
+	if err != nil {
+		return nil, handleSQLError(err)
+	}
+
 	for _, v := range user.Addresses {
 		var addressModel models.AddressModel
 		addressModel.LoadFromAddressCore(v)
-		addressModel.UserID = int(userLastID)
-		addressesModel = append(addressesModel, addressModel)
-	}
+		addressModel.UserID = int(lastUserID)
 
-	for _, v := range addressesModel {
-		_, err = tx.Exec(
-			`INSERT INTO UserAddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
-				VALUES (?,?,?,?,?,?)`,
-			v.Type, v.UserID, v.ProvinceID, v.CityID, v.PostalCode, v.Detail)
+		_, err = addressStmt.Exec(addressModel.Type, addressModel.UserID, addressModel.ProvinceID,
+			addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
 		if err != nil {
 			return nil, handleSQLError(err)
 		}
 	}
+	_ = addressStmt.Close()
 
-	var paymentCardsModel []models.PaymentCardModel
+	paymentCardStmt, err := tx.Prepare(
+		`INSERT INTO UserPaymentCard (Type, UserID, Company, Issuer, HolderName, Number, ExpirationDate, CVV) 
+			VALUES (?,?,?,?,?,?,?,?)`)
+	if err != nil {
+		return nil, handleSQLError(err)
+	}
+
 	for _, v := range user.PaymentCards {
 		var cardModel models.PaymentCardModel
 		cardModel.LoadFromPaymentCardCore(v)
-		cardModel.UserID = int(userLastID)
-		paymentCardsModel = append(paymentCardsModel, cardModel)
-	}
-
-	for _, v := range paymentCardsModel {
-		_, err = tx.Exec(
-			`INSERT INTO UserPaymentCard (Type, UserID, Company, Issuer, HolderName, Number, ExpirationDate, CVV) 
-				VALUES (?,?,?,?,?,?,?,?)`,
-			v.Type, v.UserID, v.Company, v.Issuer, v.HolderName, v.Number, v.ExpirationDate, v.CVV)
+		cardModel.UserID = int(lastUserID)
+		_, err = paymentCardStmt.Exec(cardModel.Type, cardModel.UserID, cardModel.Company, cardModel.Issuer,
+			cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
 		if err != nil {
 			return nil, handleSQLError(err)
 		}
 	}
+	_ = paymentCardStmt.Close()
 
 	err = tx.Commit()
 	if err != nil {
 		return nil, handleSQLError(err)
 	}
 
-	userModel.ID = int(userLastID)
+	userModel.ID = int(lastUserID)
 	return userModel.ToUserCore(), nil
 }
 
