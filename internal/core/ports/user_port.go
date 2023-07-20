@@ -15,9 +15,11 @@ type IUserService interface {
 }
 
 type IUserRepository interface {
-	GetAllUsers() ([]entities.User, error)
-	GetUserById(userID int) (*entities.User, error)
-	GetUserByEmail(email string) (*entities.User, error)
-	CreateUser(user entities.User) (*entities.User, error)
+	SelectAllUsers() ([]entities.User, error)
+	SelectUserById(userID int) (*entities.User, error)
+	SelectUserByEmail(email string) (*entities.User, error)
+	InsertUser(user entities.User) (*entities.User, error)
+	InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error)
+	InsertUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error)
 	UpdateUser(userID int, user entities.User) error
 }

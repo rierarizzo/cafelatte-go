@@ -24,7 +24,7 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 		return nil, errors.ErrInvalidUserData
 	}
 
-	retrievedUser, err := us.userRepo.CreateUser(user)
+	retrievedUser, err := us.userRepo.InsertUser(user)
 	if err != nil {
 		return nil, errors.ErrUnexpected
 	}
@@ -43,7 +43,7 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 }
 
 func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
-	retrievedUser, err := us.userRepo.GetUserByEmail(email)
+	retrievedUser, err := us.userRepo.SelectUserByEmail(email)
 	if err != nil {
 		return nil, errors.ErrUnauthorizedUser
 	}
@@ -66,11 +66,11 @@ func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser,
 }
 
 func (us *UserService) GetAllUsers() ([]entities.User, error) {
-	return us.userRepo.GetAllUsers()
+	return us.userRepo.SelectAllUsers()
 }
 
 func (us *UserService) FindUserById(id int) (*entities.User, error) {
-	return us.userRepo.GetUserById(id)
+	return us.userRepo.SelectUserById(id)
 }
 
 func (us *UserService) UpdateUser(userID int, user entities.User) error {

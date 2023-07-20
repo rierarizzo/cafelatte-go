@@ -12,7 +12,7 @@ type UserRepository struct {
 	db *sqlx.DB
 }
 
-func (ur *UserRepository) GetAllUsers() ([]entities.User, error) {
+func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	var userModel []models.UserModel
 
 	query := "SELECT * FROM user"
@@ -33,7 +33,7 @@ func (ur *UserRepository) GetAllUsers() ([]entities.User, error) {
 	return users, nil
 }
 
-func (ur *UserRepository) GetUserById(userID int) (*entities.User, error) {
+func (ur *UserRepository) SelectUserById(userID int) (*entities.User, error) {
 	var userModel models.UserModel
 
 	query := "SELECT * FROM user u WHERE u.id=?"
@@ -45,7 +45,7 @@ func (ur *UserRepository) GetUserById(userID int) (*entities.User, error) {
 	return userModel.ToUserCore(), nil
 }
 
-func (ur *UserRepository) GetUserByEmail(email string) (*entities.User, error) {
+func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
 	var userModel models.UserModel
 
 	query := "SELECT * FROM user u WHERE u.email=?"
@@ -57,81 +57,97 @@ func (ur *UserRepository) GetUserByEmail(email string) (*entities.User, error) {
 	return userModel.ToUserCore(), nil
 }
 
-func (ur *UserRepository) CreateUser(user entities.User) (*entities.User, error) {
+func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error) {
 	var userModel models.UserModel
 	userModel.LoadFromUserCore(user)
 
-	handleTXError := func(tx *sql.Tx, err error) (*entities.User, error) {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			return nil, errors.ErrUnexpected
-		}
-
-		return nil, handleSQLError(err)
-	}
-
-	tx, err := ur.db.Begin()
-	if err != nil {
-		return nil, handleSQLError(err)
-	}
-
-	r, err := tx.Exec(
+	result, err := ur.db.Exec(
 		`INSERT INTO User (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
 			VALUES (?,?,?,?,?,?,?)`,
 		userModel.Username, userModel.Name, userModel.Surname, userModel.PhoneNumber,
 		userModel.Email, userModel.Password, userModel.RoleCode)
 	if err != nil {
-		return handleTXError(tx, err)
+		return nil, handleSQLError(err)
 	}
 
-	lastUserID, _ := r.LastInsertId()
-
-	addressStmt, err := tx.Prepare(
-		`INSERT INTO UserAddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
-			VALUES (?,?,?,?,?,?)`)
-	if err != nil {
-		return handleTXError(tx, err)
-	}
-
-	for _, v := range user.Addresses {
-		var addressModel models.AddressModel
-		addressModel.LoadFromAddressCore(v)
-		addressModel.UserID = int(lastUserID)
-
-		_, err = addressStmt.Exec(addressModel.Type, addressModel.UserID, addressModel.ProvinceID,
-			addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
-		if err != nil {
-			return handleTXError(tx, err)
-		}
-	}
-	_ = addressStmt.Close()
-
-	paymentCardStmt, err := tx.Prepare(
-		`INSERT INTO UserPaymentCard (Type, UserID, Company, Issuer, HolderName, Number, ExpirationDate, CVV) 
-			VALUES (?,?,?,?,?,?,?,?)`)
-	if err != nil {
-		return handleTXError(tx, err)
-	}
-
-	for _, v := range user.PaymentCards {
-		var cardModel models.PaymentCardModel
-		cardModel.LoadFromPaymentCardCore(v)
-		cardModel.UserID = int(lastUserID)
-		_, err = paymentCardStmt.Exec(cardModel.Type, cardModel.UserID, cardModel.Company, cardModel.Issuer,
-			cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
-		if err != nil {
-			return handleTXError(tx, err)
-		}
-	}
-	_ = paymentCardStmt.Close()
-
-	err = tx.Commit()
-	if err != nil {
-		return handleTXError(tx, err)
-	}
+	lastUserID, _ := result.LastInsertId()
 
 	userModel.ID = int(lastUserID)
 	return userModel.ToUserCore(), nil
+}
+
+func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
+	tx, err := ur.db.Begin()
+	if err != nil {
+		return nil, errors.ErrUnexpected
+	}
+
+	insertStmnt, err := tx.Prepare(
+		`INSERT INTO UserPaymentCard (Type, UserID, Company, Issuer, HolderName, Number, ExpirationDate, CVV) 
+			VALUES (?,?,?,?,?,?,?,?)`)
+	if err != nil {
+		return nil, errors.ErrUnexpected
+	}
+
+	for _, v := range cards {
+		var cardModel models.PaymentCardModel
+		cardModel.LoadFromPaymentCardCore(v)
+		cardModel.UserID = userID
+
+		result, err := insertStmnt.Exec(cardModel.Type, cardModel.UserID, cardModel.Company, cardModel.Issuer,
+			cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
+		if err != nil {
+			_ = tx.Rollback()
+			return nil, errors.ErrUnexpected
+		}
+
+		lastInsertID, _ := result.LastInsertId()
+		v.ID = int(lastInsertID)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, errors.ErrUnexpected
+	}
+
+	return cards, nil
+}
+
+func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
+	tx, err := ur.db.Begin()
+	if err != nil {
+		return nil, errors.ErrUnexpected
+	}
+
+	insertStmnt, err := tx.Prepare(
+		`INSERT INTO UserAddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
+			VALUES (?,?,?,?,?,?)`)
+	if err != nil {
+		return nil, errors.ErrUnexpected
+	}
+
+	for _, v := range addresses {
+		var addressModel models.AddressModel
+		addressModel.LoadFromAddressCore(v)
+		addressModel.UserID = userID
+
+		result, err := insertStmnt.Exec(addressModel.Type, addressModel.UserID, addressModel.ProvinceID,
+			addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
+		if err != nil {
+			_ = tx.Rollback()
+			return nil, errors.ErrUnexpected
+		}
+
+		lastInsertID, _ := result.LastInsertId()
+		v.ID = int(lastInsertID)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, errors.ErrUnexpected
+	}
+
+	return addresses, nil
 }
 
 func (ur *UserRepository) UpdateUser(userID int, user entities.User) error {
