@@ -7,7 +7,6 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/jmoiron/sqlx v1.3.5
-	github.com/joho/godotenv v1.5.1
 	github.com/sirupsen/logrus v1.9.3
 	golang.org/x/crypto v0.11.0
 )

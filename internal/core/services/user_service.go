@@ -5,6 +5,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/utils"
+	"github.com/sirupsen/logrus"
 )
 
 type UserService struct {
@@ -17,6 +18,11 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 		return nil, errors.ErrUnexpected
 	}
 	user.SetPassword(hashedPassword)
+
+	if !user.IsValidUser() {
+		logrus.Error(errors.ErrInvalidUserData.Error())
+		return nil, errors.ErrInvalidUserData
+	}
 
 	retrievedUser, err := us.userRepo.CreateUser(user)
 	if err != nil {

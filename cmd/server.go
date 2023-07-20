@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"github.com/rierarizzo/cafelatte/internal/core/services"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
@@ -14,12 +13,6 @@ import (
 )
 
 func Server() {
-	// Load environment variables from .env
-	err := godotenv.Load()
-	if err != nil {
-		log.Panic(err)
-	}
-
 	// Map config environment variable to struct
 	config := LoadConfig()
 	// Gin mode
@@ -35,7 +28,7 @@ func Server() {
 	// Initialize router with all paths
 	router := api.Router(userHandler)
 
-	err = http.ListenAndServe(":8080", router)
+	err := http.ListenAndServe(":8080", router)
 	if err != nil {
 		log.Panic(err)
 	}
