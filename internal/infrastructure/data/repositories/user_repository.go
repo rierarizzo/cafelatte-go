@@ -90,14 +90,21 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 		return nil, errors.ErrUnexpected
 	}
 
+	concurrencyLimit := 5
+	sem := make(chan struct{}, concurrencyLimit)
+
 	errCh := make(chan error, len(cards))
 	var wg sync.WaitGroup
 
 	for _, v := range cards {
 		wg.Add(1)
+		sem <- struct{}{}
 
 		go func(card entities.PaymentCard) {
-			defer wg.Done()
+			defer func() {
+				wg.Done()
+				<-sem
+			}()
 
 			var cardModel models.PaymentCardModel
 			cardModel.LoadFromPaymentCardCore(card)
