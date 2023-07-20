@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"sync"
 )
@@ -105,10 +106,7 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 				wg.Done()
 				<-sem
 			}()
-
-			var cardModel models.PaymentCardModel
-			cardModel.LoadFromPaymentCardCore(card)
-			cardModel.UserID = userID
+			cardModel := mappers.PaymentCardCoreToPaymentCardModel(card, userID)
 
 			result, err := insertStmnt.Exec(cardModel.Type, cardModel.UserID, cardModel.Company, cardModel.Issuer,
 				cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
@@ -150,20 +148,42 @@ func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.A
 		return nil, errors.ErrUnexpected
 	}
 
+	concurrencyLimit := 5
+	sem := make(chan struct{}, concurrencyLimit)
+
+	errCh := make(chan error, len(addresses))
+	var wg sync.WaitGroup
+
 	for _, v := range addresses {
-		var addressModel models.AddressModel
-		addressModel.LoadFromAddressCore(v)
-		addressModel.UserID = userID
+		wg.Add(1)
+		sem <- struct{}{}
 
-		result, err := insertStmnt.Exec(addressModel.Type, addressModel.UserID, addressModel.ProvinceID,
-			addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
-		if err != nil {
-			_ = tx.Rollback()
-			return nil, errors.ErrUnexpected
-		}
+		go func(address entities.Address) {
+			defer func() {
+				wg.Done()
+				<-sem
+			}()
+			addressModel := mappers.AddressCoreToAddressModel(address, userID)
 
-		addressID, _ := result.LastInsertId()
-		v.ID = int(addressID)
+			result, err := insertStmnt.Exec(addressModel.Type, addressModel.UserID, addressModel.ProvinceID,
+				addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
+			if err != nil {
+				errCh <- err
+				return
+			}
+
+			addressID, _ := result.LastInsertId()
+			address.ID = int(addressID)
+		}(v)
+
+	}
+
+	wg.Wait()
+	close(errCh)
+
+	for err := range errCh {
+		_ = tx.Rollback()
+		return nil, err
 	}
 
 	err = tx.Commit()
