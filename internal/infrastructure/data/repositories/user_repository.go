@@ -6,6 +6,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
+	"sync"
 )
 
 type UserRepository struct {
@@ -89,20 +90,36 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 		return nil, errors.ErrUnexpected
 	}
 
+	errCh := make(chan error, len(cards))
+	var wg sync.WaitGroup
+
 	for _, v := range cards {
-		var cardModel models.PaymentCardModel
-		cardModel.LoadFromPaymentCardCore(v)
-		cardModel.UserID = userID
+		wg.Add(1)
 
-		result, err := insertStmnt.Exec(cardModel.Type, cardModel.UserID, cardModel.Company, cardModel.Issuer,
-			cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
-		if err != nil {
-			_ = tx.Rollback()
-			return nil, errors.ErrUnexpected
-		}
+		go func(card entities.PaymentCard) {
+			defer wg.Done()
 
-		lastInsertID, _ := result.LastInsertId()
-		v.ID = int(lastInsertID)
+			var cardModel models.PaymentCardModel
+			cardModel.LoadFromPaymentCardCore(card)
+			cardModel.UserID = userID
+
+			result, err := insertStmnt.Exec(cardModel.Type, cardModel.UserID, cardModel.Company, cardModel.Issuer,
+				cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
+			if err != nil {
+				errCh <- err
+				return
+			}
+
+			cardID, _ := result.LastInsertId()
+			card.ID = int(cardID)
+		}(v)
+	}
+
+	wg.Wait()
+	close(errCh)
+	for err := range errCh {
+		_ = tx.Rollback()
+		return nil, err
 	}
 
 	err = tx.Commit()
@@ -138,8 +155,8 @@ func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.A
 			return nil, errors.ErrUnexpected
 		}
 
-		lastInsertID, _ := result.LastInsertId()
-		v.ID = int(lastInsertID)
+		addressID, _ := result.LastInsertId()
+		v.ID = int(addressID)
 	}
 
 	err = tx.Commit()
