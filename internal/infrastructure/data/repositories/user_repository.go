@@ -14,11 +14,16 @@ type UserRepository struct {
 	db *sqlx.DB
 }
 
-func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
-	var userModel []models.UserModel
+const (
+	selectAddressesByUserIDQuery = "select * from UserAddress ua where ua.UserID=?"
+	selectCardsByUserIDQuery     = "select * from UserPaymentCard upc where upc.UserID=?"
+)
 
-	query := "SELECT * FROM user"
-	err := ur.db.Select(&userModel, query)
+func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
+	var usersModel []models.UserModel
+
+	query := "select * from User u where u.Status = 'V'"
+	err := ur.db.Select(&usersModel, query)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return []entities.User{}, nil
@@ -27,9 +32,27 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 		}
 	}
 
+	for _, v := range usersModel {
+		var addressesModel []models.AddressModel
+		var cardsModel []models.PaymentCardModel
+
+		err := ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, v.ID)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, handleSQLError(err)
+		}
+
+		err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, v.ID)
+		if err != nil && err != sql.ErrNoRows {
+			return nil, handleSQLError(err)
+		}
+
+		v.Addresses = addressesModel
+		v.PaymentCards = cardsModel
+	}
+
 	var users []entities.User
-	for _, k := range userModel {
-		users = append(users, *k.ToUserCore())
+	for _, k := range usersModel {
+		users = append(users, *mappers.UserModelToUserCore(k))
 	}
 
 	return users, nil
@@ -38,34 +61,65 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 func (ur *UserRepository) SelectUserById(userID int) (*entities.User, error) {
 	var userModel models.UserModel
 
-	query := "SELECT * FROM user u WHERE u.id=?"
+	query := "select * from User u where u.ID=?"
 	err := ur.db.Get(&userModel, query, userID)
 	if err != nil {
 		return nil, handleSQLError(err)
 	}
 
-	return userModel.ToUserCore(), nil
+	var addressesModel []models.AddressModel
+	var cardsModel []models.PaymentCardModel
+
+	err = ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, userModel.ID)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, handleSQLError(err)
+	}
+
+	err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, userModel.ID)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, handleSQLError(err)
+	}
+
+	userModel.Addresses = addressesModel
+	userModel.PaymentCards = cardsModel
+
+	return mappers.UserModelToUserCore(userModel), nil
 }
 
 func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
 	var userModel models.UserModel
 
-	query := "SELECT * FROM user u WHERE u.email=?"
+	query := "select * from User u where u.Email=?"
 	err := ur.db.Get(&userModel, query, email)
 	if err != nil {
 		return nil, handleSQLError(err)
 	}
 
-	return userModel.ToUserCore(), nil
+	var addressesModel []models.AddressModel
+	var cardsModel []models.PaymentCardModel
+
+	err = ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, userModel.ID)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, handleSQLError(err)
+	}
+
+	err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, userModel.ID)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, handleSQLError(err)
+	}
+
+	userModel.Addresses = addressesModel
+	userModel.PaymentCards = cardsModel
+
+	return mappers.UserModelToUserCore(userModel), nil
 }
 
 func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error) {
-	var userModel models.UserModel
-	userModel.LoadFromUserCore(user)
+	userModel := mappers.UserCoreToUserModel(user)
 
 	result, err := ur.db.Exec(
-		`INSERT INTO User (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
-			VALUES (?,?,?,?,?,?,?)`,
+		`insert into User (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
+			values (?,?,?,?,?,?,?)`,
 		userModel.Username, userModel.Name, userModel.Surname, userModel.PhoneNumber,
 		userModel.Email, userModel.Password, userModel.RoleCode)
 	if err != nil {
@@ -75,7 +129,7 @@ func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error)
 	lastUserID, _ := result.LastInsertId()
 
 	userModel.ID = int(lastUserID)
-	return userModel.ToUserCore(), nil
+	return mappers.UserModelToUserCore(*userModel), nil
 }
 
 func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
@@ -85,8 +139,8 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 	}
 
 	insertStmnt, err := tx.Prepare(
-		`INSERT INTO UserPaymentCard (Type, UserID, Company, Issuer, HolderName, Number, ExpirationDate, CVV) 
-			VALUES (?,?,?,?,?,?,?,?)`)
+		`insert into UserPaymentCard (Type, UserID, Company, HolderName, Number, ExpirationDate, CVV) 
+			values (?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		return nil, errors.ErrUnexpected
 	}
@@ -106,9 +160,9 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 				wg.Done()
 				<-sem
 			}()
-			cardModel := mappers.PaymentCardCoreToPaymentCardModel(card, userID)
+			cardModel := mappers.PaymentCardCoreToPaymentCardModel(card)
 
-			result, err := insertStmnt.Exec(cardModel.Type, cardModel.UserID, cardModel.Company, cardModel.Issuer,
+			result, err := insertStmnt.Exec(cardModel.Type, userID, cardModel.Company,
 				cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
 			if err != nil {
 				errCh <- err
@@ -142,8 +196,8 @@ func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.A
 	}
 
 	insertStmnt, err := tx.Prepare(
-		`INSERT INTO UserAddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
-			VALUES (?,?,?,?,?,?)`)
+		`insert into UserAddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
+			values (?,?,?,?,?,?)`)
 	if err != nil {
 		return nil, errors.ErrUnexpected
 	}
@@ -163,9 +217,9 @@ func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.A
 				wg.Done()
 				<-sem
 			}()
-			addressModel := mappers.AddressCoreToAddressModel(address, userID)
+			addressModel := mappers.AddressCoreToAddressModel(address)
 
-			result, err := insertStmnt.Exec(addressModel.Type, addressModel.UserID, addressModel.ProvinceID,
+			result, err := insertStmnt.Exec(addressModel.Type, userID, addressModel.ProvinceID,
 				addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
 			if err != nil {
 				errCh <- err
@@ -195,12 +249,11 @@ func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.A
 }
 
 func (ur *UserRepository) UpdateUser(userID int, user entities.User) error {
-	var userModel models.UserModel
-	userModel.LoadFromUserCore(user)
+	userModel := mappers.UserCoreToUserModel(user)
 
-	query := "UPDATE user SET name=?, surname=?, phone_number=?, email=?, password=? WHERE id=?"
+	query := "update User set Username=?, Name=?, Surname=?, PhoneNumber=? where ID=?"
 
-	_, err := ur.db.Exec(query, user.Name, user.Surname, user.PhoneNumber, user.Email, user.Password, userID)
+	_, err := ur.db.Exec(query, userModel.Name, userModel.Surname, userModel.PhoneNumber, userID)
 	if err != nil {
 		return handleSQLError(err)
 	}

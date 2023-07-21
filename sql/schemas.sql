@@ -28,7 +28,9 @@ CREATE TABLE User
     Email       VARCHAR(50)  NOT NULL UNIQUE,
     Password    VARCHAR(100) NOT NULL,
     RoleCode    CHAR         NOT NULL,
-    Status      CHAR DEFAULT 'V',
+    Status      BOOL      DEFAULT TRUE,
+    CreatedAt   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt   DATETIME  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (ID),
     FOREIGN KEY (RoleCode) REFERENCES UserRole (Code)
 );
@@ -90,7 +92,9 @@ CREATE TABLE UserAddress
     CityID     INT          NOT NULL,
     PostalCode VARCHAR(10),
     Detail     VARCHAR(150) NOT NULL,
-    Enabled    BOOL DEFAULT TRUE,
+    Status     BOOL      DEFAULT TRUE,
+    CreatedAt  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt  DATETIME  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (ID, UserID),
     FOREIGN KEY (Type) REFERENCES AddressType (Code),
     FOREIGN KEY (UserID) REFERENCES User (ID),
@@ -114,22 +118,6 @@ VALUES ('MASTERCARD');
 INSERT INTO CardCompany (Name)
 VALUES ('DISCOVER');
 
-CREATE TABLE CardIssuer
-(
-    ID   INT AUTO_INCREMENT,
-    Name VARCHAR(50),
-    PRIMARY KEY (ID)
-);
-
-INSERT INTO CardIssuer (Name)
-VALUES ('BANCO DE GUAYAQUIL');
-INSERT INTO CardIssuer (Name)
-VALUES ('BANCO DE PICHINCHA');
-INSERT INTO CardIssuer (Name)
-VALUES ('BANCO DEL PACIFICO');
-INSERT INTO CardIssuer (Name)
-VALUES ('BANCO BOLIVARIANO');
-
 CREATE TABLE CardType
 (
     Code        CHAR NOT NULL,
@@ -148,15 +136,15 @@ CREATE TABLE UserPaymentCard
     Type           CHAR         NOT NULL,
     UserID         INT          NOT NULL,
     Company        INT          NOT NULL,
-    Issuer         INT          NOT NULL,
     HolderName     VARCHAR(100) NOT NULL,
     Number         VARCHAR(100) NOT NULL,
     ExpirationDate DATE         NOT NULL,
     CVV            VARCHAR(100) NOT NULL,
-    Enabled        BOOL DEFAULT TRUE,
+    Status         BOOL      DEFAULT TRUE,
+    CreatedAt      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UpdatedAt      DATETIME  DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (ID),
     FOREIGN KEY (Type) REFERENCES CardType (Code),
     FOREIGN KEY (UserID) REFERENCES User (ID),
-    FOREIGN KEY (Company) REFERENCES CardCompany (ID),
-    FOREIGN KEY (Issuer) REFERENCES CardIssuer (ID)
+    FOREIGN KEY (Company) REFERENCES CardCompany (ID)
 );

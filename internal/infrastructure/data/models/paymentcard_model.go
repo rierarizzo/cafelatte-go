@@ -7,12 +7,12 @@ import (
 type PaymentCardModel struct {
 	ID             int       `db:"ID"`
 	Type           string    `db:"Type"`
-	UserID         int       `db:"UserID"`
 	Company        int       `db:"Company"`
-	Issuer         int       `db:"Issuer"`
 	HolderName     string    `db:"HolderName"`
 	Number         string    `db:"Number"`
 	ExpirationDate time.Time `db:"ExpirationDate"`
 	CVV            string    `db:"CVV"`
-	Enabled        bool      `db:"Enabled"`
+	Status         bool      `db:"Status"`
+	CreatedAt      time.Time `db:"CreatedAt"`
+	UpdatedAt      time.Time `db:"UpdatedAt"`
 }
