@@ -15,8 +15,9 @@ type UserRepository struct {
 }
 
 const (
-	selectAddressesByUserIDQuery = "select * from UserAddress ua where ua.UserID=?"
-	selectCardsByUserIDQuery     = "select * from UserPaymentCard upc where upc.UserID=?"
+	concurrencyLimit             = 5
+	selectAddressesByUserIDQuery = "select * from UserAddress ua where ua.UserID=? and u.Status=true"
+	selectCardsByUserIDQuery     = "select * from UserPaymentCard upc where upc.UserID=? and u.Status=true"
 )
 
 func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
@@ -32,7 +33,6 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 		}
 	}
 
-	concurrencyLimit := 5
 	sem := make(chan struct{}, concurrencyLimit)
 
 	errCh := make(chan error, len(usersModel))
@@ -86,8 +86,7 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 	var userModel models.UserModel
 
-	query := "select * from User u where u.ID=? and u.Status=true"
-	err := ur.db.Get(&userModel, query, userID)
+	err := ur.db.Get(&userModel, "select * from User u where u.ID=? and u.Status=true", userID)
 	if err != nil {
 		return nil, handleSQLError(err)
 	}
@@ -114,8 +113,7 @@ func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
 	var userModel models.UserModel
 
-	query := "select * from User u where u.Email=? and u.Status=true"
-	err := ur.db.Get(&userModel, query, email)
+	err := ur.db.Get(&userModel, "select * from User u where u.Email=? and u.Status=true", email)
 	if err != nil {
 		return nil, handleSQLError(err)
 	}
@@ -170,7 +168,6 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 		return nil, errors.ErrUnexpected
 	}
 
-	concurrencyLimit := 5
 	sem := make(chan struct{}, concurrencyLimit)
 
 	errCh := make(chan error, len(cards))
@@ -227,7 +224,6 @@ func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.A
 		return nil, errors.ErrUnexpected
 	}
 
-	concurrencyLimit := 5
 	sem := make(chan struct{}, concurrencyLimit)
 
 	errCh := make(chan error, len(addresses))
