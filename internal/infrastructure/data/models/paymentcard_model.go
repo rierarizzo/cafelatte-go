@@ -7,6 +7,7 @@ import (
 type PaymentCardModel struct {
 	ID             int       `db:"ID"`
 	Type           string    `db:"Type"`
+	UserID         int       `db:"UserID"`
 	Company        int       `db:"Company"`
 	HolderName     string    `db:"HolderName"`
 	Number         string    `db:"Number"`

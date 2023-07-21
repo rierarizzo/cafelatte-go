@@ -5,7 +5,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
 
-func AddressCoreToAddressModel(address entities.Address) *models.AddressModel {
+func FromAddressCoreToAddressModel(address entities.Address) *models.AddressModel {
 	return &models.AddressModel{
 		Type:       address.Type,
 		ProvinceID: address.ProvinceID,
@@ -15,7 +15,7 @@ func AddressCoreToAddressModel(address entities.Address) *models.AddressModel {
 	}
 }
 
-func AddressModelToAddressCore(addressModel models.AddressModel) *entities.Address {
+func FromAddressModelToAddressCore(addressModel models.AddressModel) *entities.Address {
 	return &entities.Address{
 		ID:         addressModel.ID,
 		Type:       addressModel.Type,

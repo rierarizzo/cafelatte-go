@@ -5,15 +5,15 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
 
-func UserModelToUserCore(userModel models.UserModel) *entities.User {
+func FromUserModelToUserCore(userModel models.UserModel) *entities.User {
 	var addresses []entities.Address
 	for _, v := range userModel.Addresses {
-		addresses = append(addresses, *AddressModelToAddressCore(v))
+		addresses = append(addresses, *FromAddressModelToAddressCore(v))
 	}
 
 	var cards []entities.PaymentCard
 	for _, v := range userModel.PaymentCards {
-		cards = append(cards, *PaymentCardModelToPaymentCardCore(v))
+		cards = append(cards, *FromPaymentCardModelToPaymentCardCore(v))
 	}
 
 	return &entities.User{
@@ -30,7 +30,7 @@ func UserModelToUserCore(userModel models.UserModel) *entities.User {
 	}
 }
 
-func UserCoreToUserModel(user entities.User) *models.UserModel {
+func FromUserCoreToUserModel(user entities.User) *models.UserModel {
 	return &models.UserModel{
 		ID:          user.ID,
 		Username:    user.Username,

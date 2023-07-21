@@ -1,21 +1,14 @@
 package dto
 
-import "github.com/rierarizzo/cafelatte/internal/core/entities"
+type UserAddressesRequest struct {
+	UserID    int              `json:"userID"`
+	Addresses []AddressRequest `json:"addresses"`
+}
 
 type AddressRequest struct {
 	Type       string `json:"type"`
-	ProvinceID int    `json:"province"`
-	CityID     int    `json:"city"`
+	ProvinceID int    `json:"provinceID"`
+	CityID     int    `json:"cityID"`
 	PostalCode string `json:"postalCode"`
 	Detail     string `json:"detail"`
-}
-
-func (ar *AddressRequest) ToAddressCore() *entities.Address {
-	return &entities.Address{
-		Type:       ar.Type,
-		ProvinceID: ar.ProvinceID,
-		CityID:     ar.CityID,
-		PostalCode: ar.PostalCode,
-		Detail:     ar.Detail,
-	}
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
 	"net/http"
 	"strconv"
 
@@ -15,17 +16,6 @@ type UserHandler struct {
 	userService ports.IUserService
 }
 
-// SignUp es un handler para registrarse en el sistema.
-//
-// Recibe in SignUpRequest, que contiene toda la información del usuario, la
-// guarda en la base de datos, y finalmente retorna un JSON con el ID, nombre
-// apellido y el token JWT generado.
-//
-// Estados HTTP:
-//
-// 400: El SignUpRequest tiene un formato incorrecto.
-// 500: Ha ocurrido un error inesperado al registrar el usuario.
-// 201: El usuario ha sido creado con éxito.
 func (uc *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	if err := c.BindJSON(&signUpRequest); err != nil {
@@ -33,30 +23,19 @@ func (uc *UserHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	user, err := uc.userService.SignUp(*signUpRequest.ToUserCore())
+	user, err := uc.userService.SignUp(*mappers.FromSignUpRequestToUserCore(signUpRequest))
 	if err != nil {
 		utils.HTTPError(err, c)
 		return
 	}
 
-	var authResponse dto.AuthResponse
-	authResponse.LoadFromAuthorizedUserCore(*user)
+	authResponse := dto.AuthResponse{
+		User:        *mappers.FromUserCoreToUserResponse(user.User),
+		AccessToken: user.AccessToken,
+	}
 	c.JSON(http.StatusCreated, authResponse)
 }
 
-// SignIn es un handler para iniciar sesión en el sistema.
-//
-// Recibe in SignInRequest, que contiene el correo y la contraseña del usuario,
-// recupera al usuario de la base de datos usando el correo, valida si la
-// contraseña es correcta y finalmente retorna un JSON con el ID, nombre, apellido
-// y el token JWT generado.
-//
-// Estados HTTP:
-//
-// 400: El SignInRequest tiene un formato incorrecto.
-// 401: El usuario no se encuentra autorizado.
-// 500: Ha ocurrido un error inesperado al registrar el usuario.
-// 201: El usuario ha sido creado con éxito.
 func (uc *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	if err := c.BindJSON(&signInRequest); err != nil {
@@ -70,9 +49,49 @@ func (uc *UserHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	var authResponse dto.AuthResponse
-	authResponse.LoadFromAuthorizedUserCore(*user)
-	c.JSON(http.StatusOK, authResponse)
+	authResponse := dto.AuthResponse{
+		User:        *mappers.FromUserCoreToUserResponse(user.User),
+		AccessToken: user.AccessToken,
+	}
+	c.JSON(http.StatusCreated, authResponse)
+}
+
+func (uc *UserHandler) AddUserAddresses(c *gin.Context) {
+	var userAddressesRequest dto.UserAddressesRequest
+	if err := c.BindJSON(&userAddressesRequest); err != nil {
+		utils.HTTPError(errors.ErrBadRequest, c)
+		return
+	}
+
+	addresses, err := uc.userService.AddUserAddresses(
+		userAddressesRequest.UserID,
+		mappers.FromAddressRequestSliceToAddressCoreSlice(userAddressesRequest.Addresses))
+	if err != nil {
+		utils.HTTPError(err, c)
+		return
+	}
+
+	// todo: send custom response
+	c.JSON(http.StatusCreated, addresses)
+}
+
+func (uc *UserHandler) AddUserPaymentCards(c *gin.Context) {
+	var userCardsRequest dto.UserPaymentCardsRequest
+	if err := c.BindJSON(&userCardsRequest); err != nil {
+		utils.HTTPError(errors.ErrBadRequest, c)
+		return
+	}
+
+	cards, err := uc.userService.AddUserPaymentCard(
+		userCardsRequest.UserID,
+		mappers.FromPaymentCardRequestSliceToPaymentCardCoreSlice(userCardsRequest.PaymentCards))
+	if err != nil {
+		utils.HTTPError(err, c)
+		return
+	}
+
+	// todo: send custom response
+	c.JSON(http.StatusCreated, cards)
 }
 
 func (uc *UserHandler) GetAllUsers(c *gin.Context) {
@@ -82,17 +101,15 @@ func (uc *UserHandler) GetAllUsers(c *gin.Context) {
 		return
 	}
 
-	var userResponse []dto.UserResponse
+	userResponse := make([]dto.UserResponse, 0)
 	for _, k := range users {
-		var res dto.UserResponse
-		res.LoadFromUserCore(k)
-		userResponse = append(userResponse, res)
+		userResponse = append(userResponse, *mappers.FromUserCoreToUserResponse(k))
 	}
 
 	c.JSON(http.StatusOK, userResponse)
 }
 
-func (uc *UserHandler) FindUser(c *gin.Context) {
+func (uc *UserHandler) FindUserByID(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
@@ -100,21 +117,13 @@ func (uc *UserHandler) FindUser(c *gin.Context) {
 		return
 	}
 
-	user, err := uc.userService.FindUserById(userID)
+	user, err := uc.userService.FindUserByID(userID)
 	if err != nil {
 		utils.HTTPError(err, c)
 		return
 	}
 
-	var userResponse dto.UserResponse
-	userResponse.LoadFromUserCore(*user)
-
-	authResponse := dto.AuthResponse{
-		User:        userResponse,
-		AccessToken: "",
-	}
-
-	c.JSON(http.StatusOK, authResponse)
+	c.JSON(http.StatusOK, *mappers.FromUserCoreToUserResponse(*user))
 }
 
 func NewUserHandler(userService ports.IUserService) *UserHandler {

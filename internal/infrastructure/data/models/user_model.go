@@ -6,7 +6,7 @@ import (
 
 type UserModel struct {
 	ID           int                `db:"ID"`
-	Username     string             `db:"Surname"`
+	Username     string             `db:"Username"`
 	Name         string             `db:"Name"`
 	Surname      string             `db:"Surname"`
 	PhoneNumber  string             `db:"PhoneNumber"`

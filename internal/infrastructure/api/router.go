@@ -21,7 +21,9 @@ func Router(userHandler *handlers.UserHandler) http.Handler {
 	usersGroup.Use(middlewares.AuthenticateMiddleware())
 	{
 		usersGroup.GET("/find", userHandler.GetAllUsers)
-		usersGroup.GET("/find/:userID", userHandler.FindUser)
+		usersGroup.GET("/find/:userID", userHandler.FindUserByID)
+		usersGroup.POST("/add-addresses", userHandler.AddUserAddresses)
+		usersGroup.POST("/add-paymentcards", userHandler.AddUserPaymentCards)
 	}
 
 	return router

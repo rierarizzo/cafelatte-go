@@ -7,7 +7,6 @@ type PaymentCard struct {
 	/* C: Crédito, D: Débito */
 	Type           string
 	Company        int
-	Issuer         int
 	HolderName     string
 	Number         string
 	ExpirationDate time.Time

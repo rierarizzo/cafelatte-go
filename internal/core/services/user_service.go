@@ -69,12 +69,20 @@ func (us *UserService) GetAllUsers() ([]entities.User, error) {
 	return us.userRepo.SelectAllUsers()
 }
 
-func (us *UserService) FindUserById(id int) (*entities.User, error) {
-	return us.userRepo.SelectUserById(id)
+func (us *UserService) FindUserByID(id int) (*entities.User, error) {
+	return us.userRepo.SelectUserByID(id)
 }
 
 func (us *UserService) UpdateUser(userID int, user entities.User) error {
 	return us.userRepo.UpdateUser(userID, user)
+}
+
+func (us *UserService) AddUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
+	return us.userRepo.InsertUserAddresses(userID, addresses)
+}
+
+func (us *UserService) AddUserPaymentCard(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
+	return us.userRepo.InsertUserPaymentCards(userID, cards)
 }
 
 func NewUserService(userRepo ports.IUserRepository) *UserService {
