@@ -13,16 +13,16 @@ type UserService struct {
 }
 
 func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
+	if !user.IsValidUser() {
+		logrus.Error(errors.ErrInvalidUserData.Error())
+		return nil, errors.ErrInvalidUserData
+	}
+
 	hashedPassword, err := utils.HashText(user.Password)
 	if err != nil {
 		return nil, errors.ErrUnexpected
 	}
 	user.SetPassword(hashedPassword)
-
-	if !user.IsValidUser() {
-		logrus.Error(errors.ErrInvalidUserData.Error())
-		return nil, errors.ErrInvalidUserData
-	}
 
 	retrievedUser, err := us.userRepo.InsertUser(user)
 	if err != nil {

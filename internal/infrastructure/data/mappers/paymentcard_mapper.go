@@ -5,7 +5,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
 
-func FromPaymentCardCoreToPaymentCardModel(card entities.PaymentCard) *models.PaymentCardModel {
+func FromPaymentCardToPaymentCardModel(card entities.PaymentCard) *models.PaymentCardModel {
 	return &models.PaymentCardModel{
 		Type:           card.Type,
 		Company:        card.Company,
@@ -16,14 +16,14 @@ func FromPaymentCardCoreToPaymentCardModel(card entities.PaymentCard) *models.Pa
 	}
 }
 
-func FromPaymentCardModelToPaymentCardCore(cardModel models.PaymentCardModel) *entities.PaymentCard {
+func FromPaymentCardModelToPaymentCard(model models.PaymentCardModel) *entities.PaymentCard {
 	return &entities.PaymentCard{
-		ID:             cardModel.ID,
-		Type:           cardModel.Type,
-		Company:        cardModel.Company,
-		HolderName:     cardModel.HolderName,
-		Number:         cardModel.Number,
-		ExpirationDate: cardModel.ExpirationDate,
-		CVV:            cardModel.CVV,
+		ID:             model.ID,
+		Type:           model.Type,
+		Company:        model.Company,
+		HolderName:     model.HolderName,
+		Number:         model.Number,
+		ExpirationDate: model.ExpirationDate,
+		CVV:            model.CVV,
 	}
 }

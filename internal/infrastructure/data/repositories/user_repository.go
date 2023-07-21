@@ -52,7 +52,7 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 
 	var users []entities.User
 	for _, k := range usersModel {
-		users = append(users, *mappers.FromUserModelToUserCore(k))
+		users = append(users, *mappers.FromUserModelToUser(k))
 	}
 
 	return users, nil
@@ -83,7 +83,7 @@ func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 	userModel.Addresses = addressesModel
 	userModel.PaymentCards = cardsModel
 
-	return mappers.FromUserModelToUserCore(userModel), nil
+	return mappers.FromUserModelToUser(userModel), nil
 }
 
 func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
@@ -111,11 +111,11 @@ func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error
 	userModel.Addresses = addressesModel
 	userModel.PaymentCards = cardsModel
 
-	return mappers.FromUserModelToUserCore(userModel), nil
+	return mappers.FromUserModelToUser(userModel), nil
 }
 
 func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error) {
-	userModel := mappers.FromUserCoreToUserModel(user)
+	userModel := mappers.FromUserToUserModel(user)
 
 	result, err := ur.db.Exec(
 		`insert into User (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
@@ -129,7 +129,7 @@ func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error)
 	lastUserID, _ := result.LastInsertId()
 
 	userModel.ID = int(lastUserID)
-	return mappers.FromUserModelToUserCore(*userModel), nil
+	return mappers.FromUserModelToUser(*userModel), nil
 }
 
 func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
@@ -160,7 +160,7 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 				wg.Done()
 				<-sem
 			}()
-			cardModel := mappers.FromPaymentCardCoreToPaymentCardModel(card)
+			cardModel := mappers.FromPaymentCardToPaymentCardModel(card)
 
 			result, err := insertStmnt.Exec(cardModel.Type, userID, cardModel.Company,
 				cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
@@ -217,7 +217,7 @@ func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.A
 				wg.Done()
 				<-sem
 			}()
-			addressModel := mappers.FromAddressCoreToAddressModel(address)
+			addressModel := mappers.FromAddressToAddressModel(address)
 
 			result, err := insertStmnt.Exec(addressModel.Type, userID, addressModel.ProvinceID,
 				addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
@@ -249,7 +249,7 @@ func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.A
 }
 
 func (ur *UserRepository) UpdateUser(userID int, user entities.User) error {
-	userModel := mappers.FromUserCoreToUserModel(user)
+	userModel := mappers.FromUserToUserModel(user)
 
 	query := "update User set Username=?, Name=?, Surname=?, PhoneNumber=? where ID=?"
 

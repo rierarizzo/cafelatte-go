@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
 	"net/http"
 	"strconv"
@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
-	"github.com/rierarizzo/cafelatte/internal/utils"
 )
 
 type UserHandler struct {
@@ -19,66 +18,54 @@ type UserHandler struct {
 
 func (uc *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
-	if err := c.BindJSON(&signUpRequest); err != nil {
-		utils.HTTPError(errors.ErrBadRequest, c)
+	err := c.BindJSON(&signUpRequest)
+	if errors.Error(c, err) {
 		return
 	}
 
-	user, err := uc.userService.SignUp(*mappers.FromSignUpRequestToUserCore(signUpRequest))
-	if err != nil {
-		utils.HTTPError(err, c)
+	authorizedUser, err := uc.userService.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
+	if errors.Error(c, err) {
 		return
 	}
 
-	authResponse := dto.AuthResponse{
-		User:        *mappers.FromUserCoreToUserResponse(user.User),
-		AccessToken: user.AccessToken,
-	}
-	c.JSON(http.StatusCreated, authResponse)
+	c.JSON(http.StatusCreated, mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
 }
 
 func (uc *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
-	if err := c.BindJSON(&signInRequest); err != nil {
-		utils.HTTPError(errors.ErrBadRequest, c)
+	err := c.BindJSON(&signInRequest)
+	if errors.Error(c, err) {
 		return
 	}
 
-	user, err := uc.userService.SignIn(signInRequest.Email, signInRequest.Password)
-	if err != nil {
-		utils.HTTPError(err, c)
+	authorizedUser, err := uc.userService.SignIn(signInRequest.Email, signInRequest.Password)
+	if errors.Error(c, err) {
 		return
 	}
 
-	authResponse := dto.AuthResponse{
-		User:        *mappers.FromUserCoreToUserResponse(user.User),
-		AccessToken: user.AccessToken,
-	}
-	c.JSON(http.StatusCreated, authResponse)
+	c.JSON(http.StatusCreated, mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
 }
 
 func (uc *UserHandler) AddUserAddresses(c *gin.Context) {
 	var userAddressesRequest dto.UserAddressesRequest
-	if err := c.BindJSON(&userAddressesRequest); err != nil {
-		utils.HTTPError(errors.ErrBadRequest, c)
+	err := c.BindJSON(&userAddressesRequest)
+	if errors.Error(c, err) {
 		return
 	}
 
 	addresses := make([]entities.Address, 0)
 	for _, v := range userAddressesRequest.Addresses {
-		addresses = append(addresses, *mappers.FromAddressReqToAddressCore(v))
+		addresses = append(addresses, *mappers.FromAddressReqToAddress(v))
 	}
 
-	addresses, err := uc.userService.AddUserAddresses(
-		userAddressesRequest.UserID, addresses)
-	if err != nil {
-		utils.HTTPError(err, c)
+	addresses, err = uc.userService.AddUserAddresses(userAddressesRequest.UserID, addresses)
+	if errors.Error(c, err) {
 		return
 	}
 
 	addressesRes := make([]dto.AddressResponse, 0)
 	for _, v := range addresses {
-		addressesRes = append(addressesRes, *mappers.FromAddressCoreToAddressResponse(v))
+		addressesRes = append(addressesRes, *mappers.FromAddressToAddressRes(v))
 	}
 
 	c.JSON(http.StatusCreated, addressesRes)
@@ -86,26 +73,24 @@ func (uc *UserHandler) AddUserAddresses(c *gin.Context) {
 
 func (uc *UserHandler) AddUserPaymentCards(c *gin.Context) {
 	var userCardsRequest dto.UserPaymentCardsRequest
-	if err := c.BindJSON(&userCardsRequest); err != nil {
-		utils.HTTPError(errors.ErrBadRequest, c)
+	err := c.BindJSON(&userCardsRequest)
+	if errors.Error(c, err) {
 		return
 	}
 
 	cards := make([]entities.PaymentCard, 0)
 	for _, v := range userCardsRequest.PaymentCards {
-		cards = append(cards, *mappers.FromCardReqToCardCore(v))
+		cards = append(cards, *mappers.FromPaymentCardReqToPaymentCard(v))
 	}
 
-	cards, err := uc.userService.AddUserPaymentCard(
-		userCardsRequest.UserID, cards)
-	if err != nil {
-		utils.HTTPError(err, c)
+	cards, err = uc.userService.AddUserPaymentCard(userCardsRequest.UserID, cards)
+	if errors.Error(c, err) {
 		return
 	}
 
 	cardsRes := make([]dto.PaymentCardResponse, 0)
 	for _, v := range cards {
-		cardsRes = append(cardsRes, *mappers.FromPaymentCardCoreToPaymentCardResponse(v))
+		cardsRes = append(cardsRes, *mappers.FromPaymentCardToPaymentCardRes(v))
 	}
 
 	c.JSON(http.StatusCreated, cardsRes)
@@ -113,14 +98,13 @@ func (uc *UserHandler) AddUserPaymentCards(c *gin.Context) {
 
 func (uc *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := uc.userService.GetAllUsers()
-	if err != nil {
-		utils.HTTPError(err, c)
+	if errors.Error(c, err) {
 		return
 	}
 
 	userResponse := make([]dto.UserResponse, 0)
 	for _, k := range users {
-		userResponse = append(userResponse, *mappers.FromUserCoreToUserResponse(k))
+		userResponse = append(userResponse, *mappers.FromUserToUserRes(k))
 	}
 
 	c.JSON(http.StatusOK, userResponse)
@@ -129,18 +113,16 @@ func (uc *UserHandler) GetAllUsers(c *gin.Context) {
 func (uc *UserHandler) FindUserByID(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
-	if err != nil {
-		utils.HTTPError(errors.ErrBadRequest, c)
+	if errors.Error(c, err) {
 		return
 	}
 
 	user, err := uc.userService.FindUserByID(userID)
-	if err != nil {
-		utils.HTTPError(err, c)
+	if errors.Error(c, err) {
 		return
 	}
 
-	c.JSON(http.StatusOK, *mappers.FromUserCoreToUserResponse(*user))
+	c.JSON(http.StatusOK, *mappers.FromUserToUserRes(*user))
 }
 
 func NewUserHandler(userService ports.IUserService) *UserHandler {

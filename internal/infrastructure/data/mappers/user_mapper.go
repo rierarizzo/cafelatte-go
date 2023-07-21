@@ -5,32 +5,32 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
 
-func FromUserModelToUserCore(userModel models.UserModel) *entities.User {
+func FromUserModelToUser(model models.UserModel) *entities.User {
 	var addresses []entities.Address
-	for _, v := range userModel.Addresses {
-		addresses = append(addresses, *FromAddressModelToAddressCore(v))
+	for _, v := range model.Addresses {
+		addresses = append(addresses, *FromAddressModelToAddress(v))
 	}
 
 	var cards []entities.PaymentCard
-	for _, v := range userModel.PaymentCards {
-		cards = append(cards, *FromPaymentCardModelToPaymentCardCore(v))
+	for _, v := range model.PaymentCards {
+		cards = append(cards, *FromPaymentCardModelToPaymentCard(v))
 	}
 
 	return &entities.User{
-		ID:           userModel.ID,
-		Username:     userModel.Username,
-		Name:         userModel.Name,
-		Surname:      userModel.Surname,
-		PhoneNumber:  userModel.PhoneNumber,
-		Email:        userModel.Email,
-		Password:     userModel.Password,
-		RoleCode:     userModel.RoleCode,
+		ID:           model.ID,
+		Username:     model.Username,
+		Name:         model.Name,
+		Surname:      model.Surname,
+		PhoneNumber:  model.PhoneNumber,
+		Email:        model.Email,
+		Password:     model.Password,
+		RoleCode:     model.RoleCode,
 		Addresses:    addresses,
 		PaymentCards: cards,
 	}
 }
 
-func FromUserCoreToUserModel(user entities.User) *models.UserModel {
+func FromUserToUserModel(user entities.User) *models.UserModel {
 	return &models.UserModel{
 		ID:          user.ID,
 		Username:    user.Username,

@@ -6,27 +6,27 @@ import (
 	"strings"
 )
 
-func FromSignUpRequestToUserCore(signUpRequest dto.SignUpRequest) *entities.User {
+func FromSignUpReqToUser(req dto.SignUpRequest) *entities.User {
 	return &entities.User{
-		Username:    signUpRequest.Username,
-		Name:        signUpRequest.Name,
-		Surname:     signUpRequest.Surname,
-		PhoneNumber: signUpRequest.PhoneNumber,
-		Email:       signUpRequest.Email,
-		Password:    signUpRequest.Password,
-		RoleCode:    signUpRequest.RoleCode,
+		Username:    req.Username,
+		Name:        req.Name,
+		Surname:     req.Surname,
+		PhoneNumber: req.PhoneNumber,
+		Email:       req.Email,
+		Password:    req.Password,
+		RoleCode:    req.RoleCode,
 	}
 }
 
-func FromUserCoreToUserResponse(user entities.User) *dto.UserResponse {
-	var addressesResponse []dto.AddressResponse
+func FromUserToUserRes(user entities.User) *dto.UserResponse {
+	var addressesRes []dto.AddressResponse
 	for _, v := range user.Addresses {
-		addressesResponse = append(addressesResponse, *FromAddressCoreToAddressResponse(v))
+		addressesRes = append(addressesRes, *FromAddressToAddressRes(v))
 	}
 
-	var cardsResponse []dto.PaymentCardResponse
+	var cardsRes []dto.PaymentCardResponse
 	for _, v := range user.PaymentCards {
-		cardsResponse = append(cardsResponse, *FromPaymentCardCoreToPaymentCardResponse(v))
+		cardsRes = append(cardsRes, *FromPaymentCardToPaymentCardRes(v))
 	}
 
 	return &dto.UserResponse{
@@ -35,24 +35,16 @@ func FromUserCoreToUserResponse(user entities.User) *dto.UserResponse {
 		Username:     user.Username,
 		Email:        user.Email,
 		Role:         user.RoleCode,
-		Addresses:    addressesResponse,
-		PaymentCards: cardsResponse,
+		Addresses:    addressesRes,
+		PaymentCards: cardsRes,
 	}
 }
 
-func FromAddressCoreToAddressResponse(address entities.Address) *dto.AddressResponse {
-	return &dto.AddressResponse{
-		Type:       address.Type,
-		ProvinceID: address.ProvinceID,
-		CityID:     address.CityID,
-		Detail:     address.Detail,
-	}
-}
+func FromAuthorizedUserToAuthorizationRes(authorizedUser entities.AuthorizedUser) *dto.AuthorizedUserResponse {
+	userRes := FromUserToUserRes(authorizedUser.User)
 
-func FromPaymentCardCoreToPaymentCardResponse(card entities.PaymentCard) *dto.PaymentCardResponse {
-	return &dto.PaymentCardResponse{
-		Type:       card.Type,
-		Company:    card.Company,
-		HolderName: card.HolderName,
+	return &dto.AuthorizedUserResponse{
+		User:        *userRes,
+		AccessToken: authorizedUser.AccessToken,
 	}
 }
