@@ -22,7 +22,7 @@ const (
 func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	var usersModel []models.UserModel
 
-	query := "select * from User u where u.Status = 'V'"
+	query := "select * from User u where u.Status='V'"
 	err := ur.db.Select(&usersModel, query)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -61,7 +61,7 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 func (ur *UserRepository) SelectUserById(userID int) (*entities.User, error) {
 	var userModel models.UserModel
 
-	query := "select * from User u where u.ID=?"
+	query := "select * from User u where u.ID=? and u.Status='V'"
 	err := ur.db.Get(&userModel, query, userID)
 	if err != nil {
 		return nil, handleSQLError(err)
@@ -89,7 +89,7 @@ func (ur *UserRepository) SelectUserById(userID int) (*entities.User, error) {
 func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
 	var userModel models.UserModel
 
-	query := "select * from User u where u.Email=?"
+	query := "select * from User u where u.Email=? and u.Status='V'"
 	err := ur.db.Get(&userModel, query, email)
 	if err != nil {
 		return nil, handleSQLError(err)
