@@ -32,22 +32,47 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 		}
 	}
 
+	concurrencyLimit := 5
+	sem := make(chan struct{}, concurrencyLimit)
+
+	errCh := make(chan error, len(usersModel))
+	var wg sync.WaitGroup
+
 	for i, v := range usersModel {
-		var addressesModel []models.AddressModel
-		var cardsModel []models.PaymentCardModel
+		wg.Add(1)
+		sem <- struct{}{}
 
-		err := ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, v.ID)
-		if err != nil && err != sql.ErrNoRows {
-			return nil, handleSQLError(err)
-		}
+		go func(userIndex int, user models.UserModel) {
+			defer func() {
+				wg.Done()
+				<-sem
+			}()
 
-		err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, v.ID)
-		if err != nil && err != sql.ErrNoRows {
-			return nil, handleSQLError(err)
-		}
+			var addressesModel []models.AddressModel
+			var cardsModel []models.PaymentCardModel
 
-		usersModel[i].Addresses = addressesModel
-		usersModel[i].PaymentCards = cardsModel
+			err := ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, user.ID)
+			if err != nil && err != sql.ErrNoRows {
+				errCh <- err
+				return
+			}
+
+			err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, user.ID)
+			if err != nil && err != sql.ErrNoRows {
+				errCh <- err
+				return
+			}
+
+			usersModel[userIndex].Addresses = addressesModel
+			usersModel[userIndex].PaymentCards = cardsModel
+		}(i, v)
+
+	}
+
+	wg.Wait()
+	close(errCh)
+	for err := range errCh {
+		return nil, handleSQLError(err)
 	}
 
 	var users []entities.User
