@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
 	"net/http"
@@ -63,16 +64,24 @@ func (uc *UserHandler) AddUserAddresses(c *gin.Context) {
 		return
 	}
 
+	addresses := make([]entities.Address, 0)
+	for _, v := range userAddressesRequest.Addresses {
+		addresses = append(addresses, *mappers.FromAddressReqToAddressCore(v))
+	}
+
 	addresses, err := uc.userService.AddUserAddresses(
-		userAddressesRequest.UserID,
-		mappers.FromAddressRequestSliceToAddressCoreSlice(userAddressesRequest.Addresses))
+		userAddressesRequest.UserID, addresses)
 	if err != nil {
 		utils.HTTPError(err, c)
 		return
 	}
 
-	// todo: send custom response
-	c.JSON(http.StatusCreated, addresses)
+	addressesRes := make([]dto.AddressResponse, 0)
+	for _, v := range addresses {
+		addressesRes = append(addressesRes, *mappers.FromAddressCoreToAddressResponse(v))
+	}
+
+	c.JSON(http.StatusCreated, addressesRes)
 }
 
 func (uc *UserHandler) AddUserPaymentCards(c *gin.Context) {
@@ -82,16 +91,24 @@ func (uc *UserHandler) AddUserPaymentCards(c *gin.Context) {
 		return
 	}
 
+	cards := make([]entities.PaymentCard, 0)
+	for _, v := range userCardsRequest.PaymentCards {
+		cards = append(cards, *mappers.FromCardReqToCardCore(v))
+	}
+
 	cards, err := uc.userService.AddUserPaymentCard(
-		userCardsRequest.UserID,
-		mappers.FromPaymentCardRequestSliceToPaymentCardCoreSlice(userCardsRequest.PaymentCards))
+		userCardsRequest.UserID, cards)
 	if err != nil {
 		utils.HTTPError(err, c)
 		return
 	}
 
-	// todo: send custom response
-	c.JSON(http.StatusCreated, cards)
+	cardsRes := make([]dto.PaymentCardResponse, 0)
+	for _, v := range cards {
+		cardsRes = append(cardsRes, *mappers.FromPaymentCardCoreToPaymentCardResponse(v))
+	}
+
+	c.JSON(http.StatusCreated, cardsRes)
 }
 
 func (uc *UserHandler) GetAllUsers(c *gin.Context) {

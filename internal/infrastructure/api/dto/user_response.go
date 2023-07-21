@@ -1,5 +1,10 @@
 package dto
 
+type AuthResponse struct {
+	User        UserResponse `json:"user"`
+	AccessToken string       `json:"accessToken"`
+}
+
 type UserResponse struct {
 	ID           int                   `json:"id"`
 	CompleteName string                `json:"completeName"`
@@ -21,9 +26,4 @@ type PaymentCardResponse struct {
 	Type       string `json:"type"`
 	Company    int    `json:"company"`
 	HolderName string `json:"holderName"`
-}
-
-type AuthResponse struct {
-	User        UserResponse `json:"user"`
-	AccessToken string       `json:"accesstoken"`
 }
