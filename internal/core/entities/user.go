@@ -1,6 +1,10 @@
 package entities
 
-import "strings"
+import (
+	"fmt"
+	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	"strings"
+)
 
 type User struct {
 	ID          int
@@ -16,20 +20,44 @@ type User struct {
 	PaymentCards []PaymentCard
 }
 
-func (u *User) IsValidUser() bool {
-	return u.isValidRole() && u.isValidPhoneNumber() && u.isValidEmail()
+func (u *User) ValidateUser() error {
+	if err := u.validateRole(); err != nil {
+		return err
+	}
+
+	if err := u.validatePhoneNumber(); err != nil {
+		return err
+	}
+
+	if err := u.validateEmail(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (u *User) isValidRole() bool {
-	return u.RoleCode == "A" || u.RoleCode == "E" || u.RoleCode == "C"
+func (u *User) validateRole() error {
+	if u.RoleCode != "A" && u.RoleCode != "E" && u.RoleCode != "C" {
+		return fmt.Errorf("%w; role must be 'A', 'E', or 'C'", errors.ErrInvalidUserFormat)
+	}
+
+	return nil
 }
 
-func (u *User) isValidPhoneNumber() bool {
-	return len(u.PhoneNumber) == 10
+func (u *User) validatePhoneNumber() error {
+	if len(u.PhoneNumber) != 10 {
+		return fmt.Errorf("%w; phone number must be 10 digits", errors.ErrInvalidUserFormat)
+	}
+
+	return nil
 }
 
-func (u *User) isValidEmail() bool {
-	return strings.Contains(u.Email, "@")
+func (u *User) validateEmail() error {
+	if !strings.Contains(u.Email, "@") {
+		return fmt.Errorf("%w; email must contain '@'", errors.ErrInvalidUserFormat)
+	}
+
+	return nil
 }
 
 func (u *User) SetPassword(password string) {

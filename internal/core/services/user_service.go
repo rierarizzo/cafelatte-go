@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
@@ -12,24 +13,24 @@ type UserService struct {
 }
 
 func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
-	if !user.IsValidUser() {
-		return nil, errors.ErrInvalidUserData
+	if err := user.ValidateUser(); err != nil {
+		return nil, err
 	}
 
 	hashedPassword, err := utils.HashText(user.Password)
 	if err != nil {
-		return nil, errors.ErrUnexpected
+		return nil, fmt.Errorf("%w; error while hashing password", errors.ErrUnexpected)
 	}
 	user.SetPassword(hashedPassword)
 
 	retrievedUser, err := us.userRepo.InsertUser(user)
 	if err != nil {
-		return nil, errors.ErrUnexpected
+		return nil, fmt.Errorf("%w; error while creating user", errors.ErrUnexpected)
 	}
 
 	token, err := utils.CreateJWTToken(*retrievedUser)
 	if err != nil {
-		return nil, errors.ErrUnexpected
+		return nil, fmt.Errorf("%w; error while creating token", errors.ErrUnexpected)
 	}
 
 	authorizedUser := entities.AuthorizedUser{
@@ -77,8 +78,8 @@ func (us *UserService) UpdateUser(userID int, user entities.User) error {
 
 func (us *UserService) AddUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
 	for _, v := range addresses {
-		if !v.IsValidAddress() {
-			return nil, errors.ErrInvalidUserData
+		if err := v.ValidateAddress(); err != nil {
+			return nil, err
 		}
 	}
 
@@ -87,8 +88,8 @@ func (us *UserService) AddUserAddresses(userID int, addresses []entities.Address
 
 func (us *UserService) AddUserPaymentCard(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
 	for _, v := range cards {
-		if !v.IsValidPaymentCard() {
-			return nil, errors.ErrInvalidUserData
+		if err := v.ValidatePaymentCard(); err != nil {
+			return nil, err
 		}
 	}
 
