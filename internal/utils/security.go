@@ -33,7 +33,7 @@ func CreateJWTToken(user entities.User) (*string, error) {
 				Time: time.Now(),
 			},
 			ExpiresAt: &jwt.NumericDate{
-				Time: time.Now().Add(time.Hour * 24),
+				Time: time.Now().Add(time.Hour),
 			},
 		},
 	})

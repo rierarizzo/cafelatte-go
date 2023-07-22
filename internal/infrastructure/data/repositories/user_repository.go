@@ -16,8 +16,8 @@ type UserRepository struct {
 
 const (
 	concurrencyLimit             = 5
-	selectAddressesByUserIDQuery = "select * from UserAddress ua where ua.UserID=? and u.Status=true"
-	selectCardsByUserIDQuery     = "select * from UserPaymentCard upc where upc.UserID=? and u.Status=true"
+	selectAddressesByUserIDQuery = "select * from UserAddress ua where ua.UserID=? and ua.Status=true"
+	selectCardsByUserIDQuery     = "select * from UserPaymentCard upc where upc.UserID=? and upc.Status=true"
 )
 
 func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
@@ -162,7 +162,7 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 	}
 
 	insertStmnt, err := tx.Prepare(
-		`insert into UserPaymentCard (Type, UserID, Company, HolderName, Number, ExpirationDate, CVV) 
+		`insert into UserPaymentCard (Type, UserID, Company, HolderName, Number, ExpirationYear, ExpirationMonth, CVV) 
 			values (?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		return nil, errors.ErrUnexpected
@@ -184,8 +184,8 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 			}()
 			cardModel := mappers.FromPaymentCardToPaymentCardModel(card)
 
-			result, err := insertStmnt.Exec(cardModel.Type, userID, cardModel.Company,
-				cardModel.HolderName, cardModel.Number, cardModel.ExpirationDate, cardModel.CVV)
+			result, err := insertStmnt.Exec(cardModel.Type, userID, cardModel.Company, cardModel.HolderName,
+				cardModel.Number, cardModel.ExpirationYear, cardModel.ExpirationMonth, cardModel.CVV)
 			if err != nil {
 				errCh <- err
 				return

@@ -5,7 +5,6 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/utils"
-	"github.com/sirupsen/logrus"
 )
 
 type UserService struct {
@@ -14,7 +13,6 @@ type UserService struct {
 
 func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
 	if !user.IsValidUser() {
-		logrus.Error(errors.ErrInvalidUserData.Error())
 		return nil, errors.ErrInvalidUserData
 	}
 
@@ -78,10 +76,22 @@ func (us *UserService) UpdateUser(userID int, user entities.User) error {
 }
 
 func (us *UserService) AddUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
+	for _, v := range addresses {
+		if !v.IsValidAddress() {
+			return nil, errors.ErrInvalidUserData
+		}
+	}
+
 	return us.userRepo.InsertUserAddresses(userID, addresses)
 }
 
 func (us *UserService) AddUserPaymentCard(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
+	for _, v := range cards {
+		if !v.IsValidPaymentCard() {
+			return nil, errors.ErrInvalidUserData
+		}
+	}
+
 	return us.userRepo.InsertUserPaymentCards(userID, cards)
 }
 

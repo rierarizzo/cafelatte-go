@@ -7,12 +7,13 @@ import (
 
 func FromPaymentCardReqToPaymentCard(req dto.PaymentCardRequest) *entities.PaymentCard {
 	return &entities.PaymentCard{
-		Type:           req.Type,
-		Company:        req.Company,
-		HolderName:     req.HolderName,
-		Number:         req.Number,
-		ExpirationDate: req.ExpirationDate,
-		CVV:            req.CVV,
+		Type:            req.Type,
+		Company:         req.Company,
+		HolderName:      req.HolderName,
+		Number:          req.Number,
+		ExpirationYear:  req.ExpirationYear,
+		ExpirationMonth: req.ExpirationMonth,
+		CVV:             req.CVV,
 	}
 }
 
