@@ -1,7 +1,6 @@
 package entities
 
 import (
-	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"strings"
 )
@@ -18,6 +17,10 @@ type User struct {
 	RoleCode     string
 	Addresses    []Address
 	PaymentCards []PaymentCard
+}
+
+func (u *User) SetPassword(password string) {
+	u.Password = password
 }
 
 func (u *User) ValidateUser() error {
@@ -38,7 +41,7 @@ func (u *User) ValidateUser() error {
 
 func (u *User) validateRole() error {
 	if u.RoleCode != "A" && u.RoleCode != "E" && u.RoleCode != "C" {
-		return fmt.Errorf("%w; role must be 'A', 'E', or 'C'", errors.ErrInvalidUserFormat)
+		return errors.WrapError(errors.ErrInvalidUserFormat, "role must be 'A', 'E', or 'C'")
 	}
 
 	return nil
@@ -46,7 +49,7 @@ func (u *User) validateRole() error {
 
 func (u *User) validatePhoneNumber() error {
 	if len(u.PhoneNumber) != 10 {
-		return fmt.Errorf("%w; phone number must be 10 digits", errors.ErrInvalidUserFormat)
+		return errors.WrapError(errors.ErrInvalidUserFormat, "phone number must be 10 digits")
 	}
 
 	return nil
@@ -54,12 +57,8 @@ func (u *User) validatePhoneNumber() error {
 
 func (u *User) validateEmail() error {
 	if !strings.Contains(u.Email, "@") {
-		return fmt.Errorf("%w; email must contain '@'", errors.ErrInvalidUserFormat)
+		return errors.WrapError(errors.ErrInvalidUserFormat, "email must contain '@'")
 	}
 
 	return nil
-}
-
-func (u *User) SetPassword(password string) {
-	u.Password = password
 }

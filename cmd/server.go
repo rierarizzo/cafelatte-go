@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	"log"
+	"fmt"
+	"github.com/sirupsen/logrus"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -28,8 +29,9 @@ func Server() {
 	// Initialize router with all paths
 	router := api.Router(userHandler)
 
-	err := http.ListenAndServe(":8080", router)
+	logrus.Infof("Listening server on port %s", config.ServerPort)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort), router)
 	if err != nil {
-		log.Panic(err)
+		logrus.Panic(err)
 	}
 }

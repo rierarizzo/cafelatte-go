@@ -1,7 +1,8 @@
 package constants
 
 const (
-	EnvSecretKey = "SECRET_KEY"
-	EnvDSN       = "DSN"
-	EnvGinMode   = "GIN_MODE"
+	EnvServerPort = "SERVER_PORT"
+	EnvSecretKey  = "SECRET_KEY"
+	EnvDSN        = "DSN"
+	EnvGinMode    = "GIN_MODE"
 )

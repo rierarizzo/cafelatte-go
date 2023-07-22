@@ -3,7 +3,7 @@ package errors
 import "errors"
 
 var (
-	ErrSignAlgorithmUnexpected = errors.New("sign algorithm unexpected")
-	ErrInvalidToken            = errors.New("invalid token")
-	ErrTokenNotPresent         = errors.New("token not present")
+	ErrSignAlgorithmUnexpected = errors.New("SignAlgorithmUnexpectedError")
+	ErrInvalidToken            = errors.New("InvalidTokenError")
+	ErrTokenNotPresent         = errors.New("TokenNotPresentError")
 )

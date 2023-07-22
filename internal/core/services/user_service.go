@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
@@ -19,18 +18,18 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 
 	hashedPassword, err := utils.HashText(user.Password)
 	if err != nil {
-		return nil, fmt.Errorf("%w; error while hashing password", errors.ErrUnexpected)
+		return nil, err
 	}
 	user.SetPassword(hashedPassword)
 
 	retrievedUser, err := us.userRepo.InsertUser(user)
 	if err != nil {
-		return nil, fmt.Errorf("%w; error while creating user", errors.ErrUnexpected)
+		return nil, err
 	}
 
 	token, err := utils.CreateJWTToken(*retrievedUser)
 	if err != nil {
-		return nil, fmt.Errorf("%w; error while creating token", errors.ErrUnexpected)
+		return nil, err
 	}
 
 	authorizedUser := entities.AuthorizedUser{
@@ -42,18 +41,24 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 }
 
 func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
+	const incorrectEmailOrPasswordMsg = "incorrect email or password"
+
 	retrievedUser, err := us.userRepo.SelectUserByEmail(email)
 	if err != nil {
-		return nil, errors.ErrUnauthorizedUser
+		if utils.CompareErrors(err, errors.ErrRecordNotFound) {
+			return nil, errors.WrapError(errors.ErrUnauthorizedUser, incorrectEmailOrPasswordMsg)
+		}
+
+		return nil, err
 	}
 
 	if !utils.CheckTextHash(retrievedUser.Password, password) {
-		return nil, errors.ErrUnauthorizedUser
+		return nil, errors.WrapError(errors.ErrUnauthorizedUser, incorrectEmailOrPasswordMsg)
 	}
 
 	token, err := utils.CreateJWTToken(*retrievedUser)
 	if err != nil {
-		return nil, errors.ErrUnauthorizedUser
+		return nil, err
 	}
 
 	authorizedUser := entities.AuthorizedUser{

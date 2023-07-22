@@ -15,7 +15,6 @@ type UserRepository struct {
 }
 
 const (
-	concurrencyLimit             = 5
 	selectAddressesByUserIDQuery = "select * from UserAddress ua where ua.UserID=? and ua.Status=true"
 	selectCardsByUserIDQuery     = "select * from UserPaymentCard upc where upc.UserID=? and upc.Status=true"
 )
@@ -29,11 +28,11 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 		if err == sql.ErrNoRows {
 			return []entities.User{}, nil
 		} else {
-			return nil, handleSQLError(err)
+			return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 		}
 	}
 
-	sem := make(chan struct{}, concurrencyLimit)
+	sem := make(chan struct{}, 3)
 
 	errCh := make(chan error, len(usersModel))
 	var wg sync.WaitGroup
@@ -72,7 +71,7 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	wg.Wait()
 	close(errCh)
 	for err := range errCh {
-		return nil, handleSQLError(err)
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	var users []entities.User
@@ -88,7 +87,10 @@ func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 
 	err := ur.db.Get(&userModel, "select * from User u where u.ID=? and u.Status=true", userID)
 	if err != nil {
-		return nil, handleSQLError(err)
+		if err == sql.ErrNoRows {
+			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
+		}
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	var addressesModel []models.AddressModel
@@ -96,12 +98,12 @@ func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 
 	err = ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, userModel.ID)
 	if err != nil && err != sql.ErrNoRows {
-		return nil, handleSQLError(err)
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, userModel.ID)
 	if err != nil && err != sql.ErrNoRows {
-		return nil, handleSQLError(err)
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	userModel.Addresses = addressesModel
@@ -115,7 +117,10 @@ func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error
 
 	err := ur.db.Get(&userModel, "select * from User u where u.Email=? and u.Status=true", email)
 	if err != nil {
-		return nil, handleSQLError(err)
+		if err == sql.ErrNoRows {
+			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
+		}
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	var addressesModel []models.AddressModel
@@ -123,12 +128,12 @@ func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error
 
 	err = ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, userModel.ID)
 	if err != nil && err != sql.ErrNoRows {
-		return nil, handleSQLError(err)
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, userModel.ID)
 	if err != nil && err != sql.ErrNoRows {
-		return nil, handleSQLError(err)
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	userModel.Addresses = addressesModel
@@ -146,7 +151,7 @@ func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error)
 		userModel.Username, userModel.Name, userModel.Surname, userModel.PhoneNumber,
 		userModel.Email, userModel.Password, userModel.RoleCode)
 	if err != nil {
-		return nil, handleSQLError(err)
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	lastUserID, _ := result.LastInsertId()
@@ -158,17 +163,17 @@ func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error)
 func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
 	tx, err := ur.db.Begin()
 	if err != nil {
-		return nil, errors.ErrUnexpected
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	insertStmnt, err := tx.Prepare(
 		`insert into UserPaymentCard (Type, UserID, Company, HolderName, Number, ExpirationYear, ExpirationMonth, CVV) 
 			values (?,?,?,?,?,?,?,?)`)
 	if err != nil {
-		return nil, errors.ErrUnexpected
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
-	sem := make(chan struct{}, concurrencyLimit)
+	sem := make(chan struct{}, 5)
 
 	errCh := make(chan error, len(cards))
 	var wg sync.WaitGroup
@@ -200,12 +205,12 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 	close(errCh)
 	for err := range errCh {
 		_ = tx.Rollback()
-		return nil, err
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, errors.ErrUnexpected
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	return cards, nil
@@ -214,17 +219,17 @@ func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.Pa
 func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
 	tx, err := ur.db.Begin()
 	if err != nil {
-		return nil, errors.ErrUnexpected
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	insertStmnt, err := tx.Prepare(
 		`insert into UserAddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
 			values (?,?,?,?,?,?)`)
 	if err != nil {
-		return nil, errors.ErrUnexpected
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
-	sem := make(chan struct{}, concurrencyLimit)
+	sem := make(chan struct{}, 5)
 
 	errCh := make(chan error, len(addresses))
 	var wg sync.WaitGroup
@@ -258,12 +263,12 @@ func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.A
 
 	for err := range errCh {
 		_ = tx.Rollback()
-		return nil, err
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, errors.ErrUnexpected
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	return addresses, nil
@@ -276,19 +281,13 @@ func (ur *UserRepository) UpdateUser(userID int, user entities.User) error {
 
 	_, err := ur.db.Exec(query, userModel.Name, userModel.Surname, userModel.PhoneNumber, userID)
 	if err != nil {
-		return handleSQLError(err)
+		if err == sql.ErrNoRows {
+			return errors.WrapError(errors.ErrRecordNotFound, err.Error())
+		}
+		return errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	return nil
-}
-
-func handleSQLError(sqlError error) error {
-	switch sqlError {
-	case sql.ErrNoRows:
-		return errors.ErrRecordNotFound
-	default:
-		return errors.ErrUnexpected
-	}
 }
 
 func NewUserRepository(db *sqlx.DB) *UserRepository {

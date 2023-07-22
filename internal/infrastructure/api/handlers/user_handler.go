@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"github.com/rierarizzo/cafelatte/internal/core/constants"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/error"
+	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	errorHandler "github.com/rierarizzo/cafelatte/internal/infrastructure/api/error"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
+	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -19,12 +22,12 @@ type UserHandler struct {
 func (uc *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	err := c.BindJSON(&signUpRequest)
-	if error.Error(c, err) {
+	if errorHandler.Error(c, err) {
 		return
 	}
 
 	authorizedUser, err := uc.userService.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
-	if error.Error(c, err) {
+	if errorHandler.Error(c, err) {
 		return
 	}
 
@@ -34,32 +37,46 @@ func (uc *UserHandler) SignUp(c *gin.Context) {
 func (uc *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	err := c.BindJSON(&signInRequest)
-	if error.Error(c, err) {
+	if errorHandler.Error(c, err) {
 		return
 	}
 
 	authorizedUser, err := uc.userService.SignIn(signInRequest.Email, signInRequest.Password)
-	if error.Error(c, err) {
+	if errorHandler.Error(c, err) {
 		return
 	}
 
 	c.JSON(http.StatusCreated, mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
 }
 
+func getUserIDFromClaims(c *gin.Context) (int, error) {
+	userClaims, exists := c.Get(constants.UserClaimsKey)
+	if !exists {
+		return 0, errors.WrapError(errors.ErrUnauthorizedUser, "claims not present in token")
+	}
+
+	return userClaims.(*utils.UserClaims).ID, nil
+}
+
 func (uc *UserHandler) AddUserAddresses(c *gin.Context) {
-	var userAddressesRequest dto.UserAddressesRequest
-	err := c.BindJSON(&userAddressesRequest)
-	if error.Error(c, err) {
+	var addressesRequest []dto.AddressRequest
+	err := c.BindJSON(&addressesRequest)
+	if errorHandler.Error(c, err) {
 		return
 	}
 
 	addresses := make([]entities.Address, 0)
-	for _, v := range userAddressesRequest.Addresses {
+	for _, v := range addressesRequest {
 		addresses = append(addresses, *mappers.FromAddressReqToAddress(v))
 	}
 
-	addresses, err = uc.userService.AddUserAddresses(userAddressesRequest.UserID, addresses)
-	if error.Error(c, err) {
+	userID, err := getUserIDFromClaims(c)
+	if errorHandler.Error(c, err) {
+		return
+	}
+
+	addresses, err = uc.userService.AddUserAddresses(userID, addresses)
+	if errorHandler.Error(c, err) {
 		return
 	}
 
@@ -72,19 +89,24 @@ func (uc *UserHandler) AddUserAddresses(c *gin.Context) {
 }
 
 func (uc *UserHandler) AddUserPaymentCards(c *gin.Context) {
-	var userCardsRequest dto.UserPaymentCardsRequest
-	err := c.BindJSON(&userCardsRequest)
-	if error.Error(c, err) {
+	var cardsRequest []dto.PaymentCardRequest
+	err := c.BindJSON(&cardsRequest)
+	if errorHandler.Error(c, err) {
 		return
 	}
 
 	cards := make([]entities.PaymentCard, 0)
-	for _, v := range userCardsRequest.PaymentCards {
+	for _, v := range cardsRequest {
 		cards = append(cards, *mappers.FromPaymentCardReqToPaymentCard(v))
 	}
 
-	cards, err = uc.userService.AddUserPaymentCard(userCardsRequest.UserID, cards)
-	if error.Error(c, err) {
+	userID, err := getUserIDFromClaims(c)
+	if errorHandler.Error(c, err) {
+		return
+	}
+
+	cards, err = uc.userService.AddUserPaymentCard(userID, cards)
+	if errorHandler.Error(c, err) {
 		return
 	}
 
@@ -98,7 +120,7 @@ func (uc *UserHandler) AddUserPaymentCards(c *gin.Context) {
 
 func (uc *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := uc.userService.GetAllUsers()
-	if error.Error(c, err) {
+	if errorHandler.Error(c, err) {
 		return
 	}
 
@@ -113,12 +135,12 @@ func (uc *UserHandler) GetAllUsers(c *gin.Context) {
 func (uc *UserHandler) FindUserByID(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
-	if error.Error(c, err) {
+	if errorHandler.Error(c, err) {
 		return
 	}
 
 	user, err := uc.userService.FindUserByID(userID)
-	if error.Error(c, err) {
+	if errorHandler.Error(c, err) {
 		return
 	}
 

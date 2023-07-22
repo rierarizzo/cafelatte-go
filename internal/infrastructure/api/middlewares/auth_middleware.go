@@ -12,16 +12,19 @@ func AuthenticateMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenWithBearer := c.GetHeader("Authorization")
 		if tokenWithBearer == "" {
-			error.Error(c, coreErrors.ErrTokenNotPresent)
-			return
+			if error.Error(c, coreErrors.ErrTokenNotPresent) {
+				return
+			}
 		}
 
 		token, _ := strings.CutPrefix(tokenWithBearer, "Bearer ")
-		if !utils.JWTTokenIsValid(token) {
-			error.Error(c, coreErrors.ErrUnauthorizedUser)
+
+		claims, err := utils.VerifyJWTToken(token)
+		if error.Error(c, err) {
 			return
 		}
 
+		c.Set("userClaims", claims)
 		c.Next()
 	}
 }

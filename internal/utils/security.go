@@ -3,7 +3,6 @@ package utils
 import (
 	"github.com/rierarizzo/cafelatte/internal/core/constants"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
-	"github.com/sirupsen/logrus"
 	"os"
 	"time"
 
@@ -40,8 +39,7 @@ func CreateJWTToken(user entities.User) (*string, error) {
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		logrus.Errorf("error while getting token signed string: %v", err)
-		return nil, errors.ErrUnexpected
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	return &tokenString, nil
@@ -53,30 +51,28 @@ func VerifyJWTToken(tokenString string) (*UserClaims, error) {
 	var userClaims UserClaims
 	token, err := jwt.ParseWithClaims(tokenString, &userClaims, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.ErrSignAlgorithmUnexpected
+			return nil, errors.WrapError(errors.ErrInvalidToken, "signing method is invalid")
 		}
 
 		return secret, nil
 	})
 	if err != nil {
-		logrus.Errorf("error while getting token: %v", err)
-		return nil, errors.ErrUnexpected
+		return nil, errors.WrapError(errors.ErrInvalidToken, err.Error())
 	}
 	if !token.Valid {
-		return nil, errors.ErrInvalidToken
+		return nil, errors.WrapError(errors.ErrInvalidToken, "token is invalid")
 	}
 
 	return &userClaims, nil
 }
 
-func JWTTokenIsValid(tokenString string) bool {
-	_, err := VerifyJWTToken(tokenString)
-	return err == nil
-}
-
 func HashText(text string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(text), bcrypt.DefaultCost)
-	return string(bytes), err
+	if err != nil {
+		return "", errors.WrapError(errors.ErrUnexpected, err.Error())
+	}
+
+	return string(bytes), nil
 }
 
 func CheckTextHash(hash string, text string) bool {

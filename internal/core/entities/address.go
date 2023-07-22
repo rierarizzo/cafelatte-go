@@ -1,7 +1,6 @@
 package entities
 
 import (
-	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"regexp"
 )
@@ -25,13 +24,13 @@ func (a *Address) ValidateAddress() error {
 
 func (a *Address) validatePostalCode() error {
 	if len(a.PostalCode) != 6 {
-		return fmt.Errorf("%w; postal code must have 6 digits", errors.ErrInvalidAddressFormat)
+		return errors.WrapError(errors.ErrInvalidAddressFormat, "postal code must have 6 digits")
 	}
 
 	regex := regexp.MustCompile("^[0-9]+$")
 
 	if !regex.MatchString(a.PostalCode) {
-		return fmt.Errorf("%w; postal code must have only numbers", errors.ErrInvalidAddressFormat)
+		return errors.WrapError(errors.ErrInvalidAddressFormat, "postal code must have only numbers")
 	}
 
 	return nil

@@ -1,7 +1,6 @@
 package entities
 
 import (
-	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"time"
 )
@@ -36,7 +35,7 @@ func (c *PaymentCard) ValidatePaymentCard() error {
 
 func (c *PaymentCard) validateType() error {
 	if c.Type != "C" && c.Type != "D" {
-		return fmt.Errorf("%w; card type must be 'C' or 'D'", errors.ErrInvalidCardFormat)
+		return errors.WrapError(errors.ErrInvalidCardFormat, "card type must be 'C' or 'D'")
 	}
 
 	return nil
@@ -44,13 +43,13 @@ func (c *PaymentCard) validateType() error {
 
 func (c *PaymentCard) validateExpirationDate() error {
 	if c.ExpirationMonth < 1 || c.ExpirationMonth > 12 {
-		return fmt.Errorf("%w; expiration date must be in a valid range [1..12]", errors.ErrInvalidCardFormat)
+		return errors.WrapError(errors.ErrInvalidCardFormat, "expiration date must be in a valid range [1..12]")
 	}
 
 	year, month, _ := time.Now().Date()
 
 	if c.ExpirationYear < year || (c.ExpirationYear == year && c.ExpirationMonth < int(month)) {
-		return errors.ErrExpiredCard
+		return errors.WrapError(errors.ErrExpiredCard, "card is already expired")
 	}
 
 	return nil
@@ -58,7 +57,7 @@ func (c *PaymentCard) validateExpirationDate() error {
 
 func (c *PaymentCard) validateCVV() error {
 	if len(c.CVV) != 3 && len(c.CVV) != 4 {
-		return fmt.Errorf("%w; CVV length must be 3 or 4", errors.ErrInvalidCardFormat)
+		return errors.WrapError(errors.ErrInvalidCardFormat, "CVV length must be 3 or 4")
 	}
 
 	return nil

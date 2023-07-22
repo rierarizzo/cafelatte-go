@@ -6,13 +6,15 @@ import (
 )
 
 type Config struct {
-	DSN     string
-	GinMode string
+	ServerPort string
+	DSN        string
+	GinMode    string
 }
 
 func LoadConfig() *Config {
 	return &Config{
-		DSN:     os.Getenv(constants.EnvDSN),
-		GinMode: os.Getenv(constants.EnvGinMode),
+		ServerPort: os.Getenv(constants.EnvServerPort),
+		DSN:        os.Getenv(constants.EnvDSN),
+		GinMode:    os.Getenv(constants.EnvGinMode),
 	}
 }

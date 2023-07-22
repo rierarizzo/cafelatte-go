@@ -11,6 +11,8 @@ import (
 func Router(userHandler *handlers.UserHandler) http.Handler {
 	router := gin.Default()
 
+	router.Use(middlewares.RequestIDMiddleware())
+
 	authGroup := router.Group("/auth")
 	{
 		authGroup.POST("/signup", userHandler.SignUp)

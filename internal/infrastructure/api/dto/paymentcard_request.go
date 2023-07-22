@@ -1,10 +1,5 @@
 package dto
 
-type UserPaymentCardsRequest struct {
-	UserID       int                  `json:"userID"`
-	PaymentCards []PaymentCardRequest `json:"paymentCards"`
-}
-
 type PaymentCardRequest struct {
 	Type            string `json:"type"`
 	Company         int    `json:"company"`
