@@ -7,6 +7,7 @@ import (
 
 func FromAddressToAddressModel(address entities.Address) *models.AddressModel {
 	return &models.AddressModel{
+		ID:         address.ID,
 		Type:       address.Type,
 		ProvinceID: address.ProvinceID,
 		CityID:     address.CityID,

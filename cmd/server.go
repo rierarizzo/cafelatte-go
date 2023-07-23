@@ -21,13 +21,23 @@ func Server() {
 	// Connect to database
 	db := data.Connect(config.DSN)
 
+	// Addresses instance
+	addressRepo := repositories.NewAddressRepository(db)
+	addressService := services.NewAddressService(addressRepo)
+	addressHandler := handlers.NewAddressHandler(addressService)
+
+	// PaymentCards instance
+	paymentCardRepo := repositories.NewPaymentCardRepository(db)
+	paymentCardService := services.NewPaymentCardService(paymentCardRepo)
+	paymentCardHandler := handlers.NewPaymentCardHandler(paymentCardService)
+
 	// Users instance
-	userRepo := repositories.NewUserRepository(db)
+	userRepo := repositories.NewUserRepository(db, addressRepo, paymentCardRepo)
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
 	// Initialize router with all paths
-	router := api.Router(userHandler)
+	router := api.Router(userHandler, addressHandler, paymentCardHandler)
 
 	logrus.Infof("Listening server on port %s", config.ServerPort)
 	err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort), router)

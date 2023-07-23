@@ -12,8 +12,6 @@ type IUserService interface {
 	// FindUserByID es un método para buscar un usuario por su ID.
 	FindUserByID(userID int) (*entities.User, error)
 	UpdateUser(userID int, user entities.User) error
-	AddUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error)
-	AddUserPaymentCard(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error)
 }
 
 type IUserRepository interface {
@@ -21,7 +19,5 @@ type IUserRepository interface {
 	SelectUserByID(userID int) (*entities.User, error)
 	SelectUserByEmail(email string) (*entities.User, error)
 	InsertUser(user entities.User) (*entities.User, error)
-	InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error)
-	InsertUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error)
 	UpdateUser(userID int, user entities.User) error
 }

@@ -81,26 +81,6 @@ func (us *UserService) UpdateUser(userID int, user entities.User) error {
 	return us.userRepo.UpdateUser(userID, user)
 }
 
-func (us *UserService) AddUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
-	for _, v := range addresses {
-		if err := v.ValidateAddress(); err != nil {
-			return nil, err
-		}
-	}
-
-	return us.userRepo.InsertUserAddresses(userID, addresses)
-}
-
-func (us *UserService) AddUserPaymentCard(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
-	for _, v := range cards {
-		if err := v.ValidatePaymentCard(); err != nil {
-			return nil, err
-		}
-	}
-
-	return us.userRepo.InsertUserPaymentCards(userID, cards)
-}
-
 func NewUserService(userRepo ports.IUserRepository) *UserService {
 	return &UserService{userRepo}
 }

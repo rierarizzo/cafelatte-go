@@ -5,19 +5,17 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"sync"
 )
 
 type UserRepository struct {
-	db *sqlx.DB
+	db              *sqlx.DB
+	addressRepo     ports.IAddressRepository
+	paymentCardRepo ports.IPaymentCardRepository
 }
-
-const (
-	selectAddressesByUserIDQuery = "select * from UserAddress ua where ua.UserID=? and ua.Status=true"
-	selectCardsByUserIDQuery     = "select * from UserPaymentCard upc where upc.UserID=? and upc.Status=true"
-)
 
 func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	var usersModel []models.UserModel
@@ -32,38 +30,40 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 		}
 	}
 
+	var users []entities.User
+	for _, k := range usersModel {
+		users = append(users, *mappers.FromUserModelToUser(k))
+	}
+
 	sem := make(chan struct{}, 3)
 
-	errCh := make(chan error, len(usersModel))
+	errCh := make(chan error, len(users))
 	var wg sync.WaitGroup
 
-	for i, v := range usersModel {
+	for i, v := range users {
 		wg.Add(1)
 		sem <- struct{}{}
 
-		go func(userIndex int, user models.UserModel) {
+		go func(userIndex int, user entities.User) {
 			defer func() {
 				wg.Done()
 				<-sem
 			}()
 
-			var addressesModel []models.AddressModel
-			var cardsModel []models.PaymentCardModel
-
-			err := ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, user.ID)
-			if err != nil && err != sql.ErrNoRows {
+			addresses, err := ur.addressRepo.SelectAddressesByUserID(user.ID)
+			if err != nil {
 				errCh <- err
 				return
 			}
 
-			err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, user.ID)
-			if err != nil && err != sql.ErrNoRows {
+			cards, err := ur.paymentCardRepo.SelectCardsByUserID(user.ID)
+			if err != nil {
 				errCh <- err
 				return
 			}
 
-			usersModel[userIndex].Addresses = addressesModel
-			usersModel[userIndex].PaymentCards = cardsModel
+			users[userIndex].Addresses = addresses
+			users[userIndex].PaymentCards = cards
 		}(i, v)
 
 	}
@@ -72,11 +72,6 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	close(errCh)
 	for err := range errCh {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	var users []entities.User
-	for _, k := range usersModel {
-		users = append(users, *mappers.FromUserModelToUser(k))
 	}
 
 	return users, nil
@@ -93,23 +88,21 @@ func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
-	var addressesModel []models.AddressModel
-	var cardsModel []models.PaymentCardModel
+	user := mappers.FromUserModelToUser(userModel)
 
-	err = ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, userModel.ID)
-	if err != nil && err != sql.ErrNoRows {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+	addresses, err := ur.addressRepo.SelectAddressesByUserID(user.ID)
+	if err != nil {
+		return nil, err
 	}
+	user.Addresses = addresses
 
-	err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, userModel.ID)
-	if err != nil && err != sql.ErrNoRows {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+	cards, err := ur.paymentCardRepo.SelectCardsByUserID(user.ID)
+	if err != nil {
+		return nil, err
 	}
+	user.PaymentCards = cards
 
-	userModel.Addresses = addressesModel
-	userModel.PaymentCards = cardsModel
-
-	return mappers.FromUserModelToUser(userModel), nil
+	return user, nil
 }
 
 func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
@@ -123,23 +116,21 @@ func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
-	var addressesModel []models.AddressModel
-	var cardsModel []models.PaymentCardModel
+	user := mappers.FromUserModelToUser(userModel)
 
-	err = ur.db.Select(&addressesModel, selectAddressesByUserIDQuery, userModel.ID)
-	if err != nil && err != sql.ErrNoRows {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+	addresses, err := ur.addressRepo.SelectAddressesByUserID(user.ID)
+	if err != nil {
+		return nil, err
 	}
+	user.Addresses = addresses
 
-	err = ur.db.Select(&cardsModel, selectCardsByUserIDQuery, userModel.ID)
-	if err != nil && err != sql.ErrNoRows {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+	cards, err := ur.paymentCardRepo.SelectCardsByUserID(user.ID)
+	if err != nil {
+		return nil, err
 	}
+	user.PaymentCards = cards
 
-	userModel.Addresses = addressesModel
-	userModel.PaymentCards = cardsModel
-
-	return mappers.FromUserModelToUser(userModel), nil
+	return user, nil
 }
 
 func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error) {
@@ -160,120 +151,6 @@ func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error)
 	return mappers.FromUserModelToUser(*userModel), nil
 }
 
-func (ur *UserRepository) InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
-	tx, err := ur.db.Begin()
-	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	insertStmnt, err := tx.Prepare(
-		`insert into UserPaymentCard (Type, UserID, Company, HolderName, Number, ExpirationYear, ExpirationMonth, CVV) 
-			values (?,?,?,?,?,?,?,?)`)
-	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	sem := make(chan struct{}, 5)
-
-	errCh := make(chan error, len(cards))
-	var wg sync.WaitGroup
-
-	for _, v := range cards {
-		wg.Add(1)
-		sem <- struct{}{}
-
-		go func(card entities.PaymentCard) {
-			defer func() {
-				wg.Done()
-				<-sem
-			}()
-			cardModel := mappers.FromPaymentCardToPaymentCardModel(card)
-
-			result, err := insertStmnt.Exec(cardModel.Type, userID, cardModel.Company, cardModel.HolderName,
-				cardModel.Number, cardModel.ExpirationYear, cardModel.ExpirationMonth, cardModel.CVV)
-			if err != nil {
-				errCh <- err
-				return
-			}
-
-			cardID, _ := result.LastInsertId()
-			card.ID = int(cardID)
-		}(v)
-	}
-
-	wg.Wait()
-	close(errCh)
-	for err := range errCh {
-		_ = tx.Rollback()
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	return cards, nil
-}
-
-func (ur *UserRepository) InsertUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
-	tx, err := ur.db.Begin()
-	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	insertStmnt, err := tx.Prepare(
-		`insert into UserAddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
-			values (?,?,?,?,?,?)`)
-	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	sem := make(chan struct{}, 5)
-
-	errCh := make(chan error, len(addresses))
-	var wg sync.WaitGroup
-
-	for _, v := range addresses {
-		wg.Add(1)
-		sem <- struct{}{}
-
-		go func(address entities.Address) {
-			defer func() {
-				wg.Done()
-				<-sem
-			}()
-			addressModel := mappers.FromAddressToAddressModel(address)
-
-			result, err := insertStmnt.Exec(addressModel.Type, userID, addressModel.ProvinceID,
-				addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
-			if err != nil {
-				errCh <- err
-				return
-			}
-
-			addressID, _ := result.LastInsertId()
-			address.ID = int(addressID)
-		}(v)
-
-	}
-
-	wg.Wait()
-	close(errCh)
-
-	for err := range errCh {
-		_ = tx.Rollback()
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	return addresses, nil
-}
-
 func (ur *UserRepository) UpdateUser(userID int, user entities.User) error {
 	userModel := mappers.FromUserToUserModel(user)
 
@@ -290,6 +167,13 @@ func (ur *UserRepository) UpdateUser(userID int, user entities.User) error {
 	return nil
 }
 
-func NewUserRepository(db *sqlx.DB) *UserRepository {
-	return &UserRepository{db}
+func NewUserRepository(db *sqlx.DB,
+	addressRepo ports.IAddressRepository,
+	paymentCardRepo ports.IPaymentCardRepository) *UserRepository {
+
+	return &UserRepository{
+		db:              db,
+		addressRepo:     addressRepo,
+		paymentCardRepo: paymentCardRepo,
+	}
 }

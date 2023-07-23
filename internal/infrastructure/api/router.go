@@ -8,7 +8,11 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
 )
 
-func Router(userHandler *handlers.UserHandler) http.Handler {
+func Router(
+	userHandler *handlers.UserHandler,
+	addressHandler *handlers.AddressHandler,
+	cardHandler *handlers.PaymentCardHandler) http.Handler {
+
 	router := gin.Default()
 
 	router.Use(middlewares.RequestIDMiddleware())
@@ -24,8 +28,8 @@ func Router(userHandler *handlers.UserHandler) http.Handler {
 	{
 		usersGroup.GET("/find", userHandler.GetAllUsers)
 		usersGroup.GET("/find/:userID", userHandler.FindUserByID)
-		usersGroup.POST("/add-addresses", userHandler.AddUserAddresses)
-		usersGroup.POST("/add-paymentcards", userHandler.AddUserPaymentCards)
+		usersGroup.POST("/add-addresses", addressHandler.AddUserAddresses)
+		usersGroup.POST("/add-paymentcards", cardHandler.AddUserPaymentCards)
 	}
 
 	return router
