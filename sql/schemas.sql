@@ -1,151 +1,151 @@
-DROP DATABASE IF EXISTS CafeLatte;
+drop database if exists cafelatte;
 
-CREATE DATABASE CafeLatte;
+create database cafelatte;
 
-USE CafeLatte;
+use cafelatte;
 
-CREATE TABLE UserRole
+create table userrole
 (
-    Code        CHAR        NOT NULL,
-    Description VARCHAR(20) NOT NULL,
-    PRIMARY KEY (Code)
+    Code        char        not null,
+    Description varchar(20) not null,
+    primary key (Code)
 );
 
-INSERT INTO UserRole
-VALUES ('A', 'ADMIN');
-INSERT INTO UserRole
-VALUES ('E', 'EMPLOYEE');
-INSERT INTO UserRole
-VALUES ('C', 'CLIENT');
+insert into userrole
+values ('A', 'ADMIN');
+insert into userrole
+values ('E', 'EMPLOYEE');
+insert into userrole
+values ('C', 'CLIENT');
 
-CREATE TABLE User
+create table user
 (
-    ID          INT AUTO_INCREMENT,
-    Username    varchar(30)  NOT NULL UNIQUE,
-    Name        VARCHAR(50)  NOT NULL,
-    Surname     VARCHAR(50)  NOT NULL,
-    PhoneNumber VARCHAR(20),
-    Email       VARCHAR(50)  NOT NULL UNIQUE,
-    Password    VARCHAR(100) NOT NULL,
-    RoleCode    CHAR         NOT NULL,
-    Status      BOOL     DEFAULT TRUE,
-    CreatedAt   DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UpdatedAt   DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (RoleCode) REFERENCES UserRole (Code)
+    ID          int auto_increment,
+    Username    varchar(30)  not null unique,
+    Name        varchar(50)  not null,
+    Surname     varchar(50)  not null,
+    PhoneNumber varchar(20),
+    Email       varchar(50)  not null unique,
+    Password    varchar(100) not null,
+    RoleCode    char         not null,
+    Status      bool     default true,
+    CreatedAt   datetime default current_timestamp,
+    UpdatedAt   datetime default current_timestamp on update current_timestamp,
+    primary key (ID),
+    foreign key (RoleCode) references userrole (Code)
 );
 
-CREATE TABLE Province
+create table province
 (
-    ID   INT         NOT NULL,
-    Name VARCHAR(50) NOT NULL,
-    PRIMARY KEY (ID)
+    ID   int         not null,
+    Name varchar(50) not null,
+    primary key (ID)
 );
 
-INSERT INTO Province
+insert into province
     (ID, Name)
-VALUES (1, 'GUAYAS');
-INSERT INTO Province
+values (1, 'GUAYAS');
+insert into province
     (ID, Name)
-VALUES (2, 'SANTA ELENA');
+values (2, 'SANTA ELENA');
 
-CREATE TABLE City
+create table city
 (
-    ID         INT         NOT NULL,
-    ProvinceID INT         NOT NULL,
-    Name       VARCHAR(50) NOT NULL,
-    PRIMARY KEY (ID, ProvinceID),
-    FOREIGN KEY (ProvinceID) REFERENCES Province (ID)
+    ID         int         not null,
+    ProvinceID int         not null,
+    Name       varchar(50) not null,
+    primary key (ID, ProvinceID),
+    foreign key (ProvinceID) references province (ID)
 );
 
-INSERT INTO City (ID, ProvinceID, Name)
-VALUES (1, 1, 'GUAYAQUIL');
-INSERT INTO City (ID, ProvinceID, Name)
-VALUES (2, 1, 'DURAN');
-INSERT INTO City (ID, ProvinceID, Name)
-VALUES (3, 1, 'YAGUACHI');
-INSERT INTO City (ID, ProvinceID, Name)
-VALUES (4, 1, 'MILAGRO');
-INSERT INTO City (ID, ProvinceID, Name)
-VALUES (1, 2, 'SALINAS');
-INSERT INTO City (ID, ProvinceID, Name)
-VALUES (2, 2, 'SANTA ELENA');
+insert into city (ID, ProvinceID, Name)
+values (1, 1, 'GUAYAQUIL');
+insert into city (ID, ProvinceID, Name)
+values (2, 1, 'DURAN');
+insert into city (ID, ProvinceID, Name)
+values (3, 1, 'YAGUACHI');
+insert into city (ID, ProvinceID, Name)
+values (4, 1, 'MILAGRO');
+insert into city (ID, ProvinceID, Name)
+values (1, 2, 'SALINAS');
+insert into city (ID, ProvinceID, Name)
+values (2, 2, 'SANTA ELENA');
 
-CREATE TABLE AddressType
+create table addresstype
 (
-    Code        CHAR,
-    Description VARCHAR(20),
-    PRIMARY KEY (Code)
+    Code        char,
+    Description varchar(20),
+    primary key (Code)
 );
 
-INSERT INTO AddressType
-VALUES ('D', 'DOMICILIO');
-INSERT INTO AddressType
-VALUES ('T', 'TRABAJO');
+insert into addresstype
+values ('D', 'DOMICILIO');
+insert into addresstype
+values ('T', 'TRABAJO');
 
-CREATE TABLE UserAddress
+create table useraddress
 (
-    ID         INT AUTO_INCREMENT,
-    Type       CHAR         NOT NULL,
-    UserID     INT          NOT NULL,
-    ProvinceID INT          NOT NULL,
-    CityID     INT          NOT NULL,
-    PostalCode VARCHAR(10),
-    Detail     VARCHAR(150) NOT NULL,
-    Status     BOOL     DEFAULT TRUE,
-    CreatedAt  DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UpdatedAt  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (ID, UserID),
-    FOREIGN KEY (Type) REFERENCES AddressType (Code),
-    FOREIGN KEY (UserID) REFERENCES User (ID),
-    FOREIGN KEY (ProvinceID) REFERENCES Province (ID),
-    FOREIGN KEY (CityID) REFERENCES City (ID)
+    ID         int auto_increment,
+    Type       char         not null,
+    UserID     int          not null,
+    ProvinceID int          not null,
+    CityID     int          not null,
+    PostalCode varchar(10),
+    Detail     varchar(150) not null,
+    Status     bool     default true,
+    CreatedAt  datetime default current_timestamp,
+    UpdatedAt  datetime default current_timestamp on update current_timestamp,
+    primary key (ID, UserID),
+    foreign key (Type) references addresstype (Code),
+    foreign key (UserID) references user (ID),
+    foreign key (ProvinceID) references province (ID),
+    foreign key (CityID) references city (ID)
 );
 
-CREATE TABLE CardCompany
+create table cardcompany
 (
-    ID   INT AUTO_INCREMENT,
-    Name VARCHAR(50),
-    PRIMARY KEY (ID)
+    ID   int auto_increment,
+    Name varchar(50),
+    primary key (ID)
 );
 
-INSERT INTO CardCompany (Name)
-VALUES ('AMERICAN EXPRESS');
-INSERT INTO CardCompany (Name)
-VALUES ('VISA');
-INSERT INTO CardCompany (Name)
-VALUES ('MASTERCARD');
-INSERT INTO CardCompany (Name)
-VALUES ('DISCOVER');
+insert into cardcompany (Name)
+values ('AMERICAN EXPRESS');
+insert into cardcompany (Name)
+values ('VISA');
+insert into cardcompany (Name)
+values ('MASTERCARD');
+insert into cardcompany (Name)
+values ('DISCOVER');
 
-CREATE TABLE CardType
+create table cardtype
 (
-    Code        CHAR NOT NULL,
-    Description VARCHAR(50),
-    PRIMARY KEY (Code)
+    Code        char not null,
+    Description varchar(50),
+    primary key (Code)
 );
 
-INSERT INTO CardType (Code, Description)
-VALUES ('C', 'CREDITO');
-INSERT INTO CardType (Code, Description)
-VALUES ('D', 'DEBITO');
+insert into cardtype (Code, Description)
+values ('C', 'CREDITO');
+insert into cardtype (Code, Description)
+values ('D', 'DEBITO');
 
-CREATE TABLE UserPaymentCard
+create table userpaymentcard
 (
-    ID              INT AUTO_INCREMENT,
-    Type            CHAR         NOT NULL,
-    UserID          INT          NOT NULL,
-    Company         INT          NOT NULL,
-    HolderName      VARCHAR(100) NOT NULL,
-    Number          VARCHAR(100) NOT NULL,
-    ExpirationYear  INT          NOT NULL,
-    ExpirationMonth INT          NOT NULL,
-    CVV             VARCHAR(100) NOT NULL,
-    Status          BOOL     DEFAULT TRUE,
-    CreatedAt       DATETIME DEFAULT CURRENT_TIMESTAMP,
-    UpdatedAt       DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (ID),
-    FOREIGN KEY (Type) REFERENCES CardType (Code),
-    FOREIGN KEY (UserID) REFERENCES User (ID),
-    FOREIGN KEY (Company) REFERENCES CardCompany (ID)
+    ID              int auto_increment,
+    Type            char         not null,
+    UserID          int          not null,
+    Company         int          not null,
+    HolderName      varchar(100) not null,
+    Number          varchar(100) not null,
+    ExpirationYear  int          not null,
+    ExpirationMonth int          not null,
+    CVV             varchar(100) not null,
+    Status          bool     default true,
+    CreatedAt       datetime default current_timestamp,
+    UpdatedAt       datetime default current_timestamp on update current_timestamp,
+    primary key (ID),
+    foreign key (Type) references cardtype (Code),
+    foreign key (UserID) references user (ID),
+    foreign key (Company) references cardcompany (ID)
 );

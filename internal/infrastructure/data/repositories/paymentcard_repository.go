@@ -41,7 +41,7 @@ func (p PaymentCardRepository) InsertUserPaymentCards(userID int, cards []entiti
 	}
 
 	insertStmnt, err := tx.Prepare(
-		`insert into UserPaymentCard (Type, UserID, Company, HolderName, Number, ExpirationYear, ExpirationMonth, CVV) 
+		`insert into userpaymentcard (Type, UserID, Company, HolderName, Number, ExpirationYear, ExpirationMonth, CVV) 
 			values (?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
