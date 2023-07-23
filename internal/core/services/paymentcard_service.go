@@ -14,6 +14,12 @@ func (p PaymentCardService) GetCardsByUserID(userID int) ([]entities.PaymentCard
 }
 
 func (p PaymentCardService) AddUserPaymentCard(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
+	for _, v := range cards {
+		if err := v.ValidatePaymentCard(); err != nil {
+			return nil, err
+		}
+	}
+
 	return p.paymentCardRepo.InsertUserPaymentCards(userID, cards)
 }
 

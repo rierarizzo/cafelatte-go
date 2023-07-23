@@ -40,11 +40,20 @@ func FromUserToUserRes(user entities.User) *dto.UserResponse {
 	}
 }
 
+func FromUserToLoggedUser(user entities.User) *dto.LoggedUserResponse {
+	return &dto.LoggedUserResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+		Role:     user.RoleCode,
+	}
+}
+
 func FromAuthorizedUserToAuthorizationRes(authorizedUser entities.AuthorizedUser) *dto.AuthorizedUserResponse {
-	userRes := FromUserToUserRes(authorizedUser.User)
+	loggedUserRes := FromUserToLoggedUser(authorizedUser.User)
 
 	return &dto.AuthorizedUserResponse{
-		User:        *userRes,
+		User:        *loggedUserRes,
 		AccessToken: authorizedUser.AccessToken,
 	}
 }

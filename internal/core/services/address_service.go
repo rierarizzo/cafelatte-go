@@ -18,6 +18,12 @@ func (a AddressService) GetAddressesByUserID(userID int) ([]entities.Address, er
 }
 
 func (a AddressService) AddUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
+	for _, v := range addresses {
+		if err := v.ValidateAddress(); err != nil {
+			return nil, err
+		}
+	}
+
 	return a.addressRepo.InsertUserAddresses(userID, addresses)
 }
 

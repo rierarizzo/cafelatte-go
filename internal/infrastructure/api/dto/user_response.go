@@ -1,8 +1,15 @@
 package dto
 
 type AuthorizedUserResponse struct {
-	User        UserResponse `json:"user"`
-	AccessToken string       `json:"accessToken"`
+	User        LoggedUserResponse `json:"user"`
+	AccessToken string             `json:"accessToken"`
+}
+
+type LoggedUserResponse struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
 }
 
 type UserResponse struct {
