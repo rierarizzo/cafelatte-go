@@ -22,12 +22,22 @@ func (c *PaymentCard) ValidatePaymentCard() error {
 		return err
 	}
 
-	if err := c.validateExpirationDate(); err != nil {
+	if err := c.validateCVV(); err != nil {
 		return err
 	}
 
-	if err := c.validateCVV(); err != nil {
-		return err
+	return nil
+}
+
+func (c *PaymentCard) ValidateExpirationDate() error {
+	if c.ExpirationMonth < 1 || c.ExpirationMonth > 12 {
+		return errors.WrapError(errors.ErrInvalidCardFormat, "expiration date must be in a valid range [1..12]")
+	}
+
+	expirationDate := time.Date(c.ExpirationYear, time.Month(c.ExpirationMonth), 0, 0, 0, 0, 0, time.UTC)
+
+	if expirationDate.Before(time.Now()) {
+		return errors.WrapError(errors.ErrExpiredCard, "card is already expired")
 	}
 
 	return nil
@@ -36,20 +46,6 @@ func (c *PaymentCard) ValidatePaymentCard() error {
 func (c *PaymentCard) validateType() error {
 	if c.Type != "C" && c.Type != "D" {
 		return errors.WrapError(errors.ErrInvalidCardFormat, "card type must be 'C' or 'D'")
-	}
-
-	return nil
-}
-
-func (c *PaymentCard) validateExpirationDate() error {
-	if c.ExpirationMonth < 1 || c.ExpirationMonth > 12 {
-		return errors.WrapError(errors.ErrInvalidCardFormat, "expiration date must be in a valid range [1..12]")
-	}
-
-	year, month, _ := time.Now().Date()
-
-	if c.ExpirationYear < year || (c.ExpirationYear == year && c.ExpirationMonth < int(month)) {
-		return errors.WrapError(errors.ErrExpiredCard, "card is already expired")
 	}
 
 	return nil
