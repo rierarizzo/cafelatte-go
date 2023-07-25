@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,9 +39,10 @@ func Server() {
 	// Initialize router with all paths
 	router := api.Router(userHandler, addressHandler, paymentCardHandler)
 
-	logrus.Infof("Listening server on port %s", config.ServerPort)
+	slog.Info(fmt.Sprintf("Listening server on port %s", config.ServerPort))
 	err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort), router)
 	if err != nil {
-		logrus.Panic(err)
+		slog.Error(err.Error())
+		panic(err)
 	}
 }

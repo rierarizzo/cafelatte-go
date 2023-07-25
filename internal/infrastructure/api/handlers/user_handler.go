@@ -45,7 +45,7 @@ func (uc *UserHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
+	c.JSON(http.StatusOK, mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
 }
 
 func (uc *UserHandler) GetAllUsers(c *gin.Context) {
