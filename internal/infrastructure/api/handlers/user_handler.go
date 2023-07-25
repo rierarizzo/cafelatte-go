@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/core/constants"
+	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	errorHandler "github.com/rierarizzo/cafelatte/internal/infrastructure/api/error"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
@@ -82,7 +83,7 @@ func getUserIDFromClaims(c *gin.Context) (int, error) {
 		return 0, errors.WrapError(errors.ErrUnauthorizedUser, "claims not present in args")
 	}
 
-	return userClaims.(*dto.UserClaims).ID, nil
+	return userClaims.(*entities.UserClaims).ID, nil
 }
 
 func NewUserHandler(userService ports.IUserService) *UserHandler {

@@ -3,7 +3,6 @@ package utils
 import (
 	"github.com/rierarizzo/cafelatte/internal/core/constants"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 	"os"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 func CreateJWTToken(user entities.User) (*string, error) {
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &dto.UserClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &entities.UserClaims{
 		ID:      user.ID,
 		Name:    user.Name,
 		Surname: user.Surname,
@@ -38,10 +37,10 @@ func CreateJWTToken(user entities.User) (*string, error) {
 	return &tokenString, nil
 }
 
-func VerifyJWTToken(tokenString string) (*dto.UserClaims, error) {
+func VerifyJWTToken(tokenString string) (*entities.UserClaims, error) {
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
-	var userClaims dto.UserClaims
+	var userClaims entities.UserClaims
 	token, err := jwt.ParseWithClaims(tokenString, &userClaims, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.WrapError(errors.ErrInvalidToken, "signing method is invalid")

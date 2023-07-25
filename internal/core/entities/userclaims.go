@@ -1,4 +1,4 @@
-package dto
+package entities
 
 import "github.com/golang-jwt/jwt/v5"
 
