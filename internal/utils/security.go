@@ -3,6 +3,7 @@ package utils
 import (
 	"github.com/rierarizzo/cafelatte/internal/core/constants"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 	"os"
 	"time"
 
@@ -11,18 +12,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserClaims struct {
-	ID      int    `json:"id"`
-	Name    string `json:"name"`
-	Surname string `json:"surname"`
-	Email   string `json:"email"`
-	jwt.RegisteredClaims
-}
-
 func CreateJWTToken(user entities.User) (*string, error) {
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &UserClaims{
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &dto.UserClaims{
 		ID:      user.ID,
 		Name:    user.Name,
 		Surname: user.Surname,
@@ -45,10 +38,10 @@ func CreateJWTToken(user entities.User) (*string, error) {
 	return &tokenString, nil
 }
 
-func VerifyJWTToken(tokenString string) (*UserClaims, error) {
+func VerifyJWTToken(tokenString string) (*dto.UserClaims, error) {
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
-	var userClaims UserClaims
+	var userClaims dto.UserClaims
 	token, err := jwt.ParseWithClaims(tokenString, &userClaims, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.WrapError(errors.ErrInvalidToken, "signing method is invalid")

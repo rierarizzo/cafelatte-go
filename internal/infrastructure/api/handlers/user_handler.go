@@ -5,7 +5,6 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	errorHandler "github.com/rierarizzo/cafelatte/internal/infrastructure/api/error"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
-	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -83,7 +82,7 @@ func getUserIDFromClaims(c *gin.Context) (int, error) {
 		return 0, errors.WrapError(errors.ErrUnauthorizedUser, "claims not present in args")
 	}
 
-	return userClaims.(*utils.UserClaims).ID, nil
+	return userClaims.(*dto.UserClaims).ID, nil
 }
 
 func NewUserHandler(userService ports.IUserService) *UserHandler {
