@@ -1,9 +1,6 @@
 package handlers
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/core/constants"
-	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	errorHandler "github.com/rierarizzo/cafelatte/internal/infrastructure/api/error"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
 	"net/http"
@@ -75,15 +72,6 @@ func (uc *UserHandler) FindUserByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, *mappers.FromUserToUserRes(*user))
-}
-
-func getUserIDFromClaims(c *gin.Context) (int, error) {
-	userClaims, exists := c.Get(constants.UserClaimsKey)
-	if !exists {
-		return 0, errors.WrapError(errors.ErrUnauthorizedUser, "claims not present in args")
-	}
-
-	return userClaims.(*entities.UserClaims).ID, nil
 }
 
 func NewUserHandler(userService ports.IUserService) *UserHandler {

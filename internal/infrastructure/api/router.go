@@ -13,9 +13,10 @@ func Router(
 	addressHandler *handlers.AddressHandler,
 	cardHandler *handlers.PaymentCardHandler) http.Handler {
 
-	router := gin.Default()
+	router := gin.New()
 
 	router.Use(middlewares.RequestIDMiddleware())
+	router.Use(middlewares.LoggingMiddleware())
 
 	authGroup := router.Group("/auth")
 	{

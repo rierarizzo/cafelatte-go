@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/core/services"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
@@ -15,9 +14,9 @@ import (
 
 func Server() {
 	// Map config environment variable to struct
-	config := LoadConfig()
-	// Gin mode
-	gin.SetMode(config.GinMode)
+	config := GetConfig()
+	LoadInitConfig(config)
+
 	// Connect to database
 	db := data.Connect(config.DSN)
 
@@ -39,7 +38,7 @@ func Server() {
 	// Initialize router with all paths
 	router := api.Router(userHandler, addressHandler, paymentCardHandler)
 
-	slog.Info(fmt.Sprintf("Listening server on port %s", config.ServerPort))
+	slog.Info("Starting server", "port", config.ServerPort)
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort), router); err != nil {
 		slog.Error(err.Error())
 		panic(err)

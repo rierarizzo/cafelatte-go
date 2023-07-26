@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/rierarizzo/cafelatte/internal/core/constants"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
@@ -26,12 +27,9 @@ func (uc *AddressHandler) AddUserAddresses(c *gin.Context) {
 		addresses = append(addresses, *mappers.FromAddressReqToAddress(v))
 	}
 
-	userID, err := getUserIDFromClaims(c)
-	if errorHandler.Error(c, err) {
-		return
-	}
+	userClaims := c.MustGet(constants.UserClaimsKey).(entities.UserClaims)
 
-	addresses, err = uc.addressService.AddUserAddresses(userID, addresses)
+	addresses, err = uc.addressService.AddUserAddresses(userClaims.ID, addresses)
 	if errorHandler.Error(c, err) {
 		return
 	}

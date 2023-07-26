@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/rierarizzo/cafelatte/internal/core/constants"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
@@ -26,12 +27,9 @@ func (uc *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 		cards = append(cards, *mappers.FromPaymentCardReqToPaymentCard(v))
 	}
 
-	userID, err := getUserIDFromClaims(c)
-	if errorHandler.Error(c, err) {
-		return
-	}
+	userClaims := c.MustGet(constants.UserClaimsKey).(entities.UserClaims)
 
-	cards, err = uc.paymentCardService.AddUserPaymentCard(userID, cards)
+	cards, err = uc.paymentCardService.AddUserPaymentCard(userClaims.ID, cards)
 	if errorHandler.Error(c, err) {
 		return
 	}
