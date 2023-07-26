@@ -45,7 +45,7 @@ func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser,
 
 	retrievedUser, err := us.userRepo.SelectUserByEmail(email)
 	if err != nil {
-		if utils.CompareErrors(err, errors.ErrRecordNotFound) {
+		if errors.CompareErrors(err, errors.ErrRecordNotFound) {
 			return nil, errors.WrapError(errors.ErrUnauthorizedUser, incorrectEmailOrPasswordMsg)
 		}
 

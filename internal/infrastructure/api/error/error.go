@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/core/constants"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
-	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
 	"time"
 )
@@ -12,7 +11,7 @@ import (
 type Response struct {
 	HTTPStatus int       `json:"status"`
 	Error      string    `json:"error"`
-	Message    string    `json:"message"`
+	Message    []string  `json:"messages"`
 	RequestID  string    `json:"requestID"`
 	TimeStamp  time.Time `json:"timestamp"`
 }
@@ -21,7 +20,7 @@ func Error(c *gin.Context, err error) bool {
 	if err != nil {
 		_ = c.Error(err)
 
-		errType, customMsg := utils.SeparateError(err)
+		errType, errMsgs := errors.SplitError(err)
 		status := HTTPStatus(errType)
 
 		requestID, _ := c.Get(constants.RequestIDKey)
@@ -29,7 +28,7 @@ func Error(c *gin.Context, err error) bool {
 		errorResponse := Response{
 			HTTPStatus: status,
 			Error:      errType.Error(),
-			Message:    customMsg,
+			Message:    errMsgs,
 			RequestID:  requestID.(string),
 			TimeStamp:  time.Now(),
 		}

@@ -28,6 +28,29 @@ var (
 )
 
 func WrapError(errType error, errReturned string) error {
-	errReturned = strings.ReplaceAll(errReturned, ":", ",")
 	return fmt.Errorf(errorMsgFormat, errType, errReturned)
+}
+
+func CompareErrors(err error, coreError error) bool {
+	return GetOriginalErrorType(err) == coreError
+}
+
+func GetOriginalErrorType(err error) error {
+	for {
+		if wrapped, ok := err.(interface{ Unwrap() error }); ok {
+			err = wrapped.Unwrap()
+		} else {
+			break
+		}
+	}
+	return err
+}
+
+func SplitError(err error) (error, []string) {
+	errorMsgs := strings.Split(err.Error(), ":")[1:]
+	for k, v := range errorMsgs {
+		errorMsgs[k] = strings.TrimSpace(v)
+	}
+
+	return GetOriginalErrorType(err), errorMsgs
 }

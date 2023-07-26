@@ -27,7 +27,7 @@ func (uc *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 		cards = append(cards, *mappers.FromPaymentCardReqToPaymentCard(v))
 	}
 
-	userClaims := c.MustGet(constants.UserClaimsKey).(entities.UserClaims)
+	userClaims := c.MustGet(constants.UserClaimsKey).(*entities.UserClaims)
 
 	cards, err = uc.paymentCardService.AddUserPaymentCard(userClaims.ID, cards)
 	if errorHandler.Error(c, err) {

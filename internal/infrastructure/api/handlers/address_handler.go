@@ -27,7 +27,7 @@ func (uc *AddressHandler) AddUserAddresses(c *gin.Context) {
 		addresses = append(addresses, *mappers.FromAddressReqToAddress(v))
 	}
 
-	userClaims := c.MustGet(constants.UserClaimsKey).(entities.UserClaims)
+	userClaims := c.MustGet(constants.UserClaimsKey).(*entities.UserClaims)
 
 	addresses, err = uc.addressService.AddUserAddresses(userClaims.ID, addresses)
 	if errorHandler.Error(c, err) {
