@@ -2,6 +2,7 @@ package errors
 
 import (
 	"fmt"
+	"slices"
 	"testing"
 )
 
@@ -39,4 +40,23 @@ func TestCompareErrors(t *testing.T) {
 
 	wrappedErr = WrapError(wrappedErr, "error msg 2")
 	validate(t, wrappedErr)
+}
+
+func TestSplitError(t *testing.T) {
+	wrappedErr := WrapError(ErrUnexpected, "error msg 1")
+	wrappedErr = WrapError(wrappedErr, "error msg 2")
+
+	var expectedErrMsgs []string
+	expectedErrMsgs = append(expectedErrMsgs, "error msg 1")
+	expectedErrMsgs = append(expectedErrMsgs, "error msg 2")
+
+	resultCoreErr, resultErrMsgs := SplitError(wrappedErr)
+
+	if resultCoreErr != ErrUnexpected {
+		t.Errorf("Result was incorrect, got: %v, want: %v.", resultCoreErr, ErrUnexpected)
+	}
+
+	if slices.Compare(resultErrMsgs, expectedErrMsgs) != 0 {
+		t.Errorf("Result was incorrect, got: %v, want: %v.", resultErrMsgs, expectedErrMsgs)
+	}
 }
