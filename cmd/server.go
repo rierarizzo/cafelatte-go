@@ -31,7 +31,7 @@ func Server() {
 	paymentCardHandler := handlers.NewPaymentCardHandler(paymentCardService)
 
 	// Users instance
-	userRepo := repositories.NewUserRepository(db, addressRepo, paymentCardRepo)
+	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 

@@ -5,21 +5,15 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/errors"
-	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
 
 type UserRepository struct {
-	db              *sqlx.DB
-	addressRepo     ports.IAddressRepository
-	paymentCardRepo ports.IPaymentCardRepository
+	db *sqlx.DB
 }
 
-func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
-	var temporaryUsers []models.TemporaryUserModel
-
-	query := `select 
+const selectUserWithAllFieldsQuery = `select 
     			u.ID as 'UserID',
     			u.Username as 'UserUsername',
 				u.Name as 'UserName',
@@ -52,8 +46,12 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 				up.CreatedAt as 'CardCreatedAt',
 				up.UpdatedAt as 'CardUpdatedAt'
 			from user u inner join useraddress ua on u.ID = ua.UserID inner join userpaymentcard up
-    		on u.ID = up.UserID where u.Status=true and ua.Status=true and up.Status=true order by u.ID`
-	err := ur.db.Select(&temporaryUsers, query)
+    		on u.ID = up.UserID where u.Status=true and ua.Status=true and up.Status=true`
+
+func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
+	var temporaryUsers []models.TemporaryUserModel
+
+	err := ur.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return []entities.User{}, nil
@@ -66,59 +64,35 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 }
 
 func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
-	var userModel models.UserModel
+	var temporaryUsers []models.TemporaryUserModel
 
-	err := ur.db.Get(&userModel, "select * from user u where u.ID=? and u.Status=true", userID)
+	err := ur.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery+" and u.ID=?", userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
+		} else {
+			return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 		}
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
-	user := mappers.FromUserModelToUser(userModel)
-
-	addresses, err := ur.addressRepo.SelectAddressesByUserID(user.ID)
-	if err != nil {
-		return nil, err
-	}
-	user.Addresses = addresses
-
-	cards, err := ur.paymentCardRepo.SelectCardsByUserID(user.ID)
-	if err != nil {
-		return nil, err
-	}
-	user.PaymentCards = cards
-
-	return user, nil
+	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
+	return &users[0], nil
 }
 
 func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
-	var userModel models.UserModel
+	var temporaryUsers []models.TemporaryUserModel
 
-	err := ur.db.Get(&userModel, "select * from user u where u.Email=? and u.Status=true", email)
+	err := ur.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery+" and u.Email=?", email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
+		} else {
+			return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 		}
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
-	user := mappers.FromUserModelToUser(userModel)
-
-	addresses, err := ur.addressRepo.SelectAddressesByUserID(user.ID)
-	if err != nil {
-		return nil, err
-	}
-	user.Addresses = addresses
-
-	cards, err := ur.paymentCardRepo.SelectCardsByUserID(user.ID)
-	if err != nil {
-		return nil, err
-	}
-	user.PaymentCards = cards
-
-	return user, nil
+	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
+	return &users[0], nil
 }
 
 func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error) {
@@ -155,13 +129,6 @@ func (ur *UserRepository) UpdateUser(userID int, user entities.User) error {
 	return nil
 }
 
-func NewUserRepository(db *sqlx.DB,
-	addressRepo ports.IAddressRepository,
-	paymentCardRepo ports.IPaymentCardRepository) *UserRepository {
-
-	return &UserRepository{
-		db:              db,
-		addressRepo:     addressRepo,
-		paymentCardRepo: paymentCardRepo,
-	}
+func NewUserRepository(db *sqlx.DB) *UserRepository {
+	return &UserRepository{db}
 }
