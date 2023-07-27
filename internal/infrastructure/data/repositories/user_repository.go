@@ -49,18 +49,20 @@ const selectUserWithAllFieldsQuery = `select
     		on u.ID = up.UserID where u.Status=true and ua.Status=true and up.Status=true`
 
 func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
+	users := make([]entities.User, 0)
+
 	var temporaryUsers []models.TemporaryUserModel
 
 	err := ur.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return []entities.User{}, nil
-		} else {
-			return nil, err
+			return users, nil
 		}
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
-	return mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers), nil
+	users = mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
+	return users, nil
 }
 
 func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
@@ -70,9 +72,8 @@ func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
-		} else {
-			return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 		}
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -86,9 +87,8 @@ func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
-		} else {
-			return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 		}
+		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
 
 	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
