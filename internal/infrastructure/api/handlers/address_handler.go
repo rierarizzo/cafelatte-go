@@ -15,7 +15,7 @@ type AddressHandler struct {
 	addressService ports.IAddressService
 }
 
-func (uc *AddressHandler) AddUserAddresses(c *gin.Context) {
+func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 	var addressesRequest []dto.AddressRequest
 	err := c.BindJSON(&addressesRequest)
 	if errorHandler.Error(c, err) {
@@ -29,7 +29,7 @@ func (uc *AddressHandler) AddUserAddresses(c *gin.Context) {
 
 	userClaims := c.MustGet(constants.UserClaimsKey).(*entities.UserClaims)
 
-	addresses, err = uc.addressService.AddUserAddresses(userClaims.ID, addresses)
+	addresses, err = h.addressService.AddUserAddresses(userClaims.ID, addresses)
 	if errorHandler.Error(c, err) {
 		return
 	}

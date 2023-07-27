@@ -11,7 +11,7 @@ type UserService struct {
 	userRepo ports.IUserRepository
 }
 
-func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
+func (s *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
 	if err := user.ValidateUser(); err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 	}
 	user.SetPassword(hashedPassword)
 
-	retrievedUser, err := us.userRepo.InsertUser(user)
+	retrievedUser, err := s.userRepo.InsertUser(user)
 	if err != nil {
 		return nil, err
 	}
@@ -35,10 +35,10 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 	return entities.NewAuthorizedUser(*retrievedUser, *token), nil
 }
 
-func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
+func (s *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
 	const incorrectEmailOrPasswordMsg = "incorrect email or password"
 
-	retrievedUser, err := us.userRepo.SelectUserByEmail(email)
+	retrievedUser, err := s.userRepo.SelectUserByEmail(email)
 	if err != nil {
 		if errors.CompareErrors(err, errors.ErrRecordNotFound) {
 			return nil, errors.WrapError(errors.ErrUnauthorizedUser, incorrectEmailOrPasswordMsg)
@@ -59,16 +59,16 @@ func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser,
 	return entities.NewAuthorizedUser(*retrievedUser, *token), nil
 }
 
-func (us *UserService) GetAllUsers() ([]entities.User, error) {
-	return us.userRepo.SelectAllUsers()
+func (s *UserService) GetAllUsers() ([]entities.User, error) {
+	return s.userRepo.SelectAllUsers()
 }
 
-func (us *UserService) FindUserByID(id int) (*entities.User, error) {
-	return us.userRepo.SelectUserByID(id)
+func (s *UserService) FindUserByID(id int) (*entities.User, error) {
+	return s.userRepo.SelectUserByID(id)
 }
 
-func (us *UserService) UpdateUser(userID int, user entities.User) error {
-	return us.userRepo.UpdateUser(userID, user)
+func (s *UserService) UpdateUser(userID int, user entities.User) error {
+	return s.userRepo.UpdateUser(userID, user)
 }
 
 func NewUserService(userRepo ports.IUserRepository) *UserService {

@@ -48,12 +48,12 @@ const selectUserWithAllFieldsQuery = `select
 			from user u inner join useraddress ua on u.ID = ua.UserID inner join userpaymentcard up
     		on u.ID = up.UserID where u.Status=true and ua.Status=true and up.Status=true`
 
-func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
+func (r *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	users := make([]entities.User, 0)
 
 	var temporaryUsers []models.TemporaryUserModel
 
-	err := ur.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery)
+	err := r.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return users, nil
@@ -65,10 +65,10 @@ func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	return users, nil
 }
 
-func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
+func (r *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 	var temporaryUsers []models.TemporaryUserModel
 
-	err := ur.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery+" and u.ID=?", userID)
+	err := r.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery+" and u.ID=?", userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
@@ -80,10 +80,10 @@ func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 	return &users[0], nil
 }
 
-func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
+func (r *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
 	var temporaryUsers []models.TemporaryUserModel
 
-	err := ur.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery+" and u.Email=?", email)
+	err := r.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery+" and u.Email=?", email)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
@@ -95,10 +95,10 @@ func (ur *UserRepository) SelectUserByEmail(email string) (*entities.User, error
 	return &users[0], nil
 }
 
-func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error) {
+func (r *UserRepository) InsertUser(user entities.User) (*entities.User, error) {
 	userModel := mappers.FromUserToUserModel(user)
 
-	result, err := ur.db.Exec(
+	result, err := r.db.Exec(
 		`insert into user (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
 			values (?,?,?,?,?,?,?)`,
 		userModel.Username, userModel.Name, userModel.Surname, userModel.PhoneNumber,
@@ -113,12 +113,12 @@ func (ur *UserRepository) InsertUser(user entities.User) (*entities.User, error)
 	return mappers.FromUserModelToUser(*userModel), nil
 }
 
-func (ur *UserRepository) UpdateUser(userID int, user entities.User) error {
+func (r *UserRepository) UpdateUser(userID int, user entities.User) error {
 	userModel := mappers.FromUserToUserModel(user)
 
 	query := "update user set Username=?, Name=?, Surname=?, PhoneNumber=? where ID=?"
 
-	_, err := ur.db.Exec(query, userModel.Name, userModel.Surname, userModel.PhoneNumber, userID)
+	_, err := r.db.Exec(query, userModel.Name, userModel.Surname, userModel.PhoneNumber, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return errors.WrapError(errors.ErrRecordNotFound, err.Error())

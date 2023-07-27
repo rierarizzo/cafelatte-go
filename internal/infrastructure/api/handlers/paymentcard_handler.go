@@ -15,7 +15,7 @@ type PaymentCardHandler struct {
 	paymentCardService ports.IPaymentCardService
 }
 
-func (uc *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
+func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 	var cardsRequest []dto.PaymentCardRequest
 	err := c.BindJSON(&cardsRequest)
 	if errorHandler.Error(c, err) {
@@ -29,7 +29,7 @@ func (uc *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 
 	userClaims := c.MustGet(constants.UserClaimsKey).(*entities.UserClaims)
 
-	cards, err = uc.paymentCardService.AddUserPaymentCard(userClaims.ID, cards)
+	cards, err = h.paymentCardService.AddUserPaymentCard(userClaims.ID, cards)
 	if errorHandler.Error(c, err) {
 		return
 	}

@@ -15,14 +15,14 @@ type UserHandler struct {
 	userService ports.IUserService
 }
 
-func (uc *UserHandler) SignUp(c *gin.Context) {
+func (h *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	err := c.BindJSON(&signUpRequest)
 	if errorHandler.Error(c, err) {
 		return
 	}
 
-	authorizedUser, err := uc.userService.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
+	authorizedUser, err := h.userService.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
 	if errorHandler.Error(c, err) {
 		return
 	}
@@ -30,14 +30,14 @@ func (uc *UserHandler) SignUp(c *gin.Context) {
 	c.JSON(http.StatusCreated, mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
 }
 
-func (uc *UserHandler) SignIn(c *gin.Context) {
+func (h *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	err := c.BindJSON(&signInRequest)
 	if errorHandler.Error(c, err) {
 		return
 	}
 
-	authorizedUser, err := uc.userService.SignIn(signInRequest.Email, signInRequest.Password)
+	authorizedUser, err := h.userService.SignIn(signInRequest.Email, signInRequest.Password)
 	if errorHandler.Error(c, err) {
 		return
 	}
@@ -45,8 +45,8 @@ func (uc *UserHandler) SignIn(c *gin.Context) {
 	c.JSON(http.StatusOK, mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
 }
 
-func (uc *UserHandler) GetAllUsers(c *gin.Context) {
-	users, err := uc.userService.GetAllUsers()
+func (h *UserHandler) GetAllUsers(c *gin.Context) {
+	users, err := h.userService.GetAllUsers()
 	if errorHandler.Error(c, err) {
 		return
 	}
@@ -59,14 +59,14 @@ func (uc *UserHandler) GetAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, userResponse)
 }
 
-func (uc *UserHandler) FindUserByID(c *gin.Context) {
+func (h *UserHandler) FindUserByID(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
 	if errorHandler.Error(c, err) {
 		return
 	}
 
-	user, err := uc.userService.FindUserByID(userID)
+	user, err := h.userService.FindUserByID(userID)
 	if errorHandler.Error(c, err) {
 		return
 	}

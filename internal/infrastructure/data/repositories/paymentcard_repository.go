@@ -14,11 +14,11 @@ type PaymentCardRepository struct {
 	db *sqlx.DB
 }
 
-func (p PaymentCardRepository) SelectCardsByUserID(userID int) ([]entities.PaymentCard, error) {
+func (r PaymentCardRepository) SelectCardsByUserID(userID int) ([]entities.PaymentCard, error) {
 	var cardsModel []models.PaymentCardModel
 
 	query := "select * from userpaymentcard where UserID=? and Status=true"
-	err := p.db.Select(&cardsModel, query, userID)
+	err := r.db.Select(&cardsModel, query, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
@@ -34,8 +34,8 @@ func (p PaymentCardRepository) SelectCardsByUserID(userID int) ([]entities.Payme
 	return cards, nil
 }
 
-func (p PaymentCardRepository) InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
-	tx, err := p.db.Begin()
+func (r PaymentCardRepository) InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
+	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}

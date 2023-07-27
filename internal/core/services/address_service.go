@@ -9,18 +9,18 @@ type AddressService struct {
 	addressRepo ports.IAddressRepository
 }
 
-func (a AddressService) GetAddressesByUserID(userID int) ([]entities.Address, error) {
-	return a.addressRepo.SelectAddressesByUserID(userID)
+func (s AddressService) GetAddressesByUserID(userID int) ([]entities.Address, error) {
+	return s.addressRepo.SelectAddressesByUserID(userID)
 }
 
-func (a AddressService) AddUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
+func (s AddressService) AddUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
 	for _, v := range addresses {
 		if err := v.ValidateAddress(); err != nil {
 			return nil, err
 		}
 	}
 
-	return a.addressRepo.InsertUserAddresses(userID, addresses)
+	return s.addressRepo.InsertUserAddresses(userID, addresses)
 }
 
 func NewAddressService(addressRepo ports.IAddressRepository) *AddressService {

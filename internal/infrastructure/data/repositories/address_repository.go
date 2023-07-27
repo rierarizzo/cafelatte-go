@@ -14,11 +14,11 @@ type AddressRepository struct {
 	db *sqlx.DB
 }
 
-func (a AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Address, error) {
+func (r AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Address, error) {
 	var addressesModel []models.AddressModel
 
 	query := "select * from useraddress where UserID=? and Status=true"
-	err := a.db.Select(&addressesModel, query, userID)
+	err := r.db.Select(&addressesModel, query, userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
@@ -34,8 +34,8 @@ func (a AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Addre
 	return addresses, nil
 }
 
-func (a AddressRepository) InsertUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
-	tx, err := a.db.Begin()
+func (r AddressRepository) InsertUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
+	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
@@ -92,11 +92,11 @@ func (a AddressRepository) InsertUserAddresses(userID int, addresses []entities.
 	return addresses, nil
 }
 
-func (a AddressRepository) SelectCityNameByCityID(cityID int) (string, error) {
+func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, error) {
 	var cityName string
 
 	query := "select Name from city where ID=?"
-	err := a.db.Get(&cityName, query, cityID)
+	err := r.db.Get(&cityName, query, cityID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return "", errors.WrapError(errors.ErrRecordNotFound, err.Error())
@@ -107,11 +107,11 @@ func (a AddressRepository) SelectCityNameByCityID(cityID int) (string, error) {
 	return cityName, nil
 }
 
-func (a AddressRepository) SelectProvinceNameByProvinceID(cityID int) (string, error) {
+func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (string, error) {
 	var provinceName string
 
 	query := "select Name from province where ID=?"
-	err := a.db.Get(&provinceName, query, cityID)
+	err := r.db.Get(&provinceName, query, cityID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return "", errors.WrapError(errors.ErrRecordNotFound, err.Error())
