@@ -32,12 +32,7 @@ func (us *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, err
 		return nil, err
 	}
 
-	authorizedUser := entities.AuthorizedUser{
-		User:        *retrievedUser,
-		AccessToken: *token,
-	}
-
-	return &authorizedUser, nil
+	return entities.NewAuthorizedUser(*retrievedUser, *token), nil
 }
 
 func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
@@ -61,12 +56,7 @@ func (us *UserService) SignIn(email, password string) (*entities.AuthorizedUser,
 		return nil, err
 	}
 
-	authorizedUser := entities.AuthorizedUser{
-		User:        *retrievedUser,
-		AccessToken: *token,
-	}
-
-	return &authorizedUser, nil
+	return entities.NewAuthorizedUser(*retrievedUser, *token), nil
 }
 
 func (us *UserService) GetAllUsers() ([]entities.User, error) {

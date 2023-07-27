@@ -8,7 +8,6 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
-	"sync"
 )
 
 type UserRepository struct {
@@ -18,63 +17,52 @@ type UserRepository struct {
 }
 
 func (ur *UserRepository) SelectAllUsers() ([]entities.User, error) {
-	var usersModel []models.UserModel
+	var temporaryUsers []models.TemporaryUserModel
 
-	query := "select * from user u where u.Status=true"
-	err := ur.db.Select(&usersModel, query)
+	query := `select 
+    			u.ID as 'UserID',
+    			u.Username as 'UserUsername',
+				u.Name as 'UserName',
+				u.Surname as 'UserSurname',
+				u.PhoneNumber as 'UserPhoneNumber',
+				u.Email as 'UserEmail',
+				u.Password as 'UserPassword',
+				u.RoleCode as 'UserRoleCode',
+				u.Status as 'UserStatus',
+				u.CreatedAt as 'UserCreatedAt',
+				u.UpdatedAt as 'UserUpdatedAt',
+				ua.ID as 'AddressID',
+				ua.Type as 'AddressType',
+				ua.ProvinceID as 'AddressProvinceID',
+				ua.CityID as 'AddressCityID',
+				ua.PostalCode as 'AddressPostalCode',
+				ua.Detail as 'AddressDetail',
+				ua.Status as 'AddressStatus',
+				ua.CreatedAt as 'AddressCreatedAt',
+				ua.UpdatedAt as 'AddressUpdatedAt',
+				up.ID as 'CardID',
+				up.Type as 'CardType',
+				up.Company as 'CardCompany',
+				up.HolderName as 'CardHolderName',
+				up.Number as 'CardNumber',
+				up.ExpirationYear as 'CardExpirationYear',
+				up.ExpirationMonth as 'CardExpirationMonth',
+				up.CVV as 'CardCVV',
+				up.Status as 'CardStatus',
+				up.CreatedAt as 'CardCreatedAt',
+				up.UpdatedAt as 'CardUpdatedAt'
+			from user u inner join useraddress ua on u.ID = ua.UserID inner join userpaymentcard up
+    		on u.ID = up.UserID where u.Status=true and ua.Status=true and up.Status=true order by u.ID`
+	err := ur.db.Select(&temporaryUsers, query)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return []entities.User{}, nil
 		} else {
-			return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+			return nil, err
 		}
 	}
 
-	var users []entities.User
-	for _, k := range usersModel {
-		users = append(users, *mappers.FromUserModelToUser(k))
-	}
-
-	sem := make(chan struct{}, 3)
-
-	errCh := make(chan error, len(users))
-	var wg sync.WaitGroup
-
-	for i, v := range users {
-		wg.Add(1)
-		sem <- struct{}{}
-
-		go func(userIndex int, user entities.User) {
-			defer func() {
-				wg.Done()
-				<-sem
-			}()
-
-			addresses, err := ur.addressRepo.SelectAddressesByUserID(user.ID)
-			if err != nil {
-				errCh <- err
-				return
-			}
-
-			cards, err := ur.paymentCardRepo.SelectCardsByUserID(user.ID)
-			if err != nil {
-				errCh <- err
-				return
-			}
-
-			users[userIndex].Addresses = addresses
-			users[userIndex].PaymentCards = cards
-		}(i, v)
-
-	}
-
-	wg.Wait()
-	close(errCh)
-	for err := range errCh {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	return users, nil
+	return mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers), nil
 }
 
 func (ur *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
