@@ -27,11 +27,9 @@ func (u *User) ValidateUser() error {
 	if err := u.validateRole(); err != nil {
 		return err
 	}
-
 	if err := u.validatePhoneNumber(); err != nil {
 		return err
 	}
-
 	if err := u.validateEmail(); err != nil {
 		return err
 	}
