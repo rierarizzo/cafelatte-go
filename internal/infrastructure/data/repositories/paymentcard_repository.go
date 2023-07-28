@@ -47,8 +47,16 @@ func (r PaymentCardRepository) InsertUserPaymentCards(
 	}
 
 	insertStmnt, err := tx.Prepare(
-		`insert into userpaymentcard (Type, UserID, Company, HolderName, Number, ExpirationYear, ExpirationMonth, CVV) 
-			values (?,?,?,?,?,?,?,?)`,
+		`insert into userpaymentcard (
+                             Type, 
+                             UserID, 
+                             Company, 
+                             HolderName, 
+                             Number, 
+                             ExpirationYear, 
+                             ExpirationMonth, 
+                             CVV
+            ) values (?,?,?,?,?,?,?,?)`,
 	)
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())

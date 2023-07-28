@@ -45,8 +45,9 @@ const selectUserWithAllFieldsQuery = `select
 				up.Status as 'CardStatus',
 				up.CreatedAt as 'CardCreatedAt',
 				up.UpdatedAt as 'CardUpdatedAt'
-			from user u inner join useraddress ua on u.ID = ua.UserID inner join userpaymentcard up
-    		on u.ID = up.UserID where u.Status=true and ua.Status=true and up.Status=true`
+			from user u inner join useraddress ua on u.ID = ua.UserID 
+			inner join userpaymentcard up on u.ID = up.UserID 
+			where u.Status=true and ua.Status=true and up.Status=true`
 
 func (r *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	users := make([]entities.User, 0)
@@ -113,8 +114,15 @@ func (r *UserRepository) InsertUser(user entities.User) (
 	userModel := mappers.FromUserToUserModel(user)
 
 	result, err := r.db.Exec(
-		`insert into user (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
-			values (?,?,?,?,?,?,?)`,
+		`insert into user (
+                  Username, 
+                  Name, 
+                  Surname, 
+                  PhoneNumber, 
+                  Email, 
+                  Password, 
+                  RoleCode
+        	) values (?,?,?,?,?,?,?)`,
 		userModel.Username,
 		userModel.Name,
 		userModel.Surname,
@@ -136,7 +144,12 @@ func (r *UserRepository) InsertUser(user entities.User) (
 func (r *UserRepository) UpdateUser(userID int, user entities.User) error {
 	userModel := mappers.FromUserToUserModel(user)
 
-	query := "update user set Username=?, Name=?, Surname=?, PhoneNumber=? where ID=?"
+	query := `update user set 
+                Username=?, 
+                Name=?, 
+                Surname=?, 
+                PhoneNumber=? 
+            where ID=?`
 
 	_, err := r.db.Exec(
 		query,

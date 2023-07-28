@@ -47,8 +47,14 @@ func (r AddressRepository) InsertUserAddresses(
 	}
 
 	insertStmnt, err := tx.Prepare(
-		`insert into useraddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
-			values (?,?,?,?,?,?)`,
+		`insert into useraddress (
+                         Type, 
+                         UserID, 
+                         ProvinceID, 
+                         CityID, 
+                         PostalCode, 
+                         Detail
+                ) values (?,?,?,?,?,?)`,
 	)
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
