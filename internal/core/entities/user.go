@@ -13,7 +13,7 @@ type User struct {
 	PhoneNumber string
 	Email       string
 	Password    string
-	/* A: Administrador, E: Empleado, C: Cliente */
+	/* A: Admin, E: Employee, C: Client */
 	RoleCode     string
 	Addresses    []Address
 	PaymentCards []PaymentCard

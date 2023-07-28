@@ -16,47 +16,46 @@ func (s *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, erro
 		return nil, err
 	}
 
-	hashedPassword, err := utils.HashText(user.Password)
+	hash, err := utils.HashText(user.Password)
 	if err != nil {
 		return nil, err
 	}
-	user.SetPassword(hashedPassword)
+	user.SetPassword(hash)
 
-	retrievedUser, err := s.userRepo.InsertUser(user)
-	if err != nil {
-		return nil, err
-	}
-
-	token, err := utils.CreateJWTToken(*retrievedUser)
+	retrUser, err := s.userRepo.InsertUser(user)
 	if err != nil {
 		return nil, err
 	}
 
-	return entities.NewAuthorizedUser(*retrievedUser, *token), nil
+	token, err := utils.CreateJWTToken(*retrUser)
+	if err != nil {
+		return nil, err
+	}
+
+	return entities.NewAuthorizedUser(*retrUser, *token), nil
 }
 
 func (s *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
 	const incorrectEmailOrPasswordMsg = "incorrect email or password"
 
-	retrievedUser, err := s.userRepo.SelectUserByEmail(email)
+	retrUser, err := s.userRepo.SelectUserByEmail(email)
 	if err != nil {
 		if errors.CompareErrors(err, errors.ErrRecordNotFound) {
 			return nil, errors.WrapError(errors.ErrUnauthorizedUser, incorrectEmailOrPasswordMsg)
 		}
-
 		return nil, err
 	}
 
-	if !utils.CheckTextHash(retrievedUser.Password, password) {
+	if !utils.CheckTextHash(retrUser.Password, password) {
 		return nil, errors.WrapError(errors.ErrUnauthorizedUser, incorrectEmailOrPasswordMsg)
 	}
 
-	token, err := utils.CreateJWTToken(*retrievedUser)
+	token, err := utils.CreateJWTToken(*retrUser)
 	if err != nil {
 		return nil, err
 	}
 
-	return entities.NewAuthorizedUser(*retrievedUser, *token), nil
+	return entities.NewAuthorizedUser(*retrUser, *token), nil
 }
 
 func (s *UserService) GetAllUsers() ([]entities.User, error) {
