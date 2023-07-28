@@ -39,7 +39,10 @@ func Server() {
 	router := api.Router(userHandler, addressHandler, paymentCardHandler)
 
 	slog.Info("Starting server", "port", config.ServerPort)
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort), router); err != nil {
+	if err := http.ListenAndServe(
+		fmt.Sprintf(":%s", config.ServerPort),
+		router,
+	); err != nil {
 		slog.Error(err.Error())
 		panic(err)
 	}

@@ -30,8 +30,17 @@ func LoggingMiddleware() gin.HandlerFunc {
 
 			timeElapsed := time.Since(start).Seconds()
 			slog.Debug(
-				"Ending request", "method", requestMethod, "path", requestPath, "timeElapsed",
-				fmt.Sprintf("%.7fs", timeElapsed), "status", requestStatus, "requestID", requestID,
+				"Ending request",
+				"method",
+				requestMethod,
+				"path",
+				requestPath,
+				"timeElapsed",
+				fmt.Sprintf("%.7fs", timeElapsed),
+				"status",
+				requestStatus,
+				"requestID",
+				requestID,
 			)
 		}()
 

@@ -9,7 +9,11 @@ import (
 func TestWrapError(t *testing.T) {
 	validate := func(t *testing.T, result error, expected error) {
 		if result.Error() != expected.Error() {
-			t.Errorf("Result was incorrect, got: %s, want: %s.", result, expected)
+			t.Errorf(
+				"Result was incorrect, got: %s, want: %s.",
+				result,
+				expected,
+			)
 		}
 	}
 
@@ -53,10 +57,18 @@ func TestSplitError(t *testing.T) {
 	resultCoreErr, resultErrMsgs := SplitError(wrappedErr)
 
 	if resultCoreErr != ErrUnexpected {
-		t.Errorf("Result was incorrect, got: %v, want: %v.", resultCoreErr, ErrUnexpected)
+		t.Errorf(
+			"Result was incorrect, got: %v, want: %v.",
+			resultCoreErr,
+			ErrUnexpected,
+		)
 	}
 
 	if slices.Compare(resultErrMsgs, expectedErrMsgs) != 0 {
-		t.Errorf("Result was incorrect, got: %v, want: %v.", resultErrMsgs, expectedErrMsgs)
+		t.Errorf(
+			"Result was incorrect, got: %v, want: %v.",
+			resultErrMsgs,
+			expectedErrMsgs,
+		)
 	}
 }

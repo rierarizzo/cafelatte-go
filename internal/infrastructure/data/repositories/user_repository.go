@@ -68,7 +68,11 @@ func (r *UserRepository) SelectAllUsers() ([]entities.User, error) {
 func (r *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 	var temporaryUsers []models.TemporaryUserModel
 
-	err := r.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery+" and u.ID=?", userID)
+	err := r.db.Select(
+		&temporaryUsers,
+		selectUserWithAllFieldsQuery+" and u.ID=?",
+		userID,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
@@ -80,10 +84,17 @@ func (r *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 	return &users[0], nil
 }
 
-func (r *UserRepository) SelectUserByEmail(email string) (*entities.User, error) {
+func (r *UserRepository) SelectUserByEmail(email string) (
+	*entities.User,
+	error,
+) {
 	var temporaryUsers []models.TemporaryUserModel
 
-	err := r.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery+" and u.Email=?", email)
+	err := r.db.Select(
+		&temporaryUsers,
+		selectUserWithAllFieldsQuery+" and u.Email=?",
+		email,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
@@ -95,7 +106,10 @@ func (r *UserRepository) SelectUserByEmail(email string) (*entities.User, error)
 	return &users[0], nil
 }
 
-func (r *UserRepository) InsertUser(user entities.User) (*entities.User, error) {
+func (r *UserRepository) InsertUser(user entities.User) (
+	*entities.User,
+	error,
+) {
 	userModel := mappers.FromUserToUserModel(user)
 
 	result, err := r.db.Exec(
@@ -124,7 +138,13 @@ func (r *UserRepository) UpdateUser(userID int, user entities.User) error {
 
 	query := "update user set Username=?, Name=?, Surname=?, PhoneNumber=? where ID=?"
 
-	_, err := r.db.Exec(query, userModel.Name, userModel.Surname, userModel.PhoneNumber, userID)
+	_, err := r.db.Exec(
+		query,
+		userModel.Name,
+		userModel.Surname,
+		userModel.PhoneNumber,
+		userID,
+	)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return errors.WrapError(errors.ErrRecordNotFound, err.Error())

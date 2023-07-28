@@ -11,7 +11,10 @@ type AddressService struct {
 	addressRepo ports.IAddressRepository
 }
 
-func (s AddressService) GetAddressesByUserID(userID int) ([]entities.Address, error) {
+func (s AddressService) GetAddressesByUserID(userID int) (
+	[]entities.Address,
+	error,
+) {
 	return s.addressRepo.SelectAddressesByUserID(userID)
 }
 

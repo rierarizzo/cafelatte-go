@@ -27,7 +27,10 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
+	c.JSON(
+		http.StatusCreated,
+		mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser),
+	)
 }
 
 func (h *UserHandler) SignIn(c *gin.Context) {
@@ -37,12 +40,18 @@ func (h *UserHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	authorizedUser, err := h.userService.SignIn(signInRequest.Email, signInRequest.Password)
+	authorizedUser, err := h.userService.SignIn(
+		signInRequest.Email,
+		signInRequest.Password,
+	)
 	if errorHandler.Error(c, err) {
 		return
 	}
 
-	c.JSON(http.StatusOK, mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
+	c.JSON(
+		http.StatusOK,
+		mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser),
+	)
 }
 
 func (h *UserHandler) GetAllUsers(c *gin.Context) {

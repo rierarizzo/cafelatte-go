@@ -24,7 +24,10 @@ func (a *Address) ValidateAddress() error {
 
 func (a *Address) validatePostalCode() error {
 	if len(a.PostalCode) != 6 {
-		return errors.WrapError(errors.ErrInvalidAddressFormat, "postal code must have 6 digits")
+		return errors.WrapError(
+			errors.ErrInvalidAddressFormat,
+			"postal code must have 6 digits",
+		)
 	}
 
 	regex := regexp.MustCompile("^[0-9]+$")

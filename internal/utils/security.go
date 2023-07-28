@@ -46,7 +46,10 @@ func VerifyJWTToken(tokenString string) (*entities.UserClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenString, &userClaims, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.WrapError(errors.ErrInvalidToken, "signing method is invalid")
+				return nil, errors.WrapError(
+					errors.ErrInvalidToken,
+					"signing method is invalid",
+				)
 			}
 
 			return secret, nil

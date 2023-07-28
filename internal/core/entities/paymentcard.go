@@ -49,7 +49,10 @@ func (c *PaymentCard) ValidateExpirationDate() error {
 	)
 
 	if expirationDate.Before(time.Now()) {
-		return errors.WrapError(errors.ErrExpiredCard, "card is already expired")
+		return errors.WrapError(
+			errors.ErrExpiredCard,
+			"card is already expired",
+		)
 	}
 
 	return nil
@@ -57,7 +60,10 @@ func (c *PaymentCard) ValidateExpirationDate() error {
 
 func (c *PaymentCard) validateType() error {
 	if c.Type != "C" && c.Type != "D" {
-		return errors.WrapError(errors.ErrInvalidCardFormat, "card type must be 'C' or 'D'")
+		return errors.WrapError(
+			errors.ErrInvalidCardFormat,
+			"card type must be 'C' or 'D'",
+		)
 	}
 
 	return nil
@@ -65,7 +71,10 @@ func (c *PaymentCard) validateType() error {
 
 func (c *PaymentCard) validateCVV() error {
 	if len(c.CVV) != 3 && len(c.CVV) != 4 {
-		return errors.WrapError(errors.ErrInvalidCardFormat, "CVV length must be 3 or 4")
+		return errors.WrapError(
+			errors.ErrInvalidCardFormat,
+			"CVV length must be 3 or 4",
+		)
 	}
 
 	return nil

@@ -39,7 +39,10 @@ func (u *User) ValidateUser() error {
 
 func (u *User) validateRole() error {
 	if u.RoleCode != "A" && u.RoleCode != "E" && u.RoleCode != "C" {
-		return errors.WrapError(errors.ErrInvalidUserFormat, "role must be 'A', 'E', or 'C'")
+		return errors.WrapError(
+			errors.ErrInvalidUserFormat,
+			"role must be 'A', 'E', or 'C'",
+		)
 	}
 
 	return nil
@@ -47,7 +50,10 @@ func (u *User) validateRole() error {
 
 func (u *User) validatePhoneNumber() error {
 	if len(u.PhoneNumber) != 10 {
-		return errors.WrapError(errors.ErrInvalidUserFormat, "phone number must be 10 digits")
+		return errors.WrapError(
+			errors.ErrInvalidUserFormat,
+			"phone number must be 10 digits",
+		)
 	}
 
 	return nil
@@ -55,7 +61,10 @@ func (u *User) validatePhoneNumber() error {
 
 func (u *User) validateEmail() error {
 	if !strings.Contains(u.Email, "@") {
-		return errors.WrapError(errors.ErrInvalidUserFormat, "email must contain '@'")
+		return errors.WrapError(
+			errors.ErrInvalidUserFormat,
+			"email must contain '@'",
+		)
 	}
 
 	return nil

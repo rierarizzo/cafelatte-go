@@ -14,7 +14,10 @@ type PaymentCardRepository struct {
 	db *sqlx.DB
 }
 
-func (r PaymentCardRepository) SelectCardsByUserID(userID int) ([]entities.PaymentCard, error) {
+func (r PaymentCardRepository) SelectCardsByUserID(userID int) (
+	[]entities.PaymentCard,
+	error,
+) {
 	var cardsModel []models.PaymentCardModel
 
 	query := "select * from userpaymentcard where UserID=? and Status=true"

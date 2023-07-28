@@ -12,7 +12,10 @@ type UserService struct {
 	userRepo ports.IUserRepository
 }
 
-func (s *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
+func (s *UserService) SignUp(user entities.User) (
+	*entities.AuthorizedUser,
+	error,
+) {
 	if err := user.ValidateUser(); err != nil {
 		return nil, errors.WrapError(
 			err,
@@ -30,7 +33,10 @@ func (s *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, erro
 	if err != nil {
 		return nil, errors.WrapError(
 			err,
-			fmt.Sprintf("failed to insert user with username '%s' into db", user.Username),
+			fmt.Sprintf(
+				"failed to insert user with username '%s' into db",
+				user.Username,
+			),
 		)
 	}
 
@@ -42,13 +48,19 @@ func (s *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, erro
 	return entities.NewAuthorizedUser(*retrUser, *token), nil
 }
 
-func (s *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
+func (s *UserService) SignIn(email, password string) (
+	*entities.AuthorizedUser,
+	error,
+) {
 	const incorrectEmailOrPasswordMsg = "incorrect email or password"
 
 	retrUser, err := s.userRepo.SelectUserByEmail(email)
 	if err != nil {
 		if errors.CompareErrors(err, errors.ErrRecordNotFound) {
-			return nil, errors.WrapError(errors.ErrUnauthorizedUser, incorrectEmailOrPasswordMsg)
+			return nil, errors.WrapError(
+				errors.ErrUnauthorizedUser,
+				incorrectEmailOrPasswordMsg,
+			)
 		}
 		return nil, errors.WrapError(
 			err,
@@ -57,7 +69,10 @@ func (s *UserService) SignIn(email, password string) (*entities.AuthorizedUser, 
 	}
 
 	if !utils.CheckTextHash(retrUser.Password, password) {
-		return nil, errors.WrapError(errors.ErrUnauthorizedUser, incorrectEmailOrPasswordMsg)
+		return nil, errors.WrapError(
+			errors.ErrUnauthorizedUser,
+			incorrectEmailOrPasswordMsg,
+		)
 	}
 
 	token, err := utils.CreateJWTToken(*retrUser)

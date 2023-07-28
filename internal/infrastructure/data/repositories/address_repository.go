@@ -14,7 +14,10 @@ type AddressRepository struct {
 	db *sqlx.DB
 }
 
-func (r AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Address, error) {
+func (r AddressRepository) SelectAddressesByUserID(userID int) (
+	[]entities.Address,
+	error,
+) {
 	var addressesModel []models.AddressModel
 
 	query := "select * from useraddress where UserID=? and Status=true"
@@ -68,8 +71,12 @@ func (r AddressRepository) InsertUserAddresses(
 			addressModel := mappers.FromAddressToAddressModel(address)
 
 			result, err := insertStmnt.Exec(
-				addressModel.Type, userID, addressModel.ProvinceID,
-				addressModel.CityID, addressModel.PostalCode, addressModel.Detail,
+				addressModel.Type,
+				userID,
+				addressModel.ProvinceID,
+				addressModel.CityID,
+				addressModel.PostalCode,
+				addressModel.Detail,
 			)
 			if err != nil {
 				errCh <- err
@@ -113,7 +120,10 @@ func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, error) {
 	return cityName, nil
 }
 
-func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (string, error) {
+func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (
+	string,
+	error,
+) {
 	var provinceName string
 
 	query := "select Name from province where ID=?"

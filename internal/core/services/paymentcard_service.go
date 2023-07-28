@@ -11,7 +11,10 @@ type PaymentCardService struct {
 	paymentCardRepo ports.IPaymentCardRepository
 }
 
-func (s PaymentCardService) GetCardsByUserID(userID int) ([]entities.PaymentCard, error) {
+func (s PaymentCardService) GetCardsByUserID(userID int) (
+	[]entities.PaymentCard,
+	error,
+) {
 	return s.paymentCardRepo.SelectCardsByUserID(userID)
 }
 
@@ -23,14 +26,20 @@ func (s PaymentCardService) AddUserPaymentCard(
 		if err := v.ValidateExpirationDate(); err != nil {
 			return nil, errors.WrapError(
 				err,
-				fmt.Sprintf("payment card with holder name '%s' is expired", v.HolderName),
+				fmt.Sprintf(
+					"payment card with holder name '%s' is expired",
+					v.HolderName,
+				),
 			)
 		}
 
 		if err := v.ValidatePaymentCard(); err != nil {
 			return nil, errors.WrapError(
 				err,
-				fmt.Sprintf("payment card with holder name '%s' is invalid", v.HolderName),
+				fmt.Sprintf(
+					"payment card with holder name '%s' is invalid",
+					v.HolderName,
+				),
 			)
 		}
 	}
