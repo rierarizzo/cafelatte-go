@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"testing"
@@ -37,20 +38,6 @@ func TestWrapError(t *testing.T) {
 	validate(t, result, expected)
 }
 
-func TestCompareErrors(t *testing.T) {
-	validate := func(t *testing.T, wrappedErr error) {
-		if !CompareErrors(wrappedErr, ErrUnexpected) {
-			t.Errorf("Result was incorrect, errors are not equals.")
-		}
-	}
-
-	wrappedErr := WrapError(ErrUnexpected, errMsg1)
-	validate(t, wrappedErr)
-
-	wrappedErr = WrapError(wrappedErr, errMsg2)
-	validate(t, wrappedErr)
-}
-
 func TestSplitError(t *testing.T) {
 	wrappedErr := WrapError(ErrUnexpected, errMsg1)
 	wrappedErr = WrapError(wrappedErr, errMsg2)
@@ -61,7 +48,7 @@ func TestSplitError(t *testing.T) {
 
 	resultCoreErr, resultErrMsgs := SplitError(wrappedErr)
 
-	if resultCoreErr != ErrUnexpected {
+	if !errors.Is(resultCoreErr, ErrUnexpected) {
 		t.Errorf(
 			"Result was incorrect, got: %v, want: %v.",
 			resultCoreErr,

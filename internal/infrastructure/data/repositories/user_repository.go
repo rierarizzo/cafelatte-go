@@ -2,9 +2,10 @@ package repositories
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	coreErrors "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
@@ -56,10 +57,10 @@ func (r *UserRepository) SelectAllUsers() ([]entities.User, error) {
 
 	err := r.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return users, nil
 		}
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
 	}
 
 	users = mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -75,10 +76,14 @@ func (r *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 		userID,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
-		}
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+	}
+
+	if temporaryUsers == nil {
+		return nil, coreErrors.WrapError(
+			coreErrors.ErrRecordNotFound,
+			"user not found",
+		)
 	}
 
 	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -97,10 +102,14 @@ func (r *UserRepository) SelectUserByEmail(email string) (
 		email,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
-		}
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+	}
+
+	if temporaryUsers == nil {
+		return nil, coreErrors.WrapError(
+			coreErrors.ErrRecordNotFound,
+			"user not found",
+		)
 	}
 
 	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -132,7 +141,7 @@ func (r *UserRepository) InsertUser(user entities.User) (
 		userModel.RoleCode,
 	)
 	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
 	}
 
 	lastUserID, _ := result.LastInsertId()
@@ -159,10 +168,13 @@ func (r *UserRepository) UpdateUser(userID int, user entities.User) error {
 		userID,
 	)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return errors.WrapError(errors.ErrRecordNotFound, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			return coreErrors.WrapError(
+				coreErrors.ErrRecordNotFound,
+				err.Error(),
+			)
 		}
-		return errors.WrapError(errors.ErrUnexpected, err.Error())
+		return coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
 	}
 
 	return nil

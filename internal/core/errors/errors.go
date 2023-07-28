@@ -31,10 +31,6 @@ func WrapError(errType error, errReturned string) error {
 	return fmt.Errorf(errorMsgFormat, errType, errReturned)
 }
 
-func CompareErrors(err error, coreError error) bool {
-	return GetOriginalErrorType(err) == coreError
-}
-
 func GetOriginalErrorType(err error) error {
 	for {
 		if wrapped, ok := err.(interface{ Unwrap() error }); ok {

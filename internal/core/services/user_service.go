@@ -1,9 +1,10 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	coreErrors "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
@@ -17,7 +18,7 @@ func (s *UserService) SignUp(user entities.User) (
 	error,
 ) {
 	if err := user.ValidateUser(); err != nil {
-		return nil, errors.WrapError(
+		return nil, coreErrors.WrapError(
 			err,
 			fmt.Sprintf("user with username '%s' is not valid", user.Username),
 		)
@@ -25,13 +26,13 @@ func (s *UserService) SignUp(user entities.User) (
 
 	hash, err := utils.HashText(user.Password)
 	if err != nil {
-		return nil, errors.WrapError(err, "failed to hash password")
+		return nil, coreErrors.WrapError(err, "failed to hash password")
 	}
 	user.SetPassword(hash)
 
 	retrUser, err := s.userRepo.InsertUser(user)
 	if err != nil {
-		return nil, errors.WrapError(
+		return nil, coreErrors.WrapError(
 			err,
 			fmt.Sprintf(
 				"failed to insert user with username '%s' into db",
@@ -42,7 +43,7 @@ func (s *UserService) SignUp(user entities.User) (
 
 	token, err := utils.CreateJWTToken(*retrUser)
 	if err != nil {
-		return nil, errors.WrapError(err, "failed to create JWT")
+		return nil, coreErrors.WrapError(err, "failed to create JWT")
 	}
 
 	return entities.NewAuthorizedUser(*retrUser, *token), nil
@@ -56,28 +57,28 @@ func (s *UserService) SignIn(email, password string) (
 
 	retrUser, err := s.userRepo.SelectUserByEmail(email)
 	if err != nil {
-		if errors.CompareErrors(err, errors.ErrRecordNotFound) {
-			return nil, errors.WrapError(
-				errors.ErrUnauthorizedUser,
+		if errors.Is(err, coreErrors.ErrRecordNotFound) {
+			return nil, coreErrors.WrapError(
+				coreErrors.ErrUnauthorizedUser,
 				incorrectEmailOrPasswordMsg,
 			)
 		}
-		return nil, errors.WrapError(
+		return nil, coreErrors.WrapError(
 			err,
 			fmt.Sprintf("failed to select user with email '%s' from db", email),
 		)
 	}
 
 	if !utils.CheckTextHash(retrUser.Password, password) {
-		return nil, errors.WrapError(
-			errors.ErrUnauthorizedUser,
+		return nil, coreErrors.WrapError(
+			coreErrors.ErrUnauthorizedUser,
 			incorrectEmailOrPasswordMsg,
 		)
 	}
 
 	token, err := utils.CreateJWTToken(*retrUser)
 	if err != nil {
-		return nil, errors.WrapError(err, "failed to create JWT")
+		return nil, coreErrors.WrapError(err, "failed to create JWT")
 	}
 
 	return entities.NewAuthorizedUser(*retrUser, *token), nil

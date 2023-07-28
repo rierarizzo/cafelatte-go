@@ -2,9 +2,10 @@ package repositories
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	coreErrors "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"sync"
@@ -23,10 +24,13 @@ func (r PaymentCardRepository) SelectCardsByUserID(userID int) (
 	query := "select * from userpaymentcard where UserID=? and Status=true"
 	err := r.db.Select(&cardsModel, query, userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.WrapError(errors.ErrRecordNotFound, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, coreErrors.WrapError(
+				coreErrors.ErrRecordNotFound,
+				err.Error(),
+			)
 		}
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
 	}
 
 	var cards []entities.PaymentCard
@@ -43,7 +47,7 @@ func (r PaymentCardRepository) InsertUserPaymentCards(
 ) ([]entities.PaymentCard, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
 	}
 
 	insertStmnt, err := tx.Prepare(
@@ -59,7 +63,7 @@ func (r PaymentCardRepository) InsertUserPaymentCards(
             ) values (?,?,?,?,?,?,?,?)`,
 	)
 	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
 	}
 
 	sem := make(chan struct{}, 5)
@@ -102,12 +106,12 @@ func (r PaymentCardRepository) InsertUserPaymentCards(
 	close(errCh)
 	for err := range errCh {
 		_ = tx.Rollback()
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
 	}
 
 	return cards, nil
