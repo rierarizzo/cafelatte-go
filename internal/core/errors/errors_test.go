@@ -6,6 +6,11 @@ import (
 	"testing"
 )
 
+const (
+	errMsg1 = "error msg 1"
+	errMsg2 = "error msg 2"
+)
+
 func TestWrapError(t *testing.T) {
 	validate := func(t *testing.T, result error, expected error) {
 		if result.Error() != expected.Error() {
@@ -39,20 +44,20 @@ func TestCompareErrors(t *testing.T) {
 		}
 	}
 
-	wrappedErr := WrapError(ErrUnexpected, "error msg 1")
+	wrappedErr := WrapError(ErrUnexpected, errMsg1)
 	validate(t, wrappedErr)
 
-	wrappedErr = WrapError(wrappedErr, "error msg 2")
+	wrappedErr = WrapError(wrappedErr, errMsg2)
 	validate(t, wrappedErr)
 }
 
 func TestSplitError(t *testing.T) {
-	wrappedErr := WrapError(ErrUnexpected, "error msg 1")
-	wrappedErr = WrapError(wrappedErr, "error msg 2")
+	wrappedErr := WrapError(ErrUnexpected, errMsg1)
+	wrappedErr = WrapError(wrappedErr, errMsg2)
 
 	var expectedErrMsgs []string
-	expectedErrMsgs = append(expectedErrMsgs, "error msg 1")
-	expectedErrMsgs = append(expectedErrMsgs, "error msg 2")
+	expectedErrMsgs = append(expectedErrMsgs, errMsg1)
+	expectedErrMsgs = append(expectedErrMsgs, errMsg2)
 
 	resultCoreErr, resultErrMsgs := SplitError(wrappedErr)
 
