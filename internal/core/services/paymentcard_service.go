@@ -15,16 +15,23 @@ func (s PaymentCardService) GetCardsByUserID(userID int) ([]entities.PaymentCard
 	return s.paymentCardRepo.SelectCardsByUserID(userID)
 }
 
-func (s PaymentCardService) AddUserPaymentCard(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
+func (s PaymentCardService) AddUserPaymentCard(
+	userID int,
+	cards []entities.PaymentCard,
+) ([]entities.PaymentCard, error) {
 	for _, v := range cards {
 		if err := v.ValidateExpirationDate(); err != nil {
-			return nil, errors.WrapError(err,
-				fmt.Sprintf("payment card with holder name '%s' is expired", v.HolderName))
+			return nil, errors.WrapError(
+				err,
+				fmt.Sprintf("payment card with holder name '%s' is expired", v.HolderName),
+			)
 		}
 
 		if err := v.ValidatePaymentCard(); err != nil {
-			return nil, errors.WrapError(err,
-				fmt.Sprintf("payment card with holder name '%s' is invalid", v.HolderName))
+			return nil, errors.WrapError(
+				err,
+				fmt.Sprintf("payment card with holder name '%s' is invalid", v.HolderName),
+			)
 		}
 	}
 

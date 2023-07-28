@@ -30,7 +30,10 @@ func (a *Address) validatePostalCode() error {
 	regex := regexp.MustCompile("^[0-9]+$")
 
 	if !regex.MatchString(a.PostalCode) {
-		return errors.WrapError(errors.ErrInvalidAddressFormat, "postal code must have only numbers")
+		return errors.WrapError(
+			errors.ErrInvalidAddressFormat,
+			"postal code must have only numbers",
+		)
 	}
 
 	return nil

@@ -101,8 +101,14 @@ func (r *UserRepository) InsertUser(user entities.User) (*entities.User, error) 
 	result, err := r.db.Exec(
 		`insert into user (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
 			values (?,?,?,?,?,?,?)`,
-		userModel.Username, userModel.Name, userModel.Surname, userModel.PhoneNumber,
-		userModel.Email, userModel.Password, userModel.RoleCode)
+		userModel.Username,
+		userModel.Name,
+		userModel.Surname,
+		userModel.PhoneNumber,
+		userModel.Email,
+		userModel.Password,
+		userModel.RoleCode,
+	)
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}

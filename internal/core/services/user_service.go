@@ -14,8 +14,10 @@ type UserService struct {
 
 func (s *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
 	if err := user.ValidateUser(); err != nil {
-		return nil, errors.WrapError(err,
-			fmt.Sprintf("user with username '%s' is not valid", user.Username))
+		return nil, errors.WrapError(
+			err,
+			fmt.Sprintf("user with username '%s' is not valid", user.Username),
+		)
 	}
 
 	hash, err := utils.HashText(user.Password)
@@ -26,8 +28,10 @@ func (s *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, erro
 
 	retrUser, err := s.userRepo.InsertUser(user)
 	if err != nil {
-		return nil, errors.WrapError(err,
-			fmt.Sprintf("failed to insert user with username '%s' into db", user.Username))
+		return nil, errors.WrapError(
+			err,
+			fmt.Sprintf("failed to insert user with username '%s' into db", user.Username),
+		)
 	}
 
 	token, err := utils.CreateJWTToken(*retrUser)
@@ -46,8 +50,10 @@ func (s *UserService) SignIn(email, password string) (*entities.AuthorizedUser, 
 		if errors.CompareErrors(err, errors.ErrRecordNotFound) {
 			return nil, errors.WrapError(errors.ErrUnauthorizedUser, incorrectEmailOrPasswordMsg)
 		}
-		return nil, errors.WrapError(err,
-			fmt.Sprintf("failed to select user with email '%s' from db", email))
+		return nil, errors.WrapError(
+			err,
+			fmt.Sprintf("failed to select user with email '%s' from db", email),
+		)
 	}
 
 	if !utils.CheckTextHash(retrUser.Password, password) {

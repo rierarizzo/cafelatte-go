@@ -31,10 +31,22 @@ func (c *PaymentCard) ValidatePaymentCard() error {
 
 func (c *PaymentCard) ValidateExpirationDate() error {
 	if c.ExpirationMonth < 1 || c.ExpirationMonth > 12 {
-		return errors.WrapError(errors.ErrInvalidCardFormat, "expiration date must be in a valid range [1..12]")
+		return errors.WrapError(
+			errors.ErrInvalidCardFormat,
+			"expiration date must be in a valid range [1..12]",
+		)
 	}
 
-	expirationDate := time.Date(c.ExpirationYear, time.Month(c.ExpirationMonth), 0, 0, 0, 0, 0, time.UTC)
+	expirationDate := time.Date(
+		c.ExpirationYear,
+		time.Month(c.ExpirationMonth),
+		0,
+		0,
+		0,
+		0,
+		0,
+		time.UTC,
+	)
 
 	if expirationDate.Before(time.Now()) {
 		return errors.WrapError(errors.ErrExpiredCard, "card is already expired")

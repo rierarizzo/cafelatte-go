@@ -15,11 +15,16 @@ func (s AddressService) GetAddressesByUserID(userID int) ([]entities.Address, er
 	return s.addressRepo.SelectAddressesByUserID(userID)
 }
 
-func (s AddressService) AddUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
+func (s AddressService) AddUserAddresses(
+	userID int,
+	addresses []entities.Address,
+) ([]entities.Address, error) {
 	for _, v := range addresses {
 		if err := v.ValidateAddress(); err != nil {
-			return nil, errors.WrapError(err,
-				fmt.Sprintf("address with detail '%s' is not valid", v.Detail))
+			return nil, errors.WrapError(
+				err,
+				fmt.Sprintf("address with detail '%s' is not valid", v.Detail),
+			)
 		}
 	}
 

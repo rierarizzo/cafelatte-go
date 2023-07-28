@@ -34,7 +34,10 @@ func (r PaymentCardRepository) SelectCardsByUserID(userID int) ([]entities.Payme
 	return cards, nil
 }
 
-func (r PaymentCardRepository) InsertUserPaymentCards(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
+func (r PaymentCardRepository) InsertUserPaymentCards(
+	userID int,
+	cards []entities.PaymentCard,
+) ([]entities.PaymentCard, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
@@ -42,7 +45,8 @@ func (r PaymentCardRepository) InsertUserPaymentCards(userID int, cards []entiti
 
 	insertStmnt, err := tx.Prepare(
 		`insert into userpaymentcard (Type, UserID, Company, HolderName, Number, ExpirationYear, ExpirationMonth, CVV) 
-			values (?,?,?,?,?,?,?,?)`)
+			values (?,?,?,?,?,?,?,?)`,
+	)
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
@@ -63,8 +67,16 @@ func (r PaymentCardRepository) InsertUserPaymentCards(userID int, cards []entiti
 			}()
 			cardModel := mappers.FromPaymentCardToPaymentCardModel(card)
 
-			result, err := insertStmnt.Exec(cardModel.Type, userID, cardModel.Company, cardModel.HolderName,
-				cardModel.Number, cardModel.ExpirationYear, cardModel.ExpirationMonth, cardModel.CVV)
+			result, err := insertStmnt.Exec(
+				cardModel.Type,
+				userID,
+				cardModel.Company,
+				cardModel.HolderName,
+				cardModel.Number,
+				cardModel.ExpirationYear,
+				cardModel.ExpirationMonth,
+				cardModel.CVV,
+			)
 			if err != nil {
 				errCh <- err
 				return

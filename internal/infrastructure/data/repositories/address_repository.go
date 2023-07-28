@@ -34,7 +34,10 @@ func (r AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Addre
 	return addresses, nil
 }
 
-func (r AddressRepository) InsertUserAddresses(userID int, addresses []entities.Address) ([]entities.Address, error) {
+func (r AddressRepository) InsertUserAddresses(
+	userID int,
+	addresses []entities.Address,
+) ([]entities.Address, error) {
 	tx, err := r.db.Begin()
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
@@ -42,7 +45,8 @@ func (r AddressRepository) InsertUserAddresses(userID int, addresses []entities.
 
 	insertStmnt, err := tx.Prepare(
 		`insert into useraddress (Type, UserID, ProvinceID, CityID, PostalCode, Detail) 
-			values (?,?,?,?,?,?)`)
+			values (?,?,?,?,?,?)`,
+	)
 	if err != nil {
 		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
 	}
@@ -63,8 +67,10 @@ func (r AddressRepository) InsertUserAddresses(userID int, addresses []entities.
 			}()
 			addressModel := mappers.FromAddressToAddressModel(address)
 
-			result, err := insertStmnt.Exec(addressModel.Type, userID, addressModel.ProvinceID,
-				addressModel.CityID, addressModel.PostalCode, addressModel.Detail)
+			result, err := insertStmnt.Exec(
+				addressModel.Type, userID, addressModel.ProvinceID,
+				addressModel.CityID, addressModel.PostalCode, addressModel.Detail,
+			)
 			if err != nil {
 				errCh <- err
 				return
