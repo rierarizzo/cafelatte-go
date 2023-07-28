@@ -1,7 +1,9 @@
 package services
 
 import (
+	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
+	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 )
 
@@ -16,11 +18,13 @@ func (s PaymentCardService) GetCardsByUserID(userID int) ([]entities.PaymentCard
 func (s PaymentCardService) AddUserPaymentCard(userID int, cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
 	for _, v := range cards {
 		if err := v.ValidateExpirationDate(); err != nil {
-			return nil, err
+			return nil, errors.WrapError(err,
+				fmt.Sprintf("payment card with holder name '%s' is expired", v.HolderName))
 		}
 
 		if err := v.ValidatePaymentCard(); err != nil {
-			return nil, err
+			return nil, errors.WrapError(err,
+				fmt.Sprintf("payment card with holder name '%s' is invalid", v.HolderName))
 		}
 	}
 
