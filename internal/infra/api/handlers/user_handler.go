@@ -20,12 +20,14 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 	err := c.BindJSON(&signUpRequest)
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 
 	authorizedUser, err := h.userService.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 
@@ -40,6 +42,7 @@ func (h *UserHandler) SignIn(c *gin.Context) {
 	err := c.BindJSON(&signInRequest)
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 
@@ -49,6 +52,7 @@ func (h *UserHandler) SignIn(c *gin.Context) {
 	)
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 
@@ -62,6 +66,7 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := h.userService.GetUsers()
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 
@@ -78,12 +83,14 @@ func (h *UserHandler) FindUserByID(c *gin.Context) {
 	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 
 	user, err := h.userService.FindUserByID(userID)
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 

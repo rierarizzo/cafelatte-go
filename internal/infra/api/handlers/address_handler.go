@@ -20,6 +20,7 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 	err := c.BindJSON(&addressesRequest)
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 
@@ -33,6 +34,7 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 	addresses, err = h.addressService.AddUserAddresses(userClaims.ID, addresses)
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 

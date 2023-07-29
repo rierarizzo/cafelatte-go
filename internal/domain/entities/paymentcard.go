@@ -56,7 +56,7 @@ func (c *PaymentCard) ValidatePaymentCard() error {
 		return err
 	}
 	if err := c.validateExpirationDateFormat(); err != nil {
-		return nil
+		return err
 	}
 
 	return nil

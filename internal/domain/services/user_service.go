@@ -59,8 +59,8 @@ func (s *UserService) SignIn(email, password string) (
 	retrUser, err := s.userRepo.SelectUserByEmail(email)
 	if err != nil {
 		var coreErr *domain.AppError
-		wrapped := errors.As(err, &coreErr)
-		if wrapped && coreErr.Type == domain.NotFoundError {
+		converted := errors.As(err, &coreErr)
+		if converted && coreErr.Type == domain.NotFoundError {
 			return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
 		} else {
 			return nil, domain.NewAppError(err, domain.UnexpectedError)
@@ -88,8 +88,8 @@ func (s *UserService) GetUsers() ([]entities.User, error) {
 	users, err := s.userRepo.SelectUsers()
 	if err != nil {
 		var coreErr *domain.AppError
-		wrapped := errors.As(err, &coreErr)
-		if wrapped && coreErr.Type == domain.NotFoundError {
+		converted := errors.As(err, &coreErr)
+		if converted && coreErr.Type == domain.NotFoundError {
 			return []entities.User{}, nil
 		} else {
 			return nil, domain.NewAppError(err, domain.UnexpectedError)
@@ -106,8 +106,8 @@ func (s *UserService) FindUserByID(id int) (*entities.User, error) {
 	user, err := s.userRepo.SelectUserByID(id)
 	if err != nil {
 		var coreErr *domain.AppError
-		wrapped := errors.As(err, &coreErr)
-		if (wrapped && coreErr.Type != domain.NotFoundError) || !wrapped {
+		converted := errors.As(err, &coreErr)
+		if (converted && coreErr.Type != domain.NotFoundError) || !converted {
 			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
 
@@ -124,8 +124,8 @@ func (s *UserService) UpdateUser(userID int, user entities.User) error {
 	err := s.userRepo.UpdateUser(userID, user)
 	if err != nil {
 		var coreErr *domain.AppError
-		wrapped := errors.As(err, &coreErr)
-		if (wrapped && coreErr.Type != domain.NotFoundError) || !wrapped {
+		converted := errors.As(err, &coreErr)
+		if (converted && coreErr.Type != domain.NotFoundError) || !converted {
 			return domain.NewAppError(err, domain.UnexpectedError)
 		}
 

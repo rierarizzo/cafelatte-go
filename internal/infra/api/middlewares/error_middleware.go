@@ -5,32 +5,55 @@ import (
 	"github.com/gin-gonic/gin"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"net/http"
+	"strings"
 )
 
 func ErrorMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
 
-		errs := c.Errors
-
-		if len(errs) > 0 {
-			var err *domain.AppError
-			ok := errors.As(errs[0].Err, &err)
+		if len(c.Errors) > 0 {
+			err := c.Errors[0].Err
+			var appErr *domain.AppError
+			ok := errors.As(err, &appErr)
 			if ok {
-				if err.Type == domain.NotFoundError {
-					c.JSON(http.StatusNotFound, err.Error())
+				if appErr.Type == domain.NotFoundError {
+					writeError(c, http.StatusNotFound, appErr)
 					return
-				} else if err.Type == domain.NotAuthorizedError || err.Type == domain.NotAuthenticatedError {
-					c.JSON(http.StatusUnauthorized, err.Error())
+				} else if appErr.Type == domain.NotAuthorizedError || appErr.Type == domain.NotAuthenticatedError {
+					writeError(c, http.StatusUnauthorized, appErr)
 					return
 				} else {
-					c.JSON(http.StatusInternalServerError, err.Error())
+					writeError(c, http.StatusInternalServerError, appErr)
 					return
 				}
 			}
 
-			c.JSON(http.StatusInternalServerError, "internal server error")
+			writeError(c, http.StatusInternalServerError, err)
 			return
 		}
 	}
+}
+
+type ErrorResponse struct {
+	Status    int      `json:"status"`
+	ErrorType string   `json:"errorType"`
+	ErrorMsgs []string `json:"errorMsgs"`
+}
+
+func writeError(c *gin.Context, httpStatus int, err error) {
+	var appErr *domain.AppError
+	converted := errors.As(err, &appErr)
+
+	if !converted {
+		appErr = domain.NewAppError(err, domain.UnexpectedError)
+	}
+
+	response := ErrorResponse{
+		Status:    httpStatus,
+		ErrorType: appErr.Type,
+		ErrorMsgs: strings.Split(appErr.Err.Error(), "\n"),
+	}
+
+	c.JSON(httpStatus, response)
 }

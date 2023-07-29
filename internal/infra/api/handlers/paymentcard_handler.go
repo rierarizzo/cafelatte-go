@@ -20,6 +20,7 @@ func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 	err := c.BindJSON(&cardsRequest)
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 
@@ -33,6 +34,7 @@ func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 	cards, err = h.paymentCardService.AddUserPaymentCard(userClaims.ID, cards)
 	if err != nil {
 		slog.Error(c.Error(err).Error())
+		c.Abort()
 		return
 	}
 

@@ -16,10 +16,11 @@ func Router(
 
 	router := gin.New()
 
+	// Error handling (always has to be the first middleware)
+	router.Use(middlewares.ErrorMiddleware())
+
 	router.Use(middlewares.RequestIDMiddleware())
 	router.Use(middlewares.LoggingMiddleware())
-	// Error handling
-	router.Use(middlewares.ErrorMiddleware())
 
 	authGroup := router.Group("/auth")
 	{
@@ -29,6 +30,7 @@ func Router(
 
 	usersGroup := router.Group("/users")
 	usersGroup.Use(middlewares.AuthenticateMiddleware())
+
 	{
 		usersGroup.GET("/find", userHandler.GetAllUsers)
 		usersGroup.GET("/find/:userID", userHandler.FindUserByID)

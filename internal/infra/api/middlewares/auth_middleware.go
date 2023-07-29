@@ -13,6 +13,7 @@ func AuthenticateMiddleware() gin.HandlerFunc {
 		tokenWithBearer := c.GetHeader("Authorization")
 		if tokenWithBearer == "" {
 			slog.Error(c.Error(domain.NewAppErrorWithType(domain.TokenValidationError)).Error())
+			c.Abort()
 			return
 		}
 
@@ -21,6 +22,7 @@ func AuthenticateMiddleware() gin.HandlerFunc {
 		claims, err := utils.VerifyJWTToken(token)
 		if err != nil {
 			slog.Error(c.Error(err).Error())
+			c.Abort()
 			return
 		}
 

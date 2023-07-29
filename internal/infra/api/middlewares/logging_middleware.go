@@ -25,25 +25,23 @@ func LoggingMiddleware() gin.HandlerFunc {
 			requestID,
 		)
 
-		defer func() {
-			requestStatus := c.Writer.Status()
-
-			timeElapsed := time.Since(start).Seconds()
-			slog.Debug(
-				"Ending request",
-				"method",
-				requestMethod,
-				"path",
-				requestPath,
-				"timeElapsed",
-				fmt.Sprintf("%.7fs", timeElapsed),
-				"status",
-				requestStatus,
-				"requestID",
-				requestID,
-			)
-		}()
-
 		c.Next()
+
+		requestStatus := c.Writer.Status()
+
+		timeElapsed := time.Since(start).Seconds()
+		slog.Debug(
+			"Ending request",
+			"method",
+			requestMethod,
+			"path",
+			requestPath,
+			"timeElapsed",
+			fmt.Sprintf("%.7fs", timeElapsed),
+			"status",
+			requestStatus,
+			"requestID",
+			requestID,
+		)
 	}
 }
