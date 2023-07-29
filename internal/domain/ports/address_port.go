@@ -1,6 +1,6 @@
 package ports
 
-import "github.com/rierarizzo/cafelatte/internal/core/entities"
+import "github.com/rierarizzo/cafelatte/internal/domain/entities"
 
 type IAddressService interface {
 	GetAddressesByUserID(userID int) ([]entities.Address, error)

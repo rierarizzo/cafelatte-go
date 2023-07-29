@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/internal/core/constants"
-	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	"github.com/rierarizzo/cafelatte/internal/core/ports"
+	"github.com/rierarizzo/cafelatte/internal/domain/constants"
+	"github.com/rierarizzo/cafelatte/internal/domain/entities"
+	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
 	"log/slog"

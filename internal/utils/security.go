@@ -2,12 +2,12 @@ package utils
 
 import (
 	"errors"
-	"github.com/rierarizzo/cafelatte/internal/core/constants"
+	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/rierarizzo/cafelatte/internal/core/entities"
+	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	"golang.org/x/crypto/bcrypt"
 )
 

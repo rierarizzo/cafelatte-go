@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	core "github.com/rierarizzo/cafelatte/internal/core/errors"
+	"github.com/rierarizzo/cafelatte/internal/domain/entities"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"sync"
@@ -30,11 +30,11 @@ func (r PaymentCardRepository) SelectCardsByUserID(userID int) (
 	err := r.db.Select(&cardsModel, query, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, core.NewAppErrorWithType(core.NotFoundError)
+			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return nil, core.NewAppError(
+		return nil, domain.NewAppError(
 			errors.Join(selectCardError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 
@@ -51,9 +51,9 @@ func (r PaymentCardRepository) InsertUserPaymentCards(
 	cards []entities.PaymentCard,
 ) ([]entities.PaymentCard, error) {
 	returnRepoError := func(err error) error {
-		return core.NewAppError(
+		return domain.NewAppError(
 			errors.Join(insertCardError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 

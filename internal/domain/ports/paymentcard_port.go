@@ -1,6 +1,6 @@
 package ports
 
-import "github.com/rierarizzo/cafelatte/internal/core/entities"
+import "github.com/rierarizzo/cafelatte/internal/domain/entities"
 
 type IPaymentCardService interface {
 	GetCardsByUserID(userID int) ([]entities.PaymentCard, error)

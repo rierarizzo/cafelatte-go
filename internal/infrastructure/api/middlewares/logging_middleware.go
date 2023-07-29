@@ -3,7 +3,7 @@ package middlewares
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/internal/core/constants"
+	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	"log/slog"
 	"time"
 )

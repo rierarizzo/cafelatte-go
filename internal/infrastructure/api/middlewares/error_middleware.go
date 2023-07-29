@@ -3,7 +3,7 @@ package middlewares
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	core "github.com/rierarizzo/cafelatte/internal/core/errors"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"net/http"
 )
 
@@ -14,13 +14,13 @@ func ErrorMiddleware() gin.HandlerFunc {
 		errs := c.Errors
 
 		if len(errs) > 0 {
-			var err *core.AppError
+			var err *domain.AppError
 			ok := errors.As(errs[0].Err, &err)
 			if ok {
-				if err.Type == core.NotFoundError {
+				if err.Type == domain.NotFoundError {
 					c.JSON(http.StatusNotFound, err.Error())
 					return
-				} else if err.Type == core.NotAuthorizedError || err.Type == core.NotAuthenticatedError {
+				} else if err.Type == domain.NotAuthorizedError || err.Type == domain.NotAuthenticatedError {
 					c.JSON(http.StatusUnauthorized, err.Error())
 					return
 				} else {

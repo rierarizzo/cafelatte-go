@@ -1,6 +1,6 @@
 package ports
 
-import "github.com/rierarizzo/cafelatte/internal/core/entities"
+import "github.com/rierarizzo/cafelatte/internal/domain/entities"
 
 type IUserService interface {
 	// SignUp es un método para registrar un usuario en el sistema.

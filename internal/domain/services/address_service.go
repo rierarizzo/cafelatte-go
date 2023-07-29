@@ -2,9 +2,9 @@ package services
 
 import (
 	"errors"
-	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	core "github.com/rierarizzo/cafelatte/internal/core/errors"
-	"github.com/rierarizzo/cafelatte/internal/core/ports"
+	"github.com/rierarizzo/cafelatte/internal/domain/entities"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 )
 
 type AddressService struct {
@@ -17,10 +17,10 @@ func (s AddressService) GetAddressesByUserID(userID int) (
 ) {
 	addresses, err := s.addressRepo.SelectAddressesByUserID(userID)
 	if err != nil {
-		var coreErr *core.AppError
+		var coreErr *domain.AppError
 		wrapped := errors.As(err, &coreErr)
-		if (wrapped && coreErr.Type != core.NotFoundError) || !wrapped {
-			return nil, core.NewAppError(err, core.UnexpectedError)
+		if (wrapped && coreErr.Type != domain.NotFoundError) || !wrapped {
+			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
 
 		return nil, err
@@ -35,13 +35,13 @@ func (s AddressService) AddUserAddresses(
 ) ([]entities.Address, error) {
 	for _, v := range addresses {
 		if err := v.ValidateAddress(); err != nil {
-			return nil, core.NewAppError(err, core.ValidationError)
+			return nil, domain.NewAppError(err, domain.ValidationError)
 		}
 	}
 
 	addresses, err := s.addressRepo.InsertUserAddresses(userID, addresses)
 	if err != nil {
-		return nil, core.NewAppError(err, core.UnexpectedError)
+		return nil, domain.NewAppError(err, domain.UnexpectedError)
 	}
 
 	return addresses, nil

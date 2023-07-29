@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/rierarizzo/cafelatte/internal/core/services"
+	"github.com/rierarizzo/cafelatte/internal/domain/services"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data"

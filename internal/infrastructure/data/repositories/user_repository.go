@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	core "github.com/rierarizzo/cafelatte/internal/core/errors"
+	"github.com/rierarizzo/cafelatte/internal/domain/entities"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
@@ -65,14 +65,14 @@ func (r *UserRepository) SelectAllUsers() ([]entities.User, error) {
 
 	err := r.db.Select(&temporaryUsers, selectTemporaryUsers)
 	if err != nil {
-		return nil, core.NewAppError(
+		return nil, domain.NewAppError(
 			errors.Join(selectUserError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 
 	if temporaryUsers == nil {
-		return nil, core.NewAppErrorWithType(core.NotFoundError)
+		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
 	users = mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -88,14 +88,14 @@ func (r *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 		userID,
 	)
 	if err != nil {
-		return nil, core.NewAppError(
+		return nil, domain.NewAppError(
 			errors.Join(selectUserError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 
 	if temporaryUsers == nil {
-		return nil, core.NewAppErrorWithType(core.NotFoundError)
+		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
 	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -114,14 +114,14 @@ func (r *UserRepository) SelectUserByEmail(email string) (
 		email,
 	)
 	if err != nil {
-		return nil, core.NewAppError(
+		return nil, domain.NewAppError(
 			errors.Join(selectUserError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 
 	if temporaryUsers == nil {
-		return nil, core.NewAppErrorWithType(core.NotFoundError)
+		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
 	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -153,9 +153,9 @@ func (r *UserRepository) InsertUser(user entities.User) (
 		userModel.RoleCode,
 	)
 	if err != nil {
-		return nil, core.NewAppError(
+		return nil, domain.NewAppError(
 			errors.Join(insertUserError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 
@@ -184,11 +184,11 @@ func (r *UserRepository) UpdateUser(userID int, user entities.User) error {
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return core.NewAppErrorWithType(core.NotFoundError)
+			return domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return core.NewAppError(
+		return domain.NewAppError(
 			errors.Join(updateUserError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 

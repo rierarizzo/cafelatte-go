@@ -2,9 +2,9 @@ package services
 
 import (
 	"errors"
-	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	core "github.com/rierarizzo/cafelatte/internal/core/errors"
-	"github.com/rierarizzo/cafelatte/internal/core/ports"
+	"github.com/rierarizzo/cafelatte/internal/domain/entities"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
 
@@ -17,23 +17,23 @@ func (s *UserService) SignUp(user entities.User) (
 	error,
 ) {
 	if err := user.ValidateUser(); err != nil {
-		return nil, core.NewAppError(err, core.ValidationError)
+		return nil, domain.NewAppError(err, domain.ValidationError)
 	}
 
 	hash, err := utils.HashText(user.Password)
 	if err != nil {
-		return nil, core.NewAppErrorWithType(core.HashGenerationError)
+		return nil, domain.NewAppErrorWithType(domain.HashGenerationError)
 	}
 	user.Password = hash
 
 	retrUser, err := s.userRepo.InsertUser(user)
 	if err != nil {
-		return nil, core.NewAppError(err, core.UnexpectedError)
+		return nil, domain.NewAppError(err, domain.UnexpectedError)
 	}
 
 	token, err := utils.CreateJWTToken(*retrUser)
 	if err != nil {
-		return nil, core.NewAppError(err, core.TokenGenerationError)
+		return nil, domain.NewAppError(err, domain.TokenGenerationError)
 	}
 
 	return entities.NewAuthorizedUser(*retrUser, *token), nil
@@ -45,22 +45,22 @@ func (s *UserService) SignIn(email, password string) (
 ) {
 	retrUser, err := s.userRepo.SelectUserByEmail(email)
 	if err != nil {
-		var coreErr *core.AppError
+		var coreErr *domain.AppError
 		wrapped := errors.As(err, &coreErr)
-		if wrapped && coreErr.Type == core.NotFoundError {
-			return nil, core.NewAppErrorWithType(core.NotAuthorizedError)
+		if wrapped && coreErr.Type == domain.NotFoundError {
+			return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
 		} else {
-			return nil, core.NewAppError(err, core.UnexpectedError)
+			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
 	}
 
 	if !utils.CheckTextHash(retrUser.Password, password) {
-		return nil, core.NewAppErrorWithType(core.NotAuthorizedError)
+		return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
 	}
 
 	token, err := utils.CreateJWTToken(*retrUser)
 	if err != nil {
-		return nil, core.NewAppError(err, core.TokenGenerationError)
+		return nil, domain.NewAppError(err, domain.TokenGenerationError)
 	}
 
 	return entities.NewAuthorizedUser(*retrUser, *token), nil
@@ -69,12 +69,12 @@ func (s *UserService) SignIn(email, password string) (
 func (s *UserService) GetAllUsers() ([]entities.User, error) {
 	users, err := s.userRepo.SelectAllUsers()
 	if err != nil {
-		var coreErr *core.AppError
+		var coreErr *domain.AppError
 		wrapped := errors.As(err, &coreErr)
-		if wrapped && coreErr.Type == core.NotFoundError {
+		if wrapped && coreErr.Type == domain.NotFoundError {
 			return []entities.User{}, nil
 		} else {
-			return nil, core.NewAppError(err, core.UnexpectedError)
+			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
 	}
 
@@ -84,10 +84,10 @@ func (s *UserService) GetAllUsers() ([]entities.User, error) {
 func (s *UserService) FindUserByID(id int) (*entities.User, error) {
 	user, err := s.userRepo.SelectUserByID(id)
 	if err != nil {
-		var coreErr *core.AppError
+		var coreErr *domain.AppError
 		wrapped := errors.As(err, &coreErr)
-		if (wrapped && coreErr.Type != core.NotFoundError) || !wrapped {
-			return nil, core.NewAppError(err, core.UnexpectedError)
+		if (wrapped && coreErr.Type != domain.NotFoundError) || !wrapped {
+			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
 
 		return nil, err
@@ -99,10 +99,10 @@ func (s *UserService) FindUserByID(id int) (*entities.User, error) {
 func (s *UserService) UpdateUser(userID int, user entities.User) error {
 	err := s.userRepo.UpdateUser(userID, user)
 	if err != nil {
-		var coreErr *core.AppError
+		var coreErr *domain.AppError
 		wrapped := errors.As(err, &coreErr)
-		if (wrapped && coreErr.Type != core.NotFoundError) || !wrapped {
-			return core.NewAppError(err, core.UnexpectedError)
+		if (wrapped && coreErr.Type != domain.NotFoundError) || !wrapped {
+			return domain.NewAppError(err, domain.UnexpectedError)
 		}
 
 		return err

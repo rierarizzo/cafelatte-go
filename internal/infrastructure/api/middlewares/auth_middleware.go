@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
-	core "github.com/rierarizzo/cafelatte/internal/core/errors"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 	"log/slog"
 	"strings"
@@ -12,7 +12,7 @@ func AuthenticateMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenWithBearer := c.GetHeader("Authorization")
 		if tokenWithBearer == "" {
-			slog.Error(c.Error(core.NewAppErrorWithType(core.TokenValidationError)).Error())
+			slog.Error(c.Error(domain.NewAppErrorWithType(domain.TokenValidationError)).Error())
 			return
 		}
 

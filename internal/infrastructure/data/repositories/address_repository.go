@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	core "github.com/rierarizzo/cafelatte/internal/core/errors"
+	"github.com/rierarizzo/cafelatte/internal/domain/entities"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"sync"
@@ -30,11 +30,11 @@ func (r AddressRepository) SelectAddressesByUserID(userID int) (
 	err := r.db.Select(&addressesModel, query, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, core.NewAppErrorWithType(core.NotFoundError)
+			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return nil, core.NewAppError(
+		return nil, domain.NewAppError(
 			errors.Join(selectAddressError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 
@@ -51,9 +51,9 @@ func (r AddressRepository) InsertUserAddresses(
 	addresses []entities.Address,
 ) ([]entities.Address, error) {
 	returnRepoError := func(err error) error {
-		return core.NewAppError(
+		return domain.NewAppError(
 			errors.Join(insertAddressError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 
@@ -134,11 +134,11 @@ func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, error) {
 	err := r.db.Get(&cityName, query, cityID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", core.NewAppErrorWithType(core.NotFoundError)
+			return "", domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return "", core.NewAppError(
+		return "", domain.NewAppError(
 			errors.Join(selectAddressError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 
@@ -155,11 +155,11 @@ func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (
 	err := r.db.Get(&provinceName, query, cityID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", core.NewAppErrorWithType(core.NotFoundError)
+			return "", domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return "", core.NewAppError(
+		return "", domain.NewAppError(
 			errors.Join(selectAddressError, err),
-			core.RepositoryError,
+			domain.RepositoryError,
 		)
 	}
 
