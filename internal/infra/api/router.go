@@ -1,11 +1,11 @@
 package api
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/middlewares"
+	"github.com/rierarizzo/cafelatte/internal/infra/api/middlewares"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
+	"github.com/rierarizzo/cafelatte/internal/infra/api/handlers"
 )
 
 func Router(

@@ -1,4 +1,4 @@
-package repositories
+package repos
 
 import (
 	"database/sql"
@@ -6,12 +6,12 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
+	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
 	"sync"
 )
 
-type PaymentCardRepository struct {
+type PaymentCardRepo struct {
 	db *sqlx.DB
 }
 
@@ -20,7 +20,7 @@ var (
 	insertCardError = errors.New("errors in inserting new card")
 )
 
-func (r PaymentCardRepository) SelectCardsByUserID(userID int) (
+func (r PaymentCardRepo) SelectCardsByUserID(userID int) (
 	[]entities.PaymentCard,
 	error,
 ) {
@@ -46,7 +46,7 @@ func (r PaymentCardRepository) SelectCardsByUserID(userID int) (
 	return cards, nil
 }
 
-func (r PaymentCardRepository) InsertUserPaymentCards(
+func (r PaymentCardRepo) InsertUserPaymentCards(
 	userID int,
 	cards []entities.PaymentCard,
 ) ([]entities.PaymentCard, error) {
@@ -129,6 +129,6 @@ func (r PaymentCardRepository) InsertUserPaymentCards(
 	return cards, nil
 }
 
-func NewPaymentCardRepository(db *sqlx.DB) *PaymentCardRepository {
-	return &PaymentCardRepository{db}
+func NewPaymentCardRepository(db *sqlx.DB) *PaymentCardRepo {
+	return &PaymentCardRepo{db}
 }

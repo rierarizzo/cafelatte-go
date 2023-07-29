@@ -1,4 +1,4 @@
-package repositories
+package repos
 
 import (
 	"database/sql"
@@ -6,12 +6,12 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
+	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
 	"sync"
 )
 
-type AddressRepository struct {
+type AddressRepo struct {
 	db *sqlx.DB
 }
 
@@ -20,7 +20,7 @@ var (
 	insertAddressError = errors.New("errors in inserting address")
 )
 
-func (r AddressRepository) SelectAddressesByUserID(userID int) (
+func (r AddressRepo) SelectAddressesByUserID(userID int) (
 	[]entities.Address,
 	error,
 ) {
@@ -46,7 +46,7 @@ func (r AddressRepository) SelectAddressesByUserID(userID int) (
 	return addresses, nil
 }
 
-func (r AddressRepository) InsertUserAddresses(
+func (r AddressRepo) InsertUserAddresses(
 	userID int,
 	addresses []entities.Address,
 ) ([]entities.Address, error) {
@@ -127,7 +127,7 @@ func (r AddressRepository) InsertUserAddresses(
 	return addresses, nil
 }
 
-func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, error) {
+func (r AddressRepo) SelectCityNameByCityID(cityID int) (string, error) {
 	var cityName string
 
 	query := "select Name from city where ID=?"
@@ -145,7 +145,7 @@ func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, error) {
 	return cityName, nil
 }
 
-func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (
+func (r AddressRepo) SelectProvinceNameByProvinceID(cityID int) (
 	string,
 	error,
 ) {
@@ -166,6 +166,6 @@ func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (
 	return provinceName, nil
 }
 
-func NewAddressRepository(db *sqlx.DB) *AddressRepository {
-	return &AddressRepository{db}
+func NewAddressRepository(db *sqlx.DB) *AddressRepo {
+	return &AddressRepo{db}
 }

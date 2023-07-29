@@ -1,4 +1,4 @@
-package repositories
+package repos
 
 import (
 	"database/sql"
@@ -6,11 +6,11 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
+	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
 )
 
-type UserRepository struct {
+type UserRepo struct {
 	db *sqlx.DB
 }
 
@@ -58,7 +58,7 @@ const selectTemporaryUsers = `select u.ID               as 'UserID',
 				  and (ua.Status = true or ua.Status is null)
 				  and (up.Status = true or up.Status is null)`
 
-func (r *UserRepository) SelectAllUsers() ([]entities.User, error) {
+func (r *UserRepo) SelectUsers() ([]entities.User, error) {
 	users := make([]entities.User, 0)
 
 	var temporaryUsers []models.TemporaryUserModel
@@ -79,7 +79,7 @@ func (r *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	return users, nil
 }
 
-func (r *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
+func (r *UserRepo) SelectUserByID(userID int) (*entities.User, error) {
 	var temporaryUsers []models.TemporaryUserModel
 
 	err := r.db.Select(
@@ -102,7 +102,7 @@ func (r *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 	return &users[0], nil
 }
 
-func (r *UserRepository) SelectUserByEmail(email string) (
+func (r *UserRepo) SelectUserByEmail(email string) (
 	*entities.User,
 	error,
 ) {
@@ -128,7 +128,7 @@ func (r *UserRepository) SelectUserByEmail(email string) (
 	return &users[0], nil
 }
 
-func (r *UserRepository) InsertUser(user entities.User) (
+func (r *UserRepo) InsertUser(user entities.User) (
 	*entities.User,
 	error,
 ) {
@@ -165,7 +165,7 @@ func (r *UserRepository) InsertUser(user entities.User) (
 	return mappers.FromUserModelToUser(*userModel), nil
 }
 
-func (r *UserRepository) UpdateUser(userID int, user entities.User) error {
+func (r *UserRepo) UpdateUser(userID int, user entities.User) error {
 	userModel := mappers.FromUserToUserModel(user)
 
 	query := `update user set 
@@ -195,6 +195,6 @@ func (r *UserRepository) UpdateUser(userID int, user entities.User) error {
 	return nil
 }
 
-func NewUserRepository(db *sqlx.DB) *UserRepository {
-	return &UserRepository{db}
+func NewUserRepository(db *sqlx.DB) *UserRepo {
+	return &UserRepo{db}
 }

@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/rierarizzo/cafelatte/internal/domain/services"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/repositories"
+	"github.com/rierarizzo/cafelatte/internal/infra/api"
+	"github.com/rierarizzo/cafelatte/internal/infra/api/handlers"
+	"github.com/rierarizzo/cafelatte/internal/infra/data"
+	"github.com/rierarizzo/cafelatte/internal/infra/data/repos"
 )
 
 func Server() {
@@ -21,17 +21,17 @@ func Server() {
 	db := data.Connect(config.DSN)
 
 	// Addresses instance
-	addressRepo := repositories.NewAddressRepository(db)
+	addressRepo := repos.NewAddressRepository(db)
 	addressService := services.NewAddressService(addressRepo)
 	addressHandler := handlers.NewAddressHandler(addressService)
 
 	// PaymentCards instance
-	paymentCardRepo := repositories.NewPaymentCardRepository(db)
+	paymentCardRepo := repos.NewPaymentCardRepository(db)
 	paymentCardService := services.NewPaymentCardService(paymentCardRepo)
 	paymentCardHandler := handlers.NewPaymentCardHandler(paymentCardService)
 
 	// Users instance
-	userRepo := repositories.NewUserRepository(db)
+	userRepo := repos.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 

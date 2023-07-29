@@ -1,14 +1,14 @@
 package handlers
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
 	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
+	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
 )
 
 type UserHandler struct {
@@ -59,7 +59,7 @@ func (h *UserHandler) SignIn(c *gin.Context) {
 }
 
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
-	users, err := h.userService.GetAllUsers()
+	users, err := h.userService.GetUsers()
 	if err != nil {
 		slog.Error(c.Error(err).Error())
 		return

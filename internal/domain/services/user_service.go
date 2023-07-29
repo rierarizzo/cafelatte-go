@@ -9,7 +9,7 @@ import (
 )
 
 type UserService struct {
-	userRepo ports.IUserRepository
+	userRepo ports.IUserRepo
 }
 
 func (s *UserService) SignUp(user entities.User) (
@@ -66,8 +66,8 @@ func (s *UserService) SignIn(email, password string) (
 	return entities.NewAuthorizedUser(*retrUser, *token), nil
 }
 
-func (s *UserService) GetAllUsers() ([]entities.User, error) {
-	users, err := s.userRepo.SelectAllUsers()
+func (s *UserService) GetUsers() ([]entities.User, error) {
+	users, err := s.userRepo.SelectUsers()
 	if err != nil {
 		var coreErr *domain.AppError
 		wrapped := errors.As(err, &coreErr)
@@ -111,6 +111,6 @@ func (s *UserService) UpdateUser(userID int, user entities.User) error {
 	return nil
 }
 
-func NewUserService(userRepo ports.IUserRepository) *UserService {
+func NewUserService(userRepo ports.IUserRepo) *UserService {
 	return &UserService{userRepo}
 }

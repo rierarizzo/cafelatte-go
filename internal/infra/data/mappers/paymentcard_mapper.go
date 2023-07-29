@@ -3,7 +3,7 @@ package mappers
 import (
 	"database/sql"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
+	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
 )
 
 func FromPaymentCardToPaymentCardModel(card entities.PaymentCard) *models.PaymentCardModel {
