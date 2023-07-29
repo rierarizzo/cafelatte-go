@@ -2,9 +2,9 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
-	coreErrors "github.com/rierarizzo/cafelatte/internal/core/errors"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/error"
+	core "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/utils"
+	"log/slog"
 	"strings"
 )
 
@@ -12,15 +12,15 @@ func AuthenticateMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenWithBearer := c.GetHeader("Authorization")
 		if tokenWithBearer == "" {
-			if error.Error(c, coreErrors.ErrTokenNotPresent) {
-				return
-			}
+			slog.Error(c.Error(core.NewAppErrorWithType(core.TokenValidationError)).Error())
+			return
 		}
 
 		token, _ := strings.CutPrefix(tokenWithBearer, "Bearer ")
 
 		claims, err := utils.VerifyJWTToken(token)
-		if error.Error(c, err) {
+		if err != nil {
+			slog.Error(c.Error(err).Error())
 			return
 		}
 

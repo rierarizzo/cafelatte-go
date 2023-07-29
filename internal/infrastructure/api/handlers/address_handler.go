@@ -6,8 +6,8 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
-	errorHandler "github.com/rierarizzo/cafelatte/internal/infrastructure/api/error"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
+	"log/slog"
 	"net/http"
 )
 
@@ -18,7 +18,8 @@ type AddressHandler struct {
 func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 	var addressesRequest []dto.AddressRequest
 	err := c.BindJSON(&addressesRequest)
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 
@@ -30,7 +31,8 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 	userClaims := c.MustGet(constants.UserClaimsKey).(*entities.UserClaims)
 
 	addresses, err = h.addressService.AddUserAddresses(userClaims.ID, addresses)
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 

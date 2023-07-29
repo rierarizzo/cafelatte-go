@@ -25,7 +25,7 @@ func GetConfig() *Config {
 
 func LoadInitConfig(config *Config) {
 	// Config logger
-	levels := map[string]int{"debug": -4, "info": 0, "warn": 4, "error": 8}
+	levels := map[string]int{"debug": -4, "info": 0, "warn": 4, "errors": 8}
 
 	var programLevel = new(slog.LevelVar)
 	programLevel.Set(slog.Level(levels[config.LogLevel]))

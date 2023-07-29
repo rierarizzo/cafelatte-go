@@ -2,51 +2,87 @@ package errors
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 )
 
-const errorMsgFormat = "%w: %s"
+const (
+	NotFoundError   = "NotFoundError"
+	notFoundMessage = "record not found"
 
-var (
-	ErrUnauthorizedUser     = errors.New("UnauthorizedUserError")
-	ErrInvalidUserFormat    = errors.New("InvalidUserFormatError")
-	ErrExpiredCard          = errors.New("ExpiredCardError")
-	ErrInvalidCardFormat    = errors.New("InvalidCardFormatError")
-	ErrInvalidAddressFormat = errors.New("InvalidAddressFormatError")
+	ValidationError        = "ValidationError"
+	validationErrorMessage = "validation errors"
+
+	ResourceAlreadyExistsError        = "ResourceAlreadyExistsError"
+	resourceAlreadyExistsErrorMessage = "resource already exists"
+
+	RepositoryError        = "RepositoryError"
+	repositoryErrorMessage = "errors in repository operation"
+
+	NotAuthenticatedError        = "NotAuthenticatedError"
+	notAuthenticatedErrorMessage = "not authenticated"
+
+	TokenGenerationError        = "TokenGenerationError"
+	tokenGenerationErrorMessage = "errors in token generation"
+
+	TokenValidationError        = "TokenValidationError"
+	tokenValidationErrorMessage = "errors in token validation"
+
+	HashGenerationError        = "HashGenerationError"
+	hashGenerationErrorMessage = "errors in hash generation"
+
+	NotAuthorizedError        = "NotAuthorizedError"
+	notAuthorizedErrorMessage = "not authorized"
+
+	UnexpectedError        = "UnexpectedError"
+	unexpectedErrorMessage = "something went wrong"
 )
 
-var (
-	ErrSignAlgorithmUnexpected = errors.New("SignAlgorithmUnexpectedError")
-	ErrInvalidToken            = errors.New("InvalidTokenError")
-	ErrTokenNotPresent         = errors.New("TokenNotPresentError")
-)
-
-var (
-	ErrRecordNotFound = errors.New("RecordNotFoundError")
-	ErrUnexpected     = errors.New("UnexpectedError")
-)
-
-func WrapError(errType error, errReturned string) error {
-	return fmt.Errorf(errorMsgFormat, errType, errReturned)
+type AppError struct {
+	Err  error
+	Type string
 }
 
-func GetOriginalErrorType(err error) error {
-	for {
-		if wrapped, ok := err.(interface{ Unwrap() error }); ok {
-			err = wrapped.Unwrap()
-		} else {
-			break
-		}
+// NewAppError returns an AppError with its type and message.
+func NewAppError(err error, errType string) *AppError {
+	return &AppError{
+		Err:  err,
+		Type: errType,
 	}
-	return err
 }
 
-func SplitError(err error) (error, []string) {
-	errorMsgs := strings.Split(err.Error(), ":")[1:]
-	for k, v := range errorMsgs {
-		errorMsgs[k] = strings.TrimSpace(v)
+// NewAppErrorWithType returns an AppError with its respective type.
+func NewAppErrorWithType(errType string) *AppError {
+	var err error
+
+	switch errType {
+	case NotFoundError:
+		err = errors.New(notFoundMessage)
+	case ValidationError:
+		err = errors.New(validationErrorMessage)
+	case ResourceAlreadyExistsError:
+		err = errors.New(resourceAlreadyExistsErrorMessage)
+	case RepositoryError:
+		err = errors.New(repositoryErrorMessage)
+	case NotAuthenticatedError:
+		err = errors.New(notAuthenticatedErrorMessage)
+	case TokenGenerationError:
+		err = errors.New(tokenGenerationErrorMessage)
+	case TokenValidationError:
+		err = errors.New(tokenValidationErrorMessage)
+	case HashGenerationError:
+		err = errors.New(hashGenerationErrorMessage)
+	case NotAuthorizedError:
+		err = errors.New(notAuthorizedErrorMessage)
+	case UnexpectedError:
+		err = errors.New(unexpectedErrorMessage)
 	}
 
-	return GetOriginalErrorType(err), errorMsgs
+	return &AppError{
+		Err:  err,
+		Type: errType,
+	}
+}
+
+// Error converts the app errors to a human-readable text.
+func (appErr *AppError) Error() string {
+	return appErr.Err.Error()
 }

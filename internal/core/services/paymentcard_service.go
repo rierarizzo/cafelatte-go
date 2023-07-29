@@ -1,9 +1,9 @@
 package services
 
 import (
-	"fmt"
+	"errors"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	coreErrors "github.com/rierarizzo/cafelatte/internal/core/errors"
+	core "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
@@ -16,7 +16,18 @@ func (s PaymentCardService) GetCardsByUserID(userID int) (
 	[]entities.PaymentCard,
 	error,
 ) {
-	return s.paymentCardRepo.SelectCardsByUserID(userID)
+	cards, err := s.paymentCardRepo.SelectCardsByUserID(userID)
+	if err != nil {
+		var coreErr *core.AppError
+		wrapped := errors.As(err, &coreErr)
+		if (wrapped && coreErr.Type != core.NotFoundError) || !wrapped {
+			return nil, core.NewAppError(err, core.UnexpectedError)
+		}
+
+		return nil, err
+	}
+
+	return cards, nil
 }
 
 func (s PaymentCardService) AddUserPaymentCard(
@@ -25,39 +36,32 @@ func (s PaymentCardService) AddUserPaymentCard(
 ) ([]entities.PaymentCard, error) {
 	for k, v := range cards {
 		if err := v.ValidateExpirationDate(); err != nil {
-			return nil, coreErrors.WrapError(
-				err,
-				fmt.Sprintf(
-					"payment card with holder name '%s' is expired",
-					v.HolderName,
-				),
-			)
+			return nil, core.NewAppError(err, core.ValidationError)
 		}
 
 		if err := v.ValidatePaymentCard(); err != nil {
-			return nil, coreErrors.WrapError(
-				err,
-				fmt.Sprintf(
-					"payment card with holder name '%s' is invalid",
-					v.HolderName,
-				),
-			)
+			return nil, core.NewAppError(err, core.ValidationError)
 		}
 
 		hash, err := utils.HashText(v.Number)
 		if err != nil {
-			return nil, coreErrors.WrapError(err, "failed to hash card number")
+			return nil, core.NewAppErrorWithType(core.HashGenerationError)
 		}
 		cards[k].Number = hash
 
 		hash, err = utils.HashText(v.CVV)
 		if err != nil {
-			return nil, coreErrors.WrapError(err, "failed to hash card CVV")
+			return nil, core.NewAppErrorWithType(core.HashGenerationError)
 		}
 		cards[k].CVV = hash
 	}
 
-	return s.paymentCardRepo.InsertUserPaymentCards(userID, cards)
+	cards, err := s.paymentCardRepo.InsertUserPaymentCards(userID, cards)
+	if err != nil {
+		return nil, core.NewAppError(err, core.UnexpectedError)
+	}
+
+	return cards, nil
 }
 
 func NewPaymentCardService(paymentCardRepo ports.IPaymentCardRepository) *PaymentCardService {

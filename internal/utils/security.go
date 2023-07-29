@@ -1,14 +1,20 @@
 package utils
 
 import (
+	"errors"
 	"github.com/rierarizzo/cafelatte/internal/core/constants"
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	invalidSigningMethodError = errors.New("signing method is not valid")
+	invalidTokenError         = errors.New("token is not valid")
+	parseTokenError           = errors.New("error in parsing token")
 )
 
 func CreateJWTToken(user entities.User) (*string, error) {
@@ -33,7 +39,7 @@ func CreateJWTToken(user entities.User) (*string, error) {
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		return nil, errors.WrapError(errors.ErrUnexpected, err.Error())
+		return nil, errors.Join(parseTokenError, err)
 	}
 
 	return &tokenString, nil
@@ -46,20 +52,17 @@ func VerifyJWTToken(tokenString string) (*entities.UserClaims, error) {
 	token, err := jwt.ParseWithClaims(
 		tokenString, &userClaims, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.WrapError(
-					errors.ErrInvalidToken,
-					"signing method is invalid",
-				)
+				return nil, invalidSigningMethodError
 			}
 
 			return secret, nil
 		},
 	)
 	if err != nil {
-		return nil, errors.WrapError(errors.ErrInvalidToken, err.Error())
+		return nil, errors.Join(parseTokenError, err)
 	}
 	if !token.Valid {
-		return nil, errors.WrapError(errors.ErrInvalidToken, "token is invalid")
+		return nil, invalidTokenError
 	}
 
 	return &userClaims, nil
@@ -67,11 +70,7 @@ func VerifyJWTToken(tokenString string) (*entities.UserClaims, error) {
 
 func HashText(text string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(text), bcrypt.DefaultCost)
-	if err != nil {
-		return "", errors.WrapError(errors.ErrUnexpected, err.Error())
-	}
-
-	return string(bytes), nil
+	return string(bytes), err
 }
 
 func CheckTextHash(hash string, text string) bool {

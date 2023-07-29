@@ -6,8 +6,8 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
-	errorHandler "github.com/rierarizzo/cafelatte/internal/infrastructure/api/error"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
+	"log/slog"
 	"net/http"
 )
 
@@ -18,7 +18,8 @@ type PaymentCardHandler struct {
 func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 	var cardsRequest []dto.PaymentCardRequest
 	err := c.BindJSON(&cardsRequest)
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 
@@ -30,7 +31,8 @@ func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 	userClaims := c.MustGet(constants.UserClaimsKey).(*entities.UserClaims)
 
 	cards, err = h.paymentCardService.AddUserPaymentCard(userClaims.ID, cards)
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 

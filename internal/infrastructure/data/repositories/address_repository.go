@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	coreErrors "github.com/rierarizzo/cafelatte/internal/core/errors"
+	core "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"sync"
@@ -14,6 +14,11 @@ import (
 type AddressRepository struct {
 	db *sqlx.DB
 }
+
+var (
+	selectAddressError = errors.New("errors in selecting address(es)")
+	insertAddressError = errors.New("errors in inserting address")
+)
 
 func (r AddressRepository) SelectAddressesByUserID(userID int) (
 	[]entities.Address,
@@ -25,12 +30,12 @@ func (r AddressRepository) SelectAddressesByUserID(userID int) (
 	err := r.db.Select(&addressesModel, query, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, coreErrors.WrapError(
-				coreErrors.ErrRecordNotFound,
-				err.Error(),
-			)
+			return nil, core.NewAppErrorWithType(core.NotFoundError)
 		}
-		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return nil, core.NewAppError(
+			errors.Join(selectAddressError, err),
+			core.RepositoryError,
+		)
 	}
 
 	var addresses []entities.Address
@@ -45,9 +50,16 @@ func (r AddressRepository) InsertUserAddresses(
 	userID int,
 	addresses []entities.Address,
 ) ([]entities.Address, error) {
+	returnRepoError := func(err error) error {
+		return core.NewAppError(
+			errors.Join(insertAddressError, err),
+			core.RepositoryError,
+		)
+	}
+
 	tx, err := r.db.Begin()
 	if err != nil {
-		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return nil, returnRepoError(err)
 	}
 
 	insertStmnt, err := tx.Prepare(
@@ -61,7 +73,7 @@ func (r AddressRepository) InsertUserAddresses(
                 ) values (?,?,?,?,?,?)`,
 	)
 	if err != nil {
-		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return nil, returnRepoError(err)
 	}
 
 	sem := make(chan struct{}, 5)
@@ -104,12 +116,12 @@ func (r AddressRepository) InsertUserAddresses(
 
 	for err := range errCh {
 		_ = tx.Rollback()
-		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return nil, returnRepoError(err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return nil, returnRepoError(err)
 	}
 
 	return addresses, nil
@@ -122,12 +134,12 @@ func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, error) {
 	err := r.db.Get(&cityName, query, cityID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", coreErrors.WrapError(
-				coreErrors.ErrRecordNotFound,
-				err.Error(),
-			)
+			return "", core.NewAppErrorWithType(core.NotFoundError)
 		}
-		return "", coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return "", core.NewAppError(
+			errors.Join(selectAddressError, err),
+			core.RepositoryError,
+		)
 	}
 
 	return cityName, nil
@@ -143,12 +155,12 @@ func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (
 	err := r.db.Get(&provinceName, query, cityID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", coreErrors.WrapError(
-				coreErrors.ErrRecordNotFound,
-				err.Error(),
-			)
+			return "", core.NewAppErrorWithType(core.NotFoundError)
 		}
-		return "", coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return "", core.NewAppError(
+			errors.Join(selectAddressError, err),
+			core.RepositoryError,
+		)
 	}
 
 	return provinceName, nil

@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	"errors"
 	"strings"
 )
 
@@ -19,8 +19,34 @@ type User struct {
 	PaymentCards []PaymentCard
 }
 
-func (u *User) SetPassword(password string) {
-	u.Password = password
+var (
+	invalidUserRoleError        = errors.New("invalid role")
+	invalidUserPhoneNumberError = errors.New("invalid phone number")
+	invalidUserEmailError       = errors.New("invalid email")
+)
+
+func (u *User) validateRole() error {
+	if u.RoleCode != "A" && u.RoleCode != "E" && u.RoleCode != "C" {
+		return invalidUserRoleError
+	}
+
+	return nil
+}
+
+func (u *User) validatePhoneNumber() error {
+	if len(u.PhoneNumber) != 10 {
+		return invalidUserPhoneNumberError
+	}
+
+	return nil
+}
+
+func (u *User) validateEmail() error {
+	if !strings.Contains(u.Email, "@") {
+		return invalidUserEmailError
+	}
+
+	return nil
 }
 
 func (u *User) ValidateUser() error {
@@ -32,39 +58,6 @@ func (u *User) ValidateUser() error {
 	}
 	if err := u.validateEmail(); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (u *User) validateRole() error {
-	if u.RoleCode != "A" && u.RoleCode != "E" && u.RoleCode != "C" {
-		return errors.WrapError(
-			errors.ErrInvalidUserFormat,
-			"role must be 'A', 'E', or 'C'",
-		)
-	}
-
-	return nil
-}
-
-func (u *User) validatePhoneNumber() error {
-	if len(u.PhoneNumber) != 10 {
-		return errors.WrapError(
-			errors.ErrInvalidUserFormat,
-			"phone number must be 10 digits",
-		)
-	}
-
-	return nil
-}
-
-func (u *User) validateEmail() error {
-	if !strings.Contains(u.Email, "@") {
-		return errors.WrapError(
-			errors.ErrInvalidUserFormat,
-			"email must contain '@'",
-		)
 	}
 
 	return nil

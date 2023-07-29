@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	errorHandler "github.com/rierarizzo/cafelatte/internal/infrastructure/api/error"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
+	"log/slog"
 	"net/http"
 	"strconv"
 
@@ -18,12 +18,14 @@ type UserHandler struct {
 func (h *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	err := c.BindJSON(&signUpRequest)
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 
 	authorizedUser, err := h.userService.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 
@@ -36,7 +38,8 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 func (h *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	err := c.BindJSON(&signInRequest)
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 
@@ -44,7 +47,8 @@ func (h *UserHandler) SignIn(c *gin.Context) {
 		signInRequest.Email,
 		signInRequest.Password,
 	)
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 
@@ -56,7 +60,8 @@ func (h *UserHandler) SignIn(c *gin.Context) {
 
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := h.userService.GetAllUsers()
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 
@@ -71,12 +76,14 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 func (h *UserHandler) FindUserByID(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 
 	user, err := h.userService.FindUserByID(userID)
-	if errorHandler.Error(c, err) {
+	if err != nil {
+		slog.Error(c.Error(err).Error())
 		return
 	}
 

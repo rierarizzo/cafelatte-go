@@ -54,39 +54,39 @@ func FromTemporaryUsersModelToUserSlice(tmpUsers []models.TemporaryUserModel) []
 		}
 
 		addressID := v.AddressID
-		if !addressMap[addressID] {
+		if !addressMap[int(addressID.Int64)] && addressID.Valid {
 			address := entities.Address{
-				ID:         v.AddressID,
-				Type:       v.AddressType,
-				ProvinceID: v.AddressProvinceID,
-				CityID:     v.AddressCityID,
-				PostalCode: v.AddressPostalCode,
-				Detail:     v.AddressDetail,
+				ID:         int(v.AddressID.Int64),
+				Type:       v.AddressType.String,
+				ProvinceID: int(v.AddressProvinceID.Int64),
+				CityID:     int(v.AddressCityID.Int64),
+				PostalCode: v.AddressPostalCode.String,
+				Detail:     v.AddressDetail.String,
 			}
 			userMap[userID].Addresses = append(
 				userMap[userID].Addresses,
 				address,
 			)
-			addressMap[addressID] = true
+			addressMap[int(addressID.Int64)] = true
 		}
 
 		cardID := v.CardID
-		if !cardMap[cardID] {
+		if !cardMap[int(cardID.Int64)] && cardID.Valid {
 			card := entities.PaymentCard{
-				ID:              v.CardID,
-				Type:            v.CardType,
-				Company:         v.CardCompany,
-				HolderName:      v.CardHolderName,
-				Number:          v.CardNumber,
-				ExpirationYear:  v.CardExpirationYear,
-				ExpirationMonth: v.CardExpirationMonth,
-				CVV:             v.CardCVV,
+				ID:              int(v.CardID.Int64),
+				Type:            v.CardType.String,
+				Company:         int(v.CardCompany.Int64),
+				HolderName:      v.CardHolderName.String,
+				Number:          v.CardNumber.String,
+				ExpirationYear:  int(v.CardExpirationYear.Int64),
+				ExpirationMonth: int(v.CardExpirationMonth.Int64),
+				CVV:             v.CardCVV.String,
 			}
 			userMap[userID].PaymentCards = append(
 				userMap[userID].PaymentCards,
 				card,
 			)
-			cardMap[cardID] = true
+			cardMap[int(cardID.Int64)] = true
 		}
 	}
 

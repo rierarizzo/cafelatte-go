@@ -1,9 +1,9 @@
 package services
 
 import (
-	"fmt"
+	"errors"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	core "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 )
 
@@ -15,7 +15,18 @@ func (s AddressService) GetAddressesByUserID(userID int) (
 	[]entities.Address,
 	error,
 ) {
-	return s.addressRepo.SelectAddressesByUserID(userID)
+	addresses, err := s.addressRepo.SelectAddressesByUserID(userID)
+	if err != nil {
+		var coreErr *core.AppError
+		wrapped := errors.As(err, &coreErr)
+		if (wrapped && coreErr.Type != core.NotFoundError) || !wrapped {
+			return nil, core.NewAppError(err, core.UnexpectedError)
+		}
+
+		return nil, err
+	}
+
+	return addresses, nil
 }
 
 func (s AddressService) AddUserAddresses(
@@ -24,14 +35,16 @@ func (s AddressService) AddUserAddresses(
 ) ([]entities.Address, error) {
 	for _, v := range addresses {
 		if err := v.ValidateAddress(); err != nil {
-			return nil, errors.WrapError(
-				err,
-				fmt.Sprintf("address with detail '%s' is not valid", v.Detail),
-			)
+			return nil, core.NewAppError(err, core.ValidationError)
 		}
 	}
 
-	return s.addressRepo.InsertUserAddresses(userID, addresses)
+	addresses, err := s.addressRepo.InsertUserAddresses(userID, addresses)
+	if err != nil {
+		return nil, core.NewAppError(err, core.UnexpectedError)
+	}
+
+	return addresses, nil
 }
 
 func NewAddressService(addressRepo ports.IAddressRepository) *AddressService {

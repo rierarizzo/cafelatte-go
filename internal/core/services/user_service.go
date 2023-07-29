@@ -2,9 +2,8 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	coreErrors "github.com/rierarizzo/cafelatte/internal/core/errors"
+	core "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
@@ -18,32 +17,23 @@ func (s *UserService) SignUp(user entities.User) (
 	error,
 ) {
 	if err := user.ValidateUser(); err != nil {
-		return nil, coreErrors.WrapError(
-			err,
-			fmt.Sprintf("user with username '%s' is not valid", user.Username),
-		)
+		return nil, core.NewAppError(err, core.ValidationError)
 	}
 
 	hash, err := utils.HashText(user.Password)
 	if err != nil {
-		return nil, coreErrors.WrapError(err, "failed to hash password")
+		return nil, core.NewAppErrorWithType(core.HashGenerationError)
 	}
-	user.SetPassword(hash)
+	user.Password = hash
 
 	retrUser, err := s.userRepo.InsertUser(user)
 	if err != nil {
-		return nil, coreErrors.WrapError(
-			err,
-			fmt.Sprintf(
-				"failed to insert user with username '%s' into db",
-				user.Username,
-			),
-		)
+		return nil, core.NewAppError(err, core.UnexpectedError)
 	}
 
 	token, err := utils.CreateJWTToken(*retrUser)
 	if err != nil {
-		return nil, coreErrors.WrapError(err, "failed to create JWT")
+		return nil, core.NewAppError(err, core.TokenGenerationError)
 	}
 
 	return entities.NewAuthorizedUser(*retrUser, *token), nil
@@ -53,47 +43,72 @@ func (s *UserService) SignIn(email, password string) (
 	*entities.AuthorizedUser,
 	error,
 ) {
-	const incorrectEmailOrPasswordMsg = "incorrect email or password"
-
 	retrUser, err := s.userRepo.SelectUserByEmail(email)
 	if err != nil {
-		if errors.Is(err, coreErrors.ErrRecordNotFound) {
-			return nil, coreErrors.WrapError(
-				coreErrors.ErrUnauthorizedUser,
-				incorrectEmailOrPasswordMsg,
-			)
+		var coreErr *core.AppError
+		wrapped := errors.As(err, &coreErr)
+		if wrapped && coreErr.Type == core.NotFoundError {
+			return nil, core.NewAppErrorWithType(core.NotAuthorizedError)
+		} else {
+			return nil, core.NewAppError(err, core.UnexpectedError)
 		}
-		return nil, coreErrors.WrapError(
-			err,
-			fmt.Sprintf("failed to select user with email '%s' from db", email),
-		)
 	}
 
 	if !utils.CheckTextHash(retrUser.Password, password) {
-		return nil, coreErrors.WrapError(
-			coreErrors.ErrUnauthorizedUser,
-			incorrectEmailOrPasswordMsg,
-		)
+		return nil, core.NewAppErrorWithType(core.NotAuthorizedError)
 	}
 
 	token, err := utils.CreateJWTToken(*retrUser)
 	if err != nil {
-		return nil, coreErrors.WrapError(err, "failed to create JWT")
+		return nil, core.NewAppError(err, core.TokenGenerationError)
 	}
 
 	return entities.NewAuthorizedUser(*retrUser, *token), nil
 }
 
 func (s *UserService) GetAllUsers() ([]entities.User, error) {
-	return s.userRepo.SelectAllUsers()
+	users, err := s.userRepo.SelectAllUsers()
+	if err != nil {
+		var coreErr *core.AppError
+		wrapped := errors.As(err, &coreErr)
+		if wrapped && coreErr.Type == core.NotFoundError {
+			return []entities.User{}, nil
+		} else {
+			return nil, core.NewAppError(err, core.UnexpectedError)
+		}
+	}
+
+	return users, nil
 }
 
 func (s *UserService) FindUserByID(id int) (*entities.User, error) {
-	return s.userRepo.SelectUserByID(id)
+	user, err := s.userRepo.SelectUserByID(id)
+	if err != nil {
+		var coreErr *core.AppError
+		wrapped := errors.As(err, &coreErr)
+		if (wrapped && coreErr.Type != core.NotFoundError) || !wrapped {
+			return nil, core.NewAppError(err, core.UnexpectedError)
+		}
+
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (s *UserService) UpdateUser(userID int, user entities.User) error {
-	return s.userRepo.UpdateUser(userID, user)
+	err := s.userRepo.UpdateUser(userID, user)
+	if err != nil {
+		var coreErr *core.AppError
+		wrapped := errors.As(err, &coreErr)
+		if (wrapped && coreErr.Type != core.NotFoundError) || !wrapped {
+			return core.NewAppError(err, core.UnexpectedError)
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 func NewUserService(userRepo ports.IUserRepository) *UserService {

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -17,25 +18,25 @@ type TemporaryUserModel struct {
 	UserCreatedAt   time.Time `db:"UserCreatedAt"`
 	UserUpdatedAt   time.Time `db:"UserUpdatedAt"`
 
-	AddressID         int       `db:"AddressID"`
-	AddressType       string    `db:"AddressType"`
-	AddressProvinceID int       `db:"AddressProvinceID"`
-	AddressCityID     int       `db:"AddressCityID"`
-	AddressPostalCode string    `db:"AddressPostalCode"`
-	AddressDetail     string    `db:"AddressDetail"`
-	AddressStatus     bool      `db:"AddressStatus"`
-	AddressCreatedAt  time.Time `db:"AddressCreatedAt"`
-	AddressUpdatedAt  time.Time `db:"AddressUpdatedAt"`
+	AddressID         sql.NullInt64  `db:"AddressID"`
+	AddressType       sql.NullString `db:"AddressType"`
+	AddressProvinceID sql.NullInt64  `db:"AddressProvinceID"`
+	AddressCityID     sql.NullInt64  `db:"AddressCityID"`
+	AddressPostalCode sql.NullString `db:"AddressPostalCode"`
+	AddressDetail     sql.NullString `db:"AddressDetail"`
+	AddressStatus     sql.NullBool   `db:"AddressStatus"`
+	AddressCreatedAt  sql.NullTime   `db:"AddressCreatedAt"`
+	AddressUpdatedAt  sql.NullTime   `db:"AddressUpdatedAt"`
 
-	CardID              int       `db:"CardID"`
-	CardType            string    `db:"CardType"`
-	CardCompany         int       `db:"CardCompany"`
-	CardHolderName      string    `db:"CardHolderName"`
-	CardNumber          string    `db:"CardNumber"`
-	CardExpirationYear  int       `db:"CardExpirationYear"`
-	CardExpirationMonth int       `db:"CardExpirationMonth"`
-	CardCVV             string    `db:"CardCVV"`
-	CardStatus          bool      `db:"CardStatus"`
-	CardCreatedAt       time.Time `db:"CardCreatedAt"`
-	CardUpdatedAt       time.Time `db:"CardUpdatedAt"`
+	CardID              sql.NullInt64  `db:"CardID"`
+	CardType            sql.NullString `db:"CardType"`
+	CardCompany         sql.NullInt64  `db:"CardCompany"`
+	CardHolderName      sql.NullString `db:"CardHolderName"`
+	CardNumber          sql.NullString `db:"CardNumber"`
+	CardExpirationYear  sql.NullInt64  `db:"CardExpirationYear"`
+	CardExpirationMonth sql.NullInt64  `db:"CardExpirationMonth"`
+	CardCVV             sql.NullString `db:"CardCVV"`
+	CardStatus          sql.NullBool   `db:"CardStatus"`
+	CardCreatedAt       sql.NullTime   `db:"CardCreatedAt"`
+	CardUpdatedAt       sql.NullTime   `db:"CardUpdatedAt"`
 }

@@ -18,6 +18,8 @@ func Router(
 
 	router.Use(middlewares.RequestIDMiddleware())
 	router.Use(middlewares.LoggingMiddleware())
+	// Error handling
+	router.Use(middlewares.ErrorMiddleware())
 
 	authGroup := router.Group("/auth")
 	{

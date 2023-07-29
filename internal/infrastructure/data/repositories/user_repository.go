@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	coreErrors "github.com/rierarizzo/cafelatte/internal/core/errors"
+	core "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
@@ -14,53 +14,65 @@ type UserRepository struct {
 	db *sqlx.DB
 }
 
-const selectUserWithAllFieldsQuery = `select 
-    			u.ID as 'UserID',
-    			u.Username as 'UserUsername',
-				u.Name as 'UserName',
-				u.Surname as 'UserSurname',
-				u.PhoneNumber as 'UserPhoneNumber',
-				u.Email as 'UserEmail',
-				u.Password as 'UserPassword',
-				u.RoleCode as 'UserRoleCode',
-				u.Status as 'UserStatus',
-				u.CreatedAt as 'UserCreatedAt',
-				u.UpdatedAt as 'UserUpdatedAt',
-				ua.ID as 'AddressID',
-				ua.Type as 'AddressType',
-				ua.ProvinceID as 'AddressProvinceID',
-				ua.CityID as 'AddressCityID',
-				ua.PostalCode as 'AddressPostalCode',
-				ua.Detail as 'AddressDetail',
-				ua.Status as 'AddressStatus',
-				ua.CreatedAt as 'AddressCreatedAt',
-				ua.UpdatedAt as 'AddressUpdatedAt',
-				up.ID as 'CardID',
-				up.Type as 'CardType',
-				up.Company as 'CardCompany',
-				up.HolderName as 'CardHolderName',
-				up.Number as 'CardNumber',
-				up.ExpirationYear as 'CardExpirationYear',
-				up.ExpirationMonth as 'CardExpirationMonth',
-				up.CVV as 'CardCVV',
-				up.Status as 'CardStatus',
-				up.CreatedAt as 'CardCreatedAt',
-				up.UpdatedAt as 'CardUpdatedAt'
-			from user u inner join useraddress ua on u.ID = ua.UserID 
-			inner join userpaymentcard up on u.ID = up.UserID 
-			where u.Status=true and ua.Status=true and up.Status=true`
+var (
+	insertUserError = errors.New("errors in inserting new user")
+	selectUserError = errors.New("errors in selecting user(s)")
+	updateUserError = errors.New("errors in updating user")
+)
+
+const selectTemporaryUsers = `select u.ID               as 'UserID',
+					   u.Username         as 'UserUsername',
+					   u.Name             as 'UserName',
+					   u.Surname          as 'UserSurname',
+					   u.PhoneNumber      as 'UserPhoneNumber',
+					   u.Email            as 'UserEmail',
+					   u.Password         as 'UserPassword',
+					   u.RoleCode         as 'UserRoleCode',
+					   u.Status           as 'UserStatus',
+					   u.CreatedAt        as 'UserCreatedAt',
+					   u.UpdatedAt        as 'UserUpdatedAt',
+					   ua.ID              as 'AddressID',
+					   ua.Type            as 'AddressType',
+					   ua.ProvinceID      as 'AddressProvinceID',
+					   ua.CityID          as 'AddressCityID',
+					   ua.PostalCode      as 'AddressPostalCode',
+					   ua.Detail          as 'AddressDetail',
+					   ua.Status          as 'AddressStatus',
+					   ua.CreatedAt       as 'AddressCreatedAt',
+					   ua.UpdatedAt       as 'AddressUpdatedAt',
+					   up.ID              as 'CardID',
+					   up.Type            as 'CardType',
+					   up.Company         as 'CardCompany',
+					   up.HolderName      as 'CardHolderName',
+					   up.Number          as 'CardNumber',
+					   up.ExpirationYear  as 'CardExpirationYear',
+					   up.ExpirationMonth as 'CardExpirationMonth',
+					   up.CVV             as 'CardCVV',
+					   up.Status          as 'CardStatus',
+					   up.CreatedAt       as 'CardCreatedAt',
+					   up.UpdatedAt       as 'CardUpdatedAt'
+				from user u
+						 left join useraddress ua on u.ID = ua.UserID
+						 left join userpaymentcard up on u.ID = up.UserID
+				where u.Status = true
+				  and (ua.Status = true or ua.Status is null)
+				  and (up.Status = true or up.Status is null)`
 
 func (r *UserRepository) SelectAllUsers() ([]entities.User, error) {
 	users := make([]entities.User, 0)
 
 	var temporaryUsers []models.TemporaryUserModel
 
-	err := r.db.Select(&temporaryUsers, selectUserWithAllFieldsQuery)
+	err := r.db.Select(&temporaryUsers, selectTemporaryUsers)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return users, nil
-		}
-		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return nil, core.NewAppError(
+			errors.Join(selectUserError, err),
+			core.RepositoryError,
+		)
+	}
+
+	if temporaryUsers == nil {
+		return nil, core.NewAppErrorWithType(core.NotFoundError)
 	}
 
 	users = mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -72,18 +84,18 @@ func (r *UserRepository) SelectUserByID(userID int) (*entities.User, error) {
 
 	err := r.db.Select(
 		&temporaryUsers,
-		selectUserWithAllFieldsQuery+" and u.ID=?",
+		selectTemporaryUsers+" and u.ID=?",
 		userID,
 	)
 	if err != nil {
-		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return nil, core.NewAppError(
+			errors.Join(selectUserError, err),
+			core.RepositoryError,
+		)
 	}
 
 	if temporaryUsers == nil {
-		return nil, coreErrors.WrapError(
-			coreErrors.ErrRecordNotFound,
-			"user not found",
-		)
+		return nil, core.NewAppErrorWithType(core.NotFoundError)
 	}
 
 	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -98,18 +110,18 @@ func (r *UserRepository) SelectUserByEmail(email string) (
 
 	err := r.db.Select(
 		&temporaryUsers,
-		selectUserWithAllFieldsQuery+" and u.Email=?",
+		selectTemporaryUsers+" and u.Email=?",
 		email,
 	)
 	if err != nil {
-		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return nil, core.NewAppError(
+			errors.Join(selectUserError, err),
+			core.RepositoryError,
+		)
 	}
 
 	if temporaryUsers == nil {
-		return nil, coreErrors.WrapError(
-			coreErrors.ErrRecordNotFound,
-			"user not found",
-		)
+		return nil, core.NewAppErrorWithType(core.NotFoundError)
 	}
 
 	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
@@ -141,7 +153,10 @@ func (r *UserRepository) InsertUser(user entities.User) (
 		userModel.RoleCode,
 	)
 	if err != nil {
-		return nil, coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return nil, core.NewAppError(
+			errors.Join(insertUserError, err),
+			core.RepositoryError,
+		)
 	}
 
 	lastUserID, _ := result.LastInsertId()
@@ -169,12 +184,12 @@ func (r *UserRepository) UpdateUser(userID int, user entities.User) error {
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return coreErrors.WrapError(
-				coreErrors.ErrRecordNotFound,
-				err.Error(),
-			)
+			return core.NewAppErrorWithType(core.NotFoundError)
 		}
-		return coreErrors.WrapError(coreErrors.ErrUnexpected, err.Error())
+		return core.NewAppError(
+			errors.Join(updateUserError, err),
+			core.RepositoryError,
+		)
 	}
 
 	return nil
