@@ -10,6 +10,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
 )
 
+// UserRepo represents a repository for user-related operations.
 type UserRepo struct {
 	db *sqlx.DB
 }
@@ -58,6 +59,9 @@ const selectTemporaryUsers = `select u.ID               as 'UserID',
 				  and (ua.Status = true or ua.Status is null)
 				  and (up.Status = true or up.Status is null)`
 
+// SelectUsers retrieves a list of users from the database and returns the
+// list of users if successful, along with any error encountered during the
+// process.
 func (r *UserRepo) SelectUsers() ([]entities.User, error) {
 	users := make([]entities.User, 0)
 
@@ -79,6 +83,9 @@ func (r *UserRepo) SelectUsers() ([]entities.User, error) {
 	return users, nil
 }
 
+// SelectUserByID retrieves a user from the database based on the provided
+// user ID and returns the user if found, along with any error encountered
+// during the process.
 func (r *UserRepo) SelectUserByID(userID int) (*entities.User, error) {
 	var temporaryUsers []models.TemporaryUserModel
 
@@ -102,6 +109,9 @@ func (r *UserRepo) SelectUserByID(userID int) (*entities.User, error) {
 	return &users[0], nil
 }
 
+// SelectUserByEmail retrieves a user from the database based on the
+// provided email and returns the user if found, along with any error
+// encountered during the process.
 func (r *UserRepo) SelectUserByEmail(email string) (
 	*entities.User,
 	error,
@@ -128,6 +138,8 @@ func (r *UserRepo) SelectUserByEmail(email string) (
 	return &users[0], nil
 }
 
+// InsertUser inserts a new user into the database and returns the inserted
+// user if successful, along with any error encountered during the process.
 func (r *UserRepo) InsertUser(user entities.User) (
 	*entities.User,
 	error,
@@ -165,6 +177,9 @@ func (r *UserRepo) InsertUser(user entities.User) (
 	return mappers.FromUserModelToUser(*userModel), nil
 }
 
+// UpdateUser updates the details of a user in the database based on the
+// provided user ID and user object and returns an error, if any,
+// encountered during the process.
 func (r *UserRepo) UpdateUser(userID int, user entities.User) error {
 	userModel := mappers.FromUserToUserModel(user)
 
