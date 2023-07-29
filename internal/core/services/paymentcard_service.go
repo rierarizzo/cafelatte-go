@@ -3,8 +3,9 @@ package services
 import (
 	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/core/entities"
-	"github.com/rierarizzo/cafelatte/internal/core/errors"
+	coreErrors "github.com/rierarizzo/cafelatte/internal/core/errors"
 	"github.com/rierarizzo/cafelatte/internal/core/ports"
+	"github.com/rierarizzo/cafelatte/internal/utils"
 )
 
 type PaymentCardService struct {
@@ -22,9 +23,9 @@ func (s PaymentCardService) AddUserPaymentCard(
 	userID int,
 	cards []entities.PaymentCard,
 ) ([]entities.PaymentCard, error) {
-	for _, v := range cards {
+	for k, v := range cards {
 		if err := v.ValidateExpirationDate(); err != nil {
-			return nil, errors.WrapError(
+			return nil, coreErrors.WrapError(
 				err,
 				fmt.Sprintf(
 					"payment card with holder name '%s' is expired",
@@ -34,7 +35,7 @@ func (s PaymentCardService) AddUserPaymentCard(
 		}
 
 		if err := v.ValidatePaymentCard(); err != nil {
-			return nil, errors.WrapError(
+			return nil, coreErrors.WrapError(
 				err,
 				fmt.Sprintf(
 					"payment card with holder name '%s' is invalid",
@@ -42,6 +43,18 @@ func (s PaymentCardService) AddUserPaymentCard(
 				),
 			)
 		}
+
+		hash, err := utils.HashText(v.Number)
+		if err != nil {
+			return nil, coreErrors.WrapError(err, "failed to hash card number")
+		}
+		cards[k].Number = hash
+
+		hash, err = utils.HashText(v.CVV)
+		if err != nil {
+			return nil, coreErrors.WrapError(err, "failed to hash card CVV")
+		}
+		cards[k].CVV = hash
 	}
 
 	return s.paymentCardRepo.InsertUserPaymentCards(userID, cards)

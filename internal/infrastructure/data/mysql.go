@@ -1,7 +1,7 @@
 package data
 
 import (
-	"log"
+	"log/slog"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -10,7 +10,8 @@ import (
 func Connect(dsn string) *sqlx.DB {
 	db, err := sqlx.Open("mysql", dsn)
 	if err != nil {
-		log.Panic(err)
+		slog.Error(err.Error())
+		panic(err)
 	}
 
 	return db
