@@ -7,6 +7,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
+	entities2 "github.com/rierarizzo/cafelatte/internal/infra/security/entities"
 	"log/slog"
 	"net/http"
 )
@@ -29,7 +30,7 @@ func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 		cards = append(cards, *mappers.FromPaymentCardReqToPaymentCard(v))
 	}
 
-	userClaims := c.MustGet(constants.UserClaimsKey).(*entities.UserClaims)
+	userClaims := c.MustGet(constants.UserClaimsKey).(*entities2.UserClaims)
 
 	cards, err = h.paymentCardService.AddUserPaymentCard(userClaims.ID, cards)
 	if err != nil {

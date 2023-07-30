@@ -3,9 +3,11 @@ package middlewares
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func ErrorMiddleware() gin.HandlerFunc {
@@ -36,9 +38,11 @@ func ErrorMiddleware() gin.HandlerFunc {
 }
 
 type ErrorResponse struct {
-	Status    int      `json:"status"`
-	ErrorType string   `json:"errorType"`
-	ErrorMsgs []string `json:"errorMsgs"`
+	Status    int       `json:"status"`
+	ErrorType string    `json:"errorType"`
+	ErrorMsgs []string  `json:"errorMsgs"`
+	IssuedAt  time.Time `json:"issuedAt"`
+	RequestID any       `json:"requestID"`
 }
 
 func writeError(c *gin.Context, httpStatus int, err error) {
@@ -53,6 +57,8 @@ func writeError(c *gin.Context, httpStatus int, err error) {
 		Status:    httpStatus,
 		ErrorType: appErr.Type,
 		ErrorMsgs: strings.Split(appErr.Err.Error(), "\n"),
+		IssuedAt:  time.Now(),
+		RequestID: c.MustGet(constants.RequestIDKey),
 	}
 
 	c.JSON(httpStatus, response)

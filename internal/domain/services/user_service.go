@@ -5,6 +5,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
+	"github.com/rierarizzo/cafelatte/internal/infra/security"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
 
@@ -32,7 +33,7 @@ func (s *UserService) SignUp(user entities.User) (
 		return nil, domain.NewAppError(err, domain.UnexpectedError)
 	}
 	// Generating JWT
-	authUser, err := entities.AuthorizeUser(*retrUser)
+	authUser, err := AuthorizeUser(*retrUser)
 	if err != nil {
 		return nil, domain.NewAppError(err, domain.TokenGenerationError)
 	}
@@ -63,7 +64,7 @@ func (s *UserService) SignIn(email, password string) (
 		return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
 	}
 	// Creating JWT
-	authUser, err := entities.AuthorizeUser(*retrUser)
+	authUser, err := AuthorizeUser(*retrUser)
 	if err != nil {
 		return nil, domain.NewAppError(err, domain.TokenGenerationError)
 	}
@@ -123,6 +124,20 @@ func (s *UserService) UpdateUser(userID int, user entities.User) error {
 	}
 
 	return nil
+}
+
+func AuthorizeUser(user entities.User) (*entities.AuthorizedUser, error) {
+	token, err := security.CreateJWTToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	authorizedUser := entities.AuthorizedUser{
+		User:        user,
+		AccessToken: *token,
+	}
+
+	return &authorizedUser, nil
 }
 
 func NewUserService(userRepo ports.IUserRepo) *UserService {

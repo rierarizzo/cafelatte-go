@@ -36,20 +36,6 @@ func (u *User) HashPassword() error {
 	return nil
 }
 
-func AuthorizeUser(user User) (*AuthorizedUser, error) {
-	token, err := utils.CreateJWTToken(user)
-	if err != nil {
-		return nil, err
-	}
-
-	authorizedUser := AuthorizedUser{
-		User:        user,
-		AccessToken: *token,
-	}
-
-	return &authorizedUser, nil
-}
-
 func (u *User) validateRole() error {
 	if u.RoleCode != "A" && u.RoleCode != "E" && u.RoleCode != "C" {
 		return invalidUserRoleError

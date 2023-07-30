@@ -7,6 +7,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
+	entities2 "github.com/rierarizzo/cafelatte/internal/infra/security/entities"
 	"log/slog"
 	"net/http"
 )
@@ -29,7 +30,7 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 		addresses = append(addresses, *mappers.FromAddressReqToAddress(v))
 	}
 
-	userClaims := c.MustGet(constants.UserClaimsKey).(*entities.UserClaims)
+	userClaims := c.MustGet(constants.UserClaimsKey).(*entities2.UserClaims)
 
 	addresses, err = h.addressService.AddUserAddresses(userClaims.ID, addresses)
 	if err != nil {
