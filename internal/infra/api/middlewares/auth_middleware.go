@@ -2,17 +2,23 @@ package middlewares
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infra/security"
-	"log/slog"
+	"github.com/rierarizzo/cafelatte/internal/singleton"
+	"github.com/sirupsen/logrus"
 	"strings"
 )
 
 func AuthenticateMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		log := logrus.WithField(constants.RequestIDKey, singleton.RequestID())
+
 		tokenWithBearer := c.GetHeader("Authorization")
 		if tokenWithBearer == "" {
-			slog.Error(c.Error(domain.NewAppErrorWithType(domain.TokenValidationError)).Error())
+			domainErr := domain.NewAppErrorWithType(domain.TokenValidationError)
+
+			log.Error(c.Error(domainErr).Error())
 			c.Abort()
 			return
 		}
@@ -21,7 +27,7 @@ func AuthenticateMiddleware() gin.HandlerFunc {
 
 		claims, err := security.VerifyJWTToken(token)
 		if err != nil {
-			slog.Error(c.Error(err).Error())
+			log.Error(c.Error(err).Error())
 			c.Abort()
 			return
 		}

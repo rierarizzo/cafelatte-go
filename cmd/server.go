@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	config2 "github.com/rierarizzo/cafelatte/cmd/config"
+	"github.com/sirupsen/logrus"
 	"log/slog"
 	"net/http"
 
@@ -14,8 +16,8 @@ import (
 
 func Server() {
 	// Map config environment variable to struct
-	config := GetConfig()
-	LoadInitConfig(config)
+	config := config2.GetConfig()
+	config2.LoadInitConfig(config)
 
 	// Connect to database
 	db := data.Connect(config.DSN)
@@ -38,7 +40,7 @@ func Server() {
 	// Initialize router with all paths
 	router := api.Router(userHandler, addressHandler, paymentCardHandler)
 
-	slog.Info("Starting server", "port", config.ServerPort)
+	logrus.WithField("port", config.ServerPort).Info("Starting server")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort),
 		router); err != nil {
 		slog.Error(err.Error())

@@ -3,8 +3,8 @@ package middlewares
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"github.com/rierarizzo/cafelatte/internal/singleton"
 	"net/http"
 	"strings"
 	"time"
@@ -58,7 +58,7 @@ func writeError(c *gin.Context, httpStatus int, err error) {
 		ErrorType: appErr.Type,
 		ErrorMsgs: strings.Split(appErr.Err.Error(), "\n"),
 		IssuedAt:  time.Now(),
-		RequestID: c.MustGet(constants.RequestIDKey),
+		RequestID: singleton.RequestID(),
 	}
 
 	c.JSON(httpStatus, response)

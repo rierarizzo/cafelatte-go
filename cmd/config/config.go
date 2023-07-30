@@ -1,9 +1,9 @@
-package cmd
+package config
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/rierarizzo/cafelatte/cmd/logger"
 	"github.com/rierarizzo/cafelatte/internal/domain/constants"
-	"log/slog"
 	"os"
 )
 
@@ -25,13 +25,7 @@ func GetConfig() *Config {
 
 func LoadInitConfig(config *Config) {
 	// Config logger
-	levels := map[string]int{"debug": -4, "info": 0, "warn": 4, "errors": 8}
-
-	var programLevel = new(slog.LevelVar)
-	programLevel.Set(slog.Level(levels[config.LogLevel]))
-	logger := slog.New(slog.NewJSONHandler(os.Stdout,
-		&slog.HandlerOptions{Level: programLevel}))
-	slog.SetDefault(logger)
+	logger.ConfigLogger()
 
 	// Debug or release
 	gin.SetMode(config.GinMode)
