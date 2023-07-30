@@ -16,36 +16,28 @@ type UserService struct {
 // SignUp registers a new user in the system and returns an AuthorizedUser
 // along with any error encountered during the process.
 func (s *UserService) SignUp(user entities.User) (
-	*entities.AuthorizedUser,
-	error,
+	*entities.AuthorizedUser, error,
 ) {
 	// Validating user
 	if err := user.ValidateUser(); err != nil {
 		return nil, domain.NewAppError(err, domain.ValidationError)
 	}
-
 	// Hashing password
-	hash, err := utils.HashText(user.Password)
-	if err != nil {
-		return nil, domain.NewAppErrorWithType(domain.HashGenerationError)
+	if err := user.HashPassword(); err != nil {
+		return nil, domain.NewAppError(err, domain.HashGenerationError)
 	}
-	user.Password = hash
-
 	// Inserting user to database
 	retrUser, err := s.userRepo.InsertUser(user)
 	if err != nil {
 		return nil, domain.NewAppError(err, domain.UnexpectedError)
 	}
-
 	// Generating JWT
-	token, err := utils.CreateJWTToken(*retrUser)
+	authUser, err := entities.AuthorizeUser(*retrUser)
 	if err != nil {
 		return nil, domain.NewAppError(err, domain.TokenGenerationError)
 	}
 
-	authorizedUser := entities.NewAuthorizedUser(*retrUser, *token)
-
-	return authorizedUser, nil
+	return authUser, nil
 }
 
 // SignIn authenticates a user with the provided email and password and
@@ -66,19 +58,17 @@ func (s *UserService) SignIn(email, password string) (
 			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
 	}
-
 	// Verifying password hash
 	if !utils.CheckTextHash(retrUser.Password, password) {
 		return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
 	}
-
 	// Creating JWT
-	token, err := utils.CreateJWTToken(*retrUser)
+	authUser, err := entities.AuthorizeUser(*retrUser)
 	if err != nil {
 		return nil, domain.NewAppError(err, domain.TokenGenerationError)
 	}
 
-	return entities.NewAuthorizedUser(*retrUser, *token), nil
+	return authUser, nil
 }
 
 // GetUsers retrieves a list of users from the system and returns the list

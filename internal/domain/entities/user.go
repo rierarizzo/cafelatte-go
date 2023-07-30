@@ -2,6 +2,7 @@ package entities
 
 import (
 	"errors"
+	"github.com/rierarizzo/cafelatte/internal/utils"
 	"strings"
 )
 
@@ -24,6 +25,30 @@ var (
 	invalidUserPhoneNumberError = errors.New("invalid phone number")
 	invalidUserEmailError       = errors.New("invalid email")
 )
+
+func (u *User) HashPassword() error {
+	hash, err := utils.HashText(u.Password)
+	if err != nil {
+		return err
+	}
+	u.Password = hash
+
+	return nil
+}
+
+func AuthorizeUser(user User) (*AuthorizedUser, error) {
+	token, err := utils.CreateJWTToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	authorizedUser := AuthorizedUser{
+		User:        user,
+		AccessToken: *token,
+	}
+
+	return &authorizedUser, nil
+}
 
 func (u *User) validateRole() error {
 	if u.RoleCode != "A" && u.RoleCode != "E" && u.RoleCode != "C" {
