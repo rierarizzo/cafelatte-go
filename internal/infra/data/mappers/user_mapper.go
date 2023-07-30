@@ -63,10 +63,8 @@ func FromTemporaryUsersModelToUserSlice(tmpUsers []models.TemporaryUserModel) []
 				PostalCode: v.AddressPostalCode.String,
 				Detail:     v.AddressDetail.String,
 			}
-			userMap[userID].Addresses = append(
-				userMap[userID].Addresses,
-				address,
-			)
+			userMap[userID].Addresses = append(userMap[userID].Addresses,
+				address)
 			addressMap[int(addressID.Int64)] = true
 		}
 
@@ -82,10 +80,8 @@ func FromTemporaryUsersModelToUserSlice(tmpUsers []models.TemporaryUserModel) []
 				ExpirationMonth: int(v.CardExpirationMonth.Int64),
 				CVV:             v.CardCVV.String,
 			}
-			userMap[userID].PaymentCards = append(
-				userMap[userID].PaymentCards,
-				card,
-			)
+			userMap[userID].PaymentCards = append(userMap[userID].PaymentCards,
+				card)
 			cardMap[int(cardID.Int64)] = true
 		}
 	}

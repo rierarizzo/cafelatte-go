@@ -11,10 +11,7 @@ type AddressService struct {
 	addressRepo ports.IAddressRepository
 }
 
-func (s AddressService) GetAddressesByUserID(userID int) (
-	[]entities.Address,
-	error,
-) {
+func (s AddressService) GetAddressesByUserID(userID int) ([]entities.Address, error) {
 	addresses, err := s.addressRepo.SelectAddressesByUserID(userID)
 	if err != nil {
 		var coreErr *domain.AppError
@@ -29,10 +26,8 @@ func (s AddressService) GetAddressesByUserID(userID int) (
 	return addresses, nil
 }
 
-func (s AddressService) AddUserAddresses(
-	userID int,
-	addresses []entities.Address,
-) ([]entities.Address, error) {
+func (s AddressService) AddUserAddresses(userID int,
+	addresses []entities.Address) ([]entities.Address, error) {
 	for _, v := range addresses {
 		if err := v.ValidateAddress(); err != nil {
 			return nil, domain.NewAppError(err, domain.ValidationError)

@@ -20,10 +20,7 @@ var (
 	insertAddressError = errors.New("errors in inserting address")
 )
 
-func (r AddressRepo) SelectAddressesByUserID(userID int) (
-	[]entities.Address,
-	error,
-) {
+func (r AddressRepo) SelectAddressesByUserID(userID int) ([]entities.Address, error) {
 	var addressesModel []models.AddressModel
 
 	query := "select * from useraddress where UserID=? and Status=true"
@@ -32,10 +29,8 @@ func (r AddressRepo) SelectAddressesByUserID(userID int) (
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return nil, domain.NewAppError(
-			errors.Join(selectAddressError, err),
-			domain.RepositoryError,
-		)
+		return nil, domain.NewAppError(errors.Join(selectAddressError, err),
+			domain.RepositoryError)
 	}
 
 	var addresses []entities.Address
@@ -46,15 +41,11 @@ func (r AddressRepo) SelectAddressesByUserID(userID int) (
 	return addresses, nil
 }
 
-func (r AddressRepo) InsertUserAddresses(
-	userID int,
-	addresses []entities.Address,
-) ([]entities.Address, error) {
+func (r AddressRepo) InsertUserAddresses(userID int,
+	addresses []entities.Address) ([]entities.Address, error) {
 	returnRepoError := func(err error) error {
-		return domain.NewAppError(
-			errors.Join(insertAddressError, err),
-			domain.RepositoryError,
-		)
+		return domain.NewAppError(errors.Join(insertAddressError, err),
+			domain.RepositoryError)
 	}
 
 	tx, err := r.db.Begin()
@@ -62,16 +53,14 @@ func (r AddressRepo) InsertUserAddresses(
 		return nil, returnRepoError(err)
 	}
 
-	insertStmnt, err := tx.Prepare(
-		`insert into useraddress (
+	insertStmnt, err := tx.Prepare(`insert into useraddress (
                          Type, 
                          UserID, 
                          ProvinceID, 
                          CityID, 
                          PostalCode, 
                          Detail
-                ) values (?,?,?,?,?,?)`,
-	)
+                ) values (?,?,?,?,?,?)`)
 	if err != nil {
 		return nil, returnRepoError(err)
 	}
@@ -92,14 +81,9 @@ func (r AddressRepo) InsertUserAddresses(
 			}()
 			addressModel := mappers.FromAddressToAddressModel(address)
 
-			result, err := insertStmnt.Exec(
-				addressModel.Type,
-				userID,
-				addressModel.ProvinceID,
-				addressModel.CityID,
-				addressModel.PostalCode,
-				addressModel.Detail,
-			)
+			result, err := insertStmnt.Exec(addressModel.Type, userID,
+				addressModel.ProvinceID, addressModel.CityID,
+				addressModel.PostalCode, addressModel.Detail)
 			if err != nil {
 				errCh <- err
 				return
@@ -136,19 +120,14 @@ func (r AddressRepo) SelectCityNameByCityID(cityID int) (string, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return "", domain.NewAppError(
-			errors.Join(selectAddressError, err),
-			domain.RepositoryError,
-		)
+		return "", domain.NewAppError(errors.Join(selectAddressError, err),
+			domain.RepositoryError)
 	}
 
 	return cityName, nil
 }
 
-func (r AddressRepo) SelectProvinceNameByProvinceID(cityID int) (
-	string,
-	error,
-) {
+func (r AddressRepo) SelectProvinceNameByProvinceID(cityID int) (string, error) {
 	var provinceName string
 
 	query := "select Name from province where ID=?"
@@ -157,10 +136,8 @@ func (r AddressRepo) SelectProvinceNameByProvinceID(cityID int) (
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return "", domain.NewAppError(
-			errors.Join(selectAddressError, err),
-			domain.RepositoryError,
-		)
+		return "", domain.NewAppError(errors.Join(selectAddressError, err),
+			domain.RepositoryError)
 	}
 
 	return provinceName, nil

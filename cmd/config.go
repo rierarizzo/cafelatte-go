@@ -29,12 +29,8 @@ func LoadInitConfig(config *Config) {
 
 	var programLevel = new(slog.LevelVar)
 	programLevel.Set(slog.Level(levels[config.LogLevel]))
-	logger := slog.New(
-		slog.NewTextHandler(
-			os.Stdout,
-			&slog.HandlerOptions{Level: programLevel},
-		),
-	)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout,
+		&slog.HandlerOptions{Level: programLevel}))
 	slog.SetDefault(logger)
 
 	// Debug or release

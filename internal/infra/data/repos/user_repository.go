@@ -69,10 +69,8 @@ func (r *UserRepo) SelectUsers() ([]entities.User, error) {
 
 	err := r.db.Select(&temporaryUsers, selectTemporaryUsers)
 	if err != nil {
-		return nil, domain.NewAppError(
-			errors.Join(selectUserError, err),
-			domain.RepositoryError,
-		)
+		return nil, domain.NewAppError(errors.Join(selectUserError, err),
+			domain.RepositoryError)
 	}
 
 	if temporaryUsers == nil {
@@ -89,16 +87,11 @@ func (r *UserRepo) SelectUsers() ([]entities.User, error) {
 func (r *UserRepo) SelectUserByID(userID int) (*entities.User, error) {
 	var temporaryUsers []models.TemporaryUserModel
 
-	err := r.db.Select(
-		&temporaryUsers,
-		selectTemporaryUsers+" and u.ID=?",
-		userID,
-	)
+	err := r.db.Select(&temporaryUsers, selectTemporaryUsers+" and u.ID=?",
+		userID)
 	if err != nil {
-		return nil, domain.NewAppError(
-			errors.Join(selectUserError, err),
-			domain.RepositoryError,
-		)
+		return nil, domain.NewAppError(errors.Join(selectUserError, err),
+			domain.RepositoryError)
 	}
 
 	if temporaryUsers == nil {
@@ -112,22 +105,14 @@ func (r *UserRepo) SelectUserByID(userID int) (*entities.User, error) {
 // SelectUserByEmail retrieves a user from the database based on the
 // provided email and returns the user if found, along with any error
 // encountered during the process.
-func (r *UserRepo) SelectUserByEmail(email string) (
-	*entities.User,
-	error,
-) {
+func (r *UserRepo) SelectUserByEmail(email string) (*entities.User, error) {
 	var temporaryUsers []models.TemporaryUserModel
 
-	err := r.db.Select(
-		&temporaryUsers,
-		selectTemporaryUsers+" and u.Email=?",
-		email,
-	)
+	err := r.db.Select(&temporaryUsers, selectTemporaryUsers+" and u.Email=?",
+		email)
 	if err != nil {
-		return nil, domain.NewAppError(
-			errors.Join(selectUserError, err),
-			domain.RepositoryError,
-		)
+		return nil, domain.NewAppError(errors.Join(selectUserError, err),
+			domain.RepositoryError)
 	}
 
 	if temporaryUsers == nil {
@@ -140,14 +125,10 @@ func (r *UserRepo) SelectUserByEmail(email string) (
 
 // InsertUser inserts a new user into the database and returns the inserted
 // user if successful, along with any error encountered during the process.
-func (r *UserRepo) InsertUser(user entities.User) (
-	*entities.User,
-	error,
-) {
+func (r *UserRepo) InsertUser(user entities.User) (*entities.User, error) {
 	userModel := mappers.FromUserToUserModel(user)
 
-	result, err := r.db.Exec(
-		`insert into user (
+	result, err := r.db.Exec(`insert into user (
                   Username, 
                   Name, 
                   Surname, 
@@ -155,20 +136,12 @@ func (r *UserRepo) InsertUser(user entities.User) (
                   Email, 
                   Password, 
                   RoleCode
-        	) values (?,?,?,?,?,?,?)`,
-		userModel.Username,
-		userModel.Name,
-		userModel.Surname,
-		userModel.PhoneNumber,
-		userModel.Email,
-		userModel.Password,
-		userModel.RoleCode,
-	)
+        	) values (?,?,?,?,?,?,?)`, userModel.Username, userModel.Name,
+		userModel.Surname, userModel.PhoneNumber, userModel.Email,
+		userModel.Password, userModel.RoleCode)
 	if err != nil {
-		return nil, domain.NewAppError(
-			errors.Join(insertUserError, err),
-			domain.RepositoryError,
-		)
+		return nil, domain.NewAppError(errors.Join(insertUserError, err),
+			domain.RepositoryError)
 	}
 
 	lastUserID, _ := result.LastInsertId()
@@ -190,21 +163,14 @@ func (r *UserRepo) UpdateUser(userID int, user entities.User) error {
                 PhoneNumber=? 
             where ID=?`
 
-	_, err := r.db.Exec(
-		query,
-		userModel.Name,
-		userModel.Surname,
-		userModel.PhoneNumber,
-		userID,
-	)
+	_, err := r.db.Exec(query, userModel.Name, userModel.Surname,
+		userModel.PhoneNumber, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return domain.NewAppError(
-			errors.Join(updateUserError, err),
-			domain.RepositoryError,
-		)
+		return domain.NewAppError(errors.Join(updateUserError, err),
+			domain.RepositoryError)
 	}
 
 	return nil

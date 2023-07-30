@@ -63,16 +63,8 @@ func (c *PaymentCard) ValidatePaymentCard() error {
 }
 
 func (c *PaymentCard) ValidateExpirationDate() error {
-	expirationDate := time.Date(
-		c.ExpirationYear,
-		time.Month(c.ExpirationMonth),
-		0,
-		0,
-		0,
-		0,
-		0,
-		time.UTC,
-	)
+	expirationDate := time.Date(c.ExpirationYear, time.Month(c.ExpirationMonth),
+		0, 0, 0, 0, 0, time.UTC)
 
 	if expirationDate.Before(time.Now()) {
 		return expiredCardError

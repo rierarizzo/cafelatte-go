@@ -8,11 +8,9 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infra/api/handlers"
 )
 
-func Router(
-	userHandler *handlers.UserHandler,
+func Router(userHandler *handlers.UserHandler,
 	addressHandler *handlers.AddressHandler,
-	cardHandler *handlers.PaymentCardHandler,
-) http.Handler {
+	cardHandler *handlers.PaymentCardHandler) http.Handler {
 
 	router := gin.New()
 

@@ -20,10 +20,7 @@ var (
 	insertCardError = errors.New("errors in inserting new card")
 )
 
-func (r PaymentCardRepo) SelectCardsByUserID(userID int) (
-	[]entities.PaymentCard,
-	error,
-) {
+func (r PaymentCardRepo) SelectCardsByUserID(userID int) ([]entities.PaymentCard, error) {
 	var cardsModel []models.PaymentCardModel
 
 	query := "select * from userpaymentcard where UserID=? and Status=true"
@@ -32,10 +29,8 @@ func (r PaymentCardRepo) SelectCardsByUserID(userID int) (
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return nil, domain.NewAppError(
-			errors.Join(selectCardError, err),
-			domain.RepositoryError,
-		)
+		return nil, domain.NewAppError(errors.Join(selectCardError, err),
+			domain.RepositoryError)
 	}
 
 	var cards []entities.PaymentCard
@@ -46,15 +41,11 @@ func (r PaymentCardRepo) SelectCardsByUserID(userID int) (
 	return cards, nil
 }
 
-func (r PaymentCardRepo) InsertUserPaymentCards(
-	userID int,
-	cards []entities.PaymentCard,
-) ([]entities.PaymentCard, error) {
+func (r PaymentCardRepo) InsertUserPaymentCards(userID int,
+	cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
 	returnRepoError := func(err error) error {
-		return domain.NewAppError(
-			errors.Join(insertCardError, err),
-			domain.RepositoryError,
-		)
+		return domain.NewAppError(errors.Join(insertCardError, err),
+			domain.RepositoryError)
 	}
 
 	tx, err := r.db.Begin()
@@ -62,8 +53,7 @@ func (r PaymentCardRepo) InsertUserPaymentCards(
 		return nil, returnRepoError(err)
 	}
 
-	insertStmnt, err := tx.Prepare(
-		`insert into userpaymentcard (
+	insertStmnt, err := tx.Prepare(`insert into userpaymentcard (
                              Type, 
                              UserID, 
                              Company, 
@@ -72,8 +62,7 @@ func (r PaymentCardRepo) InsertUserPaymentCards(
                              ExpirationYear, 
                              ExpirationMonth, 
                              CVV
-            ) values (?,?,?,?,?,?,?,?)`,
-	)
+            ) values (?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		return nil, returnRepoError(err)
 	}
@@ -94,16 +83,10 @@ func (r PaymentCardRepo) InsertUserPaymentCards(
 			}()
 			cardModel := mappers.FromPaymentCardToPaymentCardModel(card)
 
-			result, err := insertStmnt.Exec(
-				cardModel.Type,
-				userID,
-				cardModel.Company,
-				cardModel.HolderName,
-				cardModel.Number,
-				cardModel.ExpirationYear,
-				cardModel.ExpirationMonth,
-				cardModel.CVV,
-			)
+			result, err := insertStmnt.Exec(cardModel.Type, userID,
+				cardModel.Company, cardModel.HolderName, cardModel.Number,
+				cardModel.ExpirationYear, cardModel.ExpirationMonth,
+				cardModel.CVV)
 			if err != nil {
 				errCh <- err
 				return

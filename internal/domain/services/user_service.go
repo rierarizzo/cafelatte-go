@@ -16,9 +16,7 @@ type UserService struct {
 
 // SignUp registers a new user in the system and returns an AuthorizedUser
 // along with any error encountered during the process.
-func (s *UserService) SignUp(user entities.User) (
-	*entities.AuthorizedUser, error,
-) {
+func (s *UserService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
 	// Validating user
 	if err := user.ValidateUser(); err != nil {
 		return nil, domain.NewAppError(err, domain.ValidationError)
@@ -44,10 +42,7 @@ func (s *UserService) SignUp(user entities.User) (
 // SignIn authenticates a user with the provided email and password and
 // returns an AuthorizedUser if the authentication is successful, along
 // with any error encountered during the process.
-func (s *UserService) SignIn(email, password string) (
-	*entities.AuthorizedUser,
-	error,
-) {
+func (s *UserService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
 	// Select user from database
 	retrUser, err := s.userRepo.SelectUserByEmail(email)
 	if err != nil {

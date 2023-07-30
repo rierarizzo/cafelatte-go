@@ -19,22 +19,20 @@ var (
 func CreateJWTToken(user entities.User) (*string, error) {
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
-	token := jwt.NewWithClaims(
-		jwt.SigningMethodHS256, &sec.UserClaims{
-			ID:      user.ID,
-			Name:    user.Name,
-			Surname: user.Surname,
-			Email:   user.Email,
-			RegisteredClaims: jwt.RegisteredClaims{
-				IssuedAt: &jwt.NumericDate{
-					Time: time.Now(),
-				},
-				ExpiresAt: &jwt.NumericDate{
-					Time: time.Now().Add(time.Hour),
-				},
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &sec.UserClaims{
+		ID:      user.ID,
+		Name:    user.Name,
+		Surname: user.Surname,
+		Email:   user.Email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			IssuedAt: &jwt.NumericDate{
+				Time: time.Now(),
+			},
+			ExpiresAt: &jwt.NumericDate{
+				Time: time.Now().Add(time.Hour),
 			},
 		},
-	)
+	})
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
@@ -48,15 +46,14 @@ func VerifyJWTToken(tokenString string) (*sec.UserClaims, error) {
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
 	var userClaims sec.UserClaims
-	token, err := jwt.ParseWithClaims(
-		tokenString, &userClaims, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &userClaims,
+		func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, invalidSigningMethodError
 			}
 
 			return secret, nil
-		},
-	)
+		})
 	if err != nil {
 		return nil, errors.Join(parseTokenError, err)
 	}

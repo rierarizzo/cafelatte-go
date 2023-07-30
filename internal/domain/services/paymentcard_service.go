@@ -12,10 +12,7 @@ type PaymentCardService struct {
 	paymentCardRepo ports.IPaymentCardRepository
 }
 
-func (s PaymentCardService) GetCardsByUserID(userID int) (
-	[]entities.PaymentCard,
-	error,
-) {
+func (s PaymentCardService) GetCardsByUserID(userID int) ([]entities.PaymentCard, error) {
 	cards, err := s.paymentCardRepo.SelectCardsByUserID(userID)
 	if err != nil {
 		var coreErr *domain.AppError
@@ -30,10 +27,8 @@ func (s PaymentCardService) GetCardsByUserID(userID int) (
 	return cards, nil
 }
 
-func (s PaymentCardService) AddUserPaymentCard(
-	userID int,
-	cards []entities.PaymentCard,
-) ([]entities.PaymentCard, error) {
+func (s PaymentCardService) AddUserPaymentCard(userID int,
+	cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
 	for k, v := range cards {
 		if err := v.ValidateExpirationDate(); err != nil {
 			return nil, domain.NewAppError(err, domain.ValidationError)
