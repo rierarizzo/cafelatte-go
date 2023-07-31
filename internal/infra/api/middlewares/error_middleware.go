@@ -20,13 +20,15 @@ func ErrorMiddleware() gin.HandlerFunc {
 			ok := errors.As(err, &appErr)
 			if ok {
 				if appErr.Type == domain.NotFoundError {
-					writeError(c, http.StatusNotFound, appErr)
+					writeError(c, http.StatusNotFound, err)
 					return
-				} else if appErr.Type == domain.NotAuthorizedError || appErr.Type == domain.NotAuthenticatedError {
-					writeError(c, http.StatusUnauthorized, appErr)
+				} else if appErr.Type == domain.NotAuthorizedError ||
+					appErr.Type == domain.NotAuthenticatedError ||
+					appErr.Type == domain.TokenValidationError {
+					writeError(c, http.StatusUnauthorized, err)
 					return
 				} else {
-					writeError(c, http.StatusInternalServerError, appErr)
+					writeError(c, http.StatusInternalServerError, err)
 					return
 				}
 			}
@@ -46,6 +48,8 @@ type ErrorResponse struct {
 }
 
 func writeError(c *gin.Context, httpStatus int, err error) {
+	originalErr := err
+
 	var appErr *domain.AppError
 	converted := errors.As(err, &appErr)
 
@@ -56,7 +60,7 @@ func writeError(c *gin.Context, httpStatus int, err error) {
 	response := ErrorResponse{
 		Status:    httpStatus,
 		ErrorType: appErr.Type,
-		ErrorMsgs: strings.Split(appErr.Err.Error(), "\n"),
+		ErrorMsgs: strings.Split(originalErr.Error(), "\n"),
 		IssuedAt:  time.Now(),
 		RequestID: resources.RequestID(),
 	}

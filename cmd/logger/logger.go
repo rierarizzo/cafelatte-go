@@ -6,6 +6,6 @@ import (
 
 func ConfigLogger() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetReportCaller(true)
+	logrus.SetReportCaller(false)
 	logrus.SetLevel(logrus.DebugLevel)
 }

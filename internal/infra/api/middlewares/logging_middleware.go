@@ -23,12 +23,14 @@ func LoggingMiddleware() gin.HandlerFunc {
 
 		c.Next()
 
-		requestStatus := c.Writer.Status()
+		defer func() {
+			requestStatus := c.Writer.Status()
 
-		timeElapsed := time.Since(start).Seconds()
-		log.WithFields(logrus.Fields{"method": requestMethod,
-			"path":        requestPath,
-			"timeElapsed": fmt.Sprintf("%.7fs", timeElapsed),
-			"status":      requestStatus}).Debug("Ending request")
+			timeElapsed := time.Since(start).Seconds()
+			log.WithFields(logrus.Fields{"method": requestMethod,
+				"path":        requestPath,
+				"timeElapsed": fmt.Sprintf("%.7fs", timeElapsed),
+				"status":      requestStatus}).Debug("Ending request")
+		}()
 	}
 }
