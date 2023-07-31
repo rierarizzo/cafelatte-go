@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
-	"log/slog"
+	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
 	"strconv"
 
@@ -19,15 +19,13 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	err := c.BindJSON(&signUpRequest)
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 
 	authorizedUser, err := h.userService.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 
@@ -39,16 +37,14 @@ func (h *UserHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	err := c.BindJSON(&signInRequest)
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 
 	authorizedUser, err := h.userService.SignIn(signInRequest.Email,
 		signInRequest.Password)
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 
@@ -59,8 +55,7 @@ func (h *UserHandler) SignIn(c *gin.Context) {
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := h.userService.GetUsers()
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 
@@ -76,15 +71,13 @@ func (h *UserHandler) FindUserByID(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 
 	user, err := h.userService.FindUserByID(userID)
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 

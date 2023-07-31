@@ -4,7 +4,6 @@ import (
 	"fmt"
 	config2 "github.com/rierarizzo/cafelatte/cmd/config"
 	"github.com/sirupsen/logrus"
-	"log/slog"
 	"net/http"
 
 	"github.com/rierarizzo/cafelatte/internal/domain/services"
@@ -43,7 +42,6 @@ func Server() {
 	logrus.WithField("port", config.ServerPort).Info("Starting server")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort),
 		router); err != nil {
-		slog.Error(err.Error())
-		panic(err)
+		logrus.Panic(err)
 	}
 }

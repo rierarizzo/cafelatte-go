@@ -8,7 +8,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
 	entities2 "github.com/rierarizzo/cafelatte/internal/infra/security/entities"
-	"log/slog"
+	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
 )
 
@@ -20,8 +20,7 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 	var addressesRequest []dto.AddressRequest
 	err := c.BindJSON(&addressesRequest)
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 
@@ -34,8 +33,7 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 
 	addresses, err = h.addressService.AddUserAddresses(userClaims.ID, addresses)
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 

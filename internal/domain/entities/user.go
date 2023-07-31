@@ -2,7 +2,10 @@ package entities
 
 import (
 	"errors"
+	"github.com/rierarizzo/cafelatte/internal/domain/constants"
+	"github.com/rierarizzo/cafelatte/internal/singleton"
 	"github.com/rierarizzo/cafelatte/internal/utils"
+	"github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -61,13 +64,18 @@ func (u *User) validateEmail() error {
 }
 
 func (u *User) ValidateUser() error {
+	log := logrus.WithField(constants.RequestIDKey, singleton.RequestID())
+
 	if err := u.validateRole(); err != nil {
+		log.Error(err)
 		return err
 	}
 	if err := u.validatePhoneNumber(); err != nil {
+		log.Error(err)
 		return err
 	}
 	if err := u.validateEmail(); err != nil {
+		log.Error(err)
 		return err
 	}
 

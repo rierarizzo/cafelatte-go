@@ -1,17 +1,15 @@
 package data
 
 import (
-	"log/slog"
-
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/sirupsen/logrus"
 )
 
 func Connect(dsn string) *sqlx.DB {
 	db, err := sqlx.Open("mysql", dsn)
 	if err != nil {
-		slog.Error(err.Error())
-		panic(err)
+		logrus.Panic(err)
 	}
 
 	return db

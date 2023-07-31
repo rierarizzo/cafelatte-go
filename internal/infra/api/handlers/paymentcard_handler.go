@@ -8,7 +8,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
 	entities2 "github.com/rierarizzo/cafelatte/internal/infra/security/entities"
-	"log/slog"
+	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
 )
 
@@ -20,8 +20,7 @@ func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 	var cardsRequest []dto.PaymentCardRequest
 	err := c.BindJSON(&cardsRequest)
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 
@@ -34,8 +33,7 @@ func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 
 	cards, err = h.paymentCardService.AddUserPaymentCard(userClaims.ID, cards)
 	if err != nil {
-		slog.Error(c.Error(err).Error())
-		c.Abort()
+		utils.AbortWithError(c, err)
 		return
 	}
 
