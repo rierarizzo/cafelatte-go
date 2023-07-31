@@ -20,6 +20,8 @@ var (
 )
 
 func CreateJWTToken(user entities.User) (*string, error) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &sec.UserClaims{
@@ -39,7 +41,9 @@ func CreateJWTToken(user entities.User) (*string, error) {
 
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
-		return nil, errors.Join(parseTokenError, err)
+		log.Error(err)
+
+		return nil, parseTokenError
 	}
 
 	return &tokenString, nil
