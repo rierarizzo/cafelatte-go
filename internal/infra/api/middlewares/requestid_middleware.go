@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/rierarizzo/cafelatte/internal/domain/constants"
-	"github.com/rierarizzo/cafelatte/internal/singleton"
+	"github.com/rierarizzo/cafelatte/internal/resources"
 )
 
 func RequestIDMiddleware() gin.HandlerFunc {
@@ -12,7 +12,7 @@ func RequestIDMiddleware() gin.HandlerFunc {
 		requestID := uuid.New().String()
 
 		c.Writer.Header().Set(constants.RequestIDHeader, requestID)
-		singleton.SetRequestID(requestID)
+		resources.SetRequestID(requestID)
 
 		c.Next()
 	}

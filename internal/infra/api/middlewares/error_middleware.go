@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/singleton"
+	"github.com/rierarizzo/cafelatte/internal/resources"
 	"net/http"
 	"strings"
 	"time"
@@ -58,7 +58,7 @@ func writeError(c *gin.Context, httpStatus int, err error) {
 		ErrorType: appErr.Type,
 		ErrorMsgs: strings.Split(appErr.Err.Error(), "\n"),
 		IssuedAt:  time.Now(),
-		RequestID: singleton.RequestID(),
+		RequestID: resources.RequestID(),
 	}
 
 	c.JSON(httpStatus, response)

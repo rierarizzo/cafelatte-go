@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/domain/constants"
-	"github.com/rierarizzo/cafelatte/internal/singleton"
+	"github.com/rierarizzo/cafelatte/internal/resources"
 	"github.com/sirupsen/logrus"
 	"time"
 )
 
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		log := logrus.WithField(constants.RequestIDKey, singleton.RequestID())
+		log := logrus.WithField(constants.RequestIDKey, resources.RequestID())
 
 		requestMethod := c.Request.Method
 		requestPath := c.Request.URL.Path
