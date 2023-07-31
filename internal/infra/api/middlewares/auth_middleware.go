@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infra/security"
@@ -23,8 +22,8 @@ func AuthenticateMiddleware() gin.HandlerFunc {
 
 		claims, err := security.VerifyJWTToken(token)
 		if err != nil {
-			utils.AbortWithError(c, errors.Join(err,
-				domain.NewAppErrorWithType(domain.TokenValidationError)))
+			utils.AbortWithError(c,
+				domain.NewAppError(err, domain.TokenValidationError))
 			return
 		}
 

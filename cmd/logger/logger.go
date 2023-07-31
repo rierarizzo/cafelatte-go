@@ -4,8 +4,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ConfigLogger() {
+func ConfigLogger(logLevel string) {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	logrus.SetReportCaller(false)
-	logrus.SetLevel(logrus.DebugLevel)
+
+	level, err := logrus.ParseLevel(logLevel)
+	if err != nil {
+		logrus.Panic(err)
+	}
+
+	logrus.SetLevel(level)
 }

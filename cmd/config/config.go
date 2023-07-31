@@ -10,7 +10,6 @@ import (
 type Config struct {
 	ServerPort string
 	DSN        string
-	GinMode    string
 	LogLevel   string
 }
 
@@ -18,15 +17,14 @@ func GetConfig() *Config {
 	return &Config{
 		ServerPort: os.Getenv(constants.EnvServerPort),
 		DSN:        os.Getenv(constants.EnvDSN),
-		GinMode:    os.Getenv(constants.EnvGinMode),
 		LogLevel:   os.Getenv(constants.EnvLogLevel),
 	}
 }
 
 func LoadInitConfig(config *Config) {
 	// Config logger
-	logger.ConfigLogger()
+	logger.ConfigLogger(config.LogLevel)
 
 	// Debug or release
-	gin.SetMode(config.GinMode)
+	gin.SetMode(gin.ReleaseMode)
 }

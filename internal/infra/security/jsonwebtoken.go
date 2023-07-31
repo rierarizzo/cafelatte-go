@@ -6,6 +6,8 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	sec "github.com/rierarizzo/cafelatte/internal/infra/security/entities"
+	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/sirupsen/logrus"
 	"os"
 	"time"
 )
@@ -13,6 +15,7 @@ import (
 var (
 	invalidSigningMethodError = errors.New("signing method is not valid")
 	invalidTokenError         = errors.New("token is not valid")
+	expiredTokenError         = errors.New("token is expired")
 	parseTokenError           = errors.New("error in parsing token")
 )
 
@@ -43,6 +46,8 @@ func CreateJWTToken(user entities.User) (*string, error) {
 }
 
 func VerifyJWTToken(tokenString string) (*sec.UserClaims, error) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
 	var userClaims sec.UserClaims
@@ -55,7 +60,13 @@ func VerifyJWTToken(tokenString string) (*sec.UserClaims, error) {
 			return secret, nil
 		})
 	if err != nil {
-		return nil, errors.Join(parseTokenError, err)
+		log.Error(err)
+
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, expiredTokenError
+		}
+
+		return nil, invalidTokenError
 	}
 	if !token.Valid {
 		return nil, invalidTokenError

@@ -1,4 +1,4 @@
-package resources
+package params
 
 type requestParams struct {
 	requestID string
