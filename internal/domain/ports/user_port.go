@@ -4,15 +4,6 @@ import "github.com/rierarizzo/cafelatte/internal/domain/entities"
 
 // IUserService represents an interface for a user service.
 type IUserService interface {
-	// SignUp registers a new user in the system and returns an AuthorizedUser
-	// along with any error encountered during the process.
-	SignUp(user entities.User) (*entities.AuthorizedUser, error)
-
-	// SignIn authenticates a user with the provided email and password and
-	// returns an AuthorizedUser if the authentication is successful, along
-	// with any error encountered during the process.
-	SignIn(email, password string) (*entities.AuthorizedUser, error)
-
 	// GetUsers retrieves a list of users from the system and returns the list
 	// of users if successful, along with any error encountered during the
 	// process.

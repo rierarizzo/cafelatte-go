@@ -21,6 +21,15 @@ func Server() {
 	// Connect to database
 	db := data.Connect(config.DSN)
 
+	// Users instance
+	userRepo := repos.NewUserRepository(db)
+	userService := services.NewUserService(userRepo)
+	userHandler := handlers.NewUserHandler(userService)
+
+	// Authentication instance
+	authService := services.NewAuthService(userRepo)
+	authHandler := handlers.NewAuthHandler(authService)
+
 	// Addresses instance
 	addressRepo := repos.NewAddressRepository(db)
 	addressService := services.NewAddressService(addressRepo)
@@ -31,13 +40,9 @@ func Server() {
 	paymentCardService := services.NewPaymentCardService(paymentCardRepo)
 	paymentCardHandler := handlers.NewPaymentCardHandler(paymentCardService)
 
-	// Users instance
-	userRepo := repos.NewUserRepository(db)
-	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
-
 	// Initialize router with all paths
-	router := api.Router(userHandler, addressHandler, paymentCardHandler)
+	router := api.Router(userHandler, authHandler, addressHandler,
+		paymentCardHandler)
 
 	logrus.WithField("port", config.ServerPort).Info("Starting server")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort),

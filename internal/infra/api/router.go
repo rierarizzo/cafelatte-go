@@ -9,6 +9,7 @@ import (
 )
 
 func Router(userHandler *handlers.UserHandler,
+	authHandler *handlers.AuthHandler,
 	addressHandler *handlers.AddressHandler,
 	cardHandler *handlers.PaymentCardHandler) http.Handler {
 
@@ -20,8 +21,8 @@ func Router(userHandler *handlers.UserHandler,
 
 	authGroup := router.Group("/auth")
 	{
-		authGroup.POST("/signup", userHandler.SignUp)
-		authGroup.POST("/signin", userHandler.SignIn)
+		authGroup.POST("/signup", authHandler.SignUp)
+		authGroup.POST("/signin", authHandler.SignIn)
 	}
 
 	usersGroup := router.Group("/users")
