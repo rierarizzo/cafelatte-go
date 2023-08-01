@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	config2 "github.com/rierarizzo/cafelatte/cmd/config"
+	"github.com/rierarizzo/cafelatte/internal/domain/usecases"
 	"github.com/sirupsen/logrus"
 	"net/http"
 
@@ -27,8 +28,8 @@ func Server() {
 	userHandler := handlers.NewUserHandler(userService)
 
 	// Authentication instance
-	authService := services.NewAuthService(userRepo)
-	authHandler := handlers.NewAuthHandler(authService)
+	authUsecase := usecases.NewAuthenticateUsecase(userService)
+	authHandler := handlers.NewAuthHandler(authUsecase)
 
 	// Addresses instance
 	addressRepo := repos.NewAddressRepository(db)
@@ -40,9 +41,14 @@ func Server() {
 	paymentCardService := services.NewPaymentCardService(paymentCardRepo)
 	paymentCardHandler := handlers.NewPaymentCardHandler(paymentCardService)
 
+	// Products instance
+	productRepo := repos.NewProductRepo(db)
+	productService := services.NewProductService(productRepo)
+	productHandler := handlers.NewProductHandler(productService)
+
 	// Initialize router with all paths
 	router := api.Router(userHandler, authHandler, addressHandler,
-		paymentCardHandler)
+		paymentCardHandler, productHandler)
 
 	logrus.WithField("port", config.ServerPort).Info("Starting server")
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort),

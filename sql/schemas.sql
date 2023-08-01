@@ -12,11 +12,11 @@ create table userrole
 );
 
 insert into userrole
-values ('A', 'ADMIN');
+values ('A', 'Admin');
 insert into userrole
-values ('E', 'EMPLOYEE');
+values ('E', 'Employee');
 insert into userrole
-values ('C', 'CLIENT');
+values ('C', 'Client');
 
 create table user
 (
@@ -44,10 +44,10 @@ create table province
 
 insert into province
     (ID, Name)
-values (1, 'GUAYAS');
+values (1, 'Guayas');
 insert into province
     (ID, Name)
-values (2, 'SANTA ELENA');
+values (2, 'Santa Elena');
 
 create table city
 (
@@ -59,17 +59,17 @@ create table city
 );
 
 insert into city (ID, ProvinceID, Name)
-values (1, 1, 'GUAYAQUIL');
+values (1, 1, 'Guayaquil');
 insert into city (ID, ProvinceID, Name)
-values (2, 1, 'DURAN');
+values (2, 1, 'Durán');
 insert into city (ID, ProvinceID, Name)
-values (3, 1, 'YAGUACHI');
+values (3, 1, 'Yaguachi');
 insert into city (ID, ProvinceID, Name)
-values (4, 1, 'MILAGRO');
+values (4, 1, 'Milagro');
 insert into city (ID, ProvinceID, Name)
-values (1, 2, 'SALINAS');
+values (1, 2, 'Salinas');
 insert into city (ID, ProvinceID, Name)
-values (2, 2, 'SANTA ELENA');
+values (2, 2, 'Santa Elena');
 
 create table addresstype
 (
@@ -79,9 +79,9 @@ create table addresstype
 );
 
 insert into addresstype
-values ('D', 'DOMICILIO');
+values ('H', 'Home');
 insert into addresstype
-values ('T', 'TRABAJO');
+values ('W', 'Work');
 
 create table useraddress
 (
@@ -110,13 +110,13 @@ create table cardcompany
 );
 
 insert into cardcompany (Name)
-values ('AMERICAN EXPRESS');
+values ('American Express');
 insert into cardcompany (Name)
-values ('VISA');
+values ('Visa');
 insert into cardcompany (Name)
-values ('MASTERCARD');
+values ('Mastercard');
 insert into cardcompany (Name)
-values ('DISCOVER');
+values ('Discover');
 
 create table cardtype
 (
@@ -126,9 +126,9 @@ create table cardtype
 );
 
 insert into cardtype (Code, Description)
-values ('C', 'CREDITO');
+values ('C', 'Credit');
 insert into cardtype (Code, Description)
-values ('D', 'DEBITO');
+values ('D', 'Debit');
 
 create table userpaymentcard
 (
@@ -148,4 +148,34 @@ create table userpaymentcard
     foreign key (Type) references cardtype (Code),
     foreign key (UserID) references user (ID),
     foreign key (Company) references cardcompany (ID)
+);
+
+create table productcategory
+(
+    Code        varchar(6),
+    Description varchar(50) not null,
+    primary key (Code)
+);
+
+insert into productcategory (Code, Description)
+values ('HOTBEV', 'Hot beverage');
+insert into productcategory (Code, Description)
+values ('COLBEV', 'Cold beverage');
+insert into productcategory (Code, Description)
+values ('DESSER', 'Dessert');
+
+create table product
+(
+    ID           int auto_increment,
+    Name         varchar(50)   not null,
+    Description  varchar(150)  not null,
+    ImageURL     varchar(200),
+    Price        decimal(6, 2) not null,
+    CategoryCode varchar(6)    not null,
+    Stock        int           not null,
+    Status       bool     default true,
+    CreatedAt    datetime default current_timestamp,
+    UpdatedAt    datetime default current_timestamp on update current_timestamp,
+    primary key (ID),
+    foreign key (CategoryCode) references productcategory (Code)
 );

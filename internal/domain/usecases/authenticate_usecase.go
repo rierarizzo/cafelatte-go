@@ -1,20 +1,21 @@
-package services
+package usecases
 
 import (
 	"errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
+	"github.com/rierarizzo/cafelatte/internal/infra/security"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
 
-type AuthService struct {
-	userRepo ports.IUserRepo
+type AuthenticateUsecase struct {
+	userService ports.IUserService
 }
 
 // SignUp registers a new user in the system and returns an AuthorizedUser
 // along with any error encountered during the process.
-func (s *AuthService) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
+func (a AuthenticateUsecase) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
 	// Validating user
 	if err := user.ValidateUser(); err != nil {
 		return nil, domain.NewAppError(err, domain.ValidationError)
@@ -24,7 +25,7 @@ func (s *AuthService) SignUp(user entities.User) (*entities.AuthorizedUser, erro
 		return nil, domain.NewAppError(err, domain.HashGenerationError)
 	}
 	// Inserting user to database
-	retrUser, err := s.userRepo.InsertUser(user)
+	retrUser, err := a.userService.CreateUser(user)
 	if err != nil {
 		return nil, domain.NewAppError(err, domain.UnexpectedError)
 	}
@@ -37,12 +38,9 @@ func (s *AuthService) SignUp(user entities.User) (*entities.AuthorizedUser, erro
 	return authUser, nil
 }
 
-// SignIn authenticates a user with the provided email and password and
-// returns an AuthorizedUser if the authentication is successful, along
-// with any error encountered during the process.
-func (s *AuthService) SignIn(email, password string) (*entities.AuthorizedUser, error) {
+func (a AuthenticateUsecase) SignIn(email, password string) (*entities.AuthorizedUser, error) {
 	// Select user from database
-	retrUser, err := s.userRepo.SelectUserByEmail(email)
+	retrUser, err := a.userService.FindUserByEmail(email)
 	if err != nil {
 		var coreErr *domain.AppError
 		converted := errors.As(err, &coreErr)
@@ -65,6 +63,20 @@ func (s *AuthService) SignIn(email, password string) (*entities.AuthorizedUser, 
 	return authUser, nil
 }
 
-func NewAuthService(userRepo ports.IUserRepo) *AuthService {
-	return &AuthService{userRepo}
+func AuthorizeUser(user entities.User) (*entities.AuthorizedUser, error) {
+	token, err := security.CreateJWTToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	authorizedUser := entities.AuthorizedUser{
+		User:        user,
+		AccessToken: *token,
+	}
+
+	return &authorizedUser, nil
+}
+
+func NewAuthenticateUsecase(userService ports.IUserService) *AuthenticateUsecase {
+	return &AuthenticateUsecase{userService}
 }

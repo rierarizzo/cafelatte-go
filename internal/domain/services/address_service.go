@@ -14,9 +14,9 @@ type AddressService struct {
 func (s AddressService) GetAddressesByUserID(userID int) ([]entities.Address, error) {
 	addresses, err := s.addressRepo.SelectAddressesByUserID(userID)
 	if err != nil {
-		var coreErr *domain.AppError
-		wrapped := errors.As(err, &coreErr)
-		if (wrapped && coreErr.Type != domain.NotFoundError) || !wrapped {
+		var appErr *domain.AppError
+		wrapped := errors.As(err, &appErr)
+		if (wrapped && appErr.Type != domain.NotFoundError) || !wrapped {
 			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
 

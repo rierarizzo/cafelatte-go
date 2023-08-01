@@ -15,9 +15,9 @@ type PaymentCardService struct {
 func (s PaymentCardService) GetCardsByUserID(userID int) ([]entities.PaymentCard, error) {
 	cards, err := s.paymentCardRepo.SelectCardsByUserID(userID)
 	if err != nil {
-		var coreErr *domain.AppError
-		wrapped := errors.As(err, &coreErr)
-		if (wrapped && coreErr.Type != domain.NotFoundError) || !wrapped {
+		var appErr *domain.AppError
+		wrapped := errors.As(err, &appErr)
+		if (wrapped && appErr.Type != domain.NotFoundError) || !wrapped {
 			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
 

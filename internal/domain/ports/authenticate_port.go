@@ -4,7 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 )
 
-type IAuthService interface {
+type IAuthenticateUsecase interface {
 	// SignUp registers a new user in the system and returns an AuthorizedUser
 	// along with any error encountered during the process.
 	SignUp(user entities.User) (*entities.AuthorizedUser, error)

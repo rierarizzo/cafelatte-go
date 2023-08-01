@@ -9,11 +9,11 @@ import (
 	"net/http"
 )
 
-type AuthHandler struct {
-	authService ports.IAuthService
+type AuthenticateHandler struct {
+	authUsecase ports.IAuthenticateUsecase
 }
 
-func (h *AuthHandler) SignUp(c *gin.Context) {
+func (h *AuthenticateHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	err := c.BindJSON(&signUpRequest)
 	if err != nil {
@@ -21,7 +21,7 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	authorizedUser, err := h.authService.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
+	authorizedUser, err := h.authUsecase.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
 	if err != nil {
 		utils.AbortWithError(c, err)
 		return
@@ -31,7 +31,7 @@ func (h *AuthHandler) SignUp(c *gin.Context) {
 		mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
 }
 
-func (h *AuthHandler) SignIn(c *gin.Context) {
+func (h *AuthenticateHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	err := c.BindJSON(&signInRequest)
 	if err != nil {
@@ -39,7 +39,7 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	authorizedUser, err := h.authService.SignIn(signInRequest.Email,
+	authorizedUser, err := h.authUsecase.SignIn(signInRequest.Email,
 		signInRequest.Password)
 	if err != nil {
 		utils.AbortWithError(c, err)
@@ -50,6 +50,6 @@ func (h *AuthHandler) SignIn(c *gin.Context) {
 		mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
 }
 
-func NewAuthHandler(authService ports.IAuthService) *AuthHandler {
-	return &AuthHandler{authService}
+func NewAuthHandler(authUsecase ports.IAuthenticateUsecase) *AuthenticateHandler {
+	return &AuthenticateHandler{authUsecase}
 }

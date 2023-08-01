@@ -14,6 +14,13 @@ type IUserService interface {
 	// the process.
 	FindUserByID(userID int) (*entities.User, error)
 
+	// FindUserByEmail retrieves a user from the system based on the
+	// provided email and returns the user if found, along with any error
+	// encountered during the process.
+	FindUserByEmail(email string) (*entities.User, error)
+
+	CreateUser(user entities.User) (*entities.User, error)
+
 	// UpdateUser updates the details of a user in the system based on the
 	// provided user ID and user object and returns an error, if any,
 	// encountered during the process.
