@@ -5,7 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
-	sec "github.com/rierarizzo/cafelatte/internal/infra/security/entities"
+	sec "github.com/rierarizzo/cafelatte/internal/infra/security/claims"
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -25,10 +25,12 @@ func CreateJWTToken(user entities.User) (*string, error) {
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &sec.UserClaims{
-		ID:      user.ID,
-		Name:    user.Name,
-		Surname: user.Surname,
-		Email:   user.Email,
+		ID:       user.ID,
+		Username: user.Username,
+		Name:     user.Name,
+		Surname:  user.Surname,
+		Email:    user.Email,
+		Role:     user.RoleCode,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt: &jwt.NumericDate{
 				Time: time.Now(),

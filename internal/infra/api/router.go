@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/middlewares"
 	"net/http"
 
@@ -16,6 +17,10 @@ func Router(userHandler *handlers.UserHandler,
 
 	router := gin.New()
 
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowCredentials: true,
+	}))
 	router.Use(middlewares.RequestIDMiddleware())
 	router.Use(middlewares.LoggingMiddleware())
 	router.Use(middlewares.ErrorMiddleware())
