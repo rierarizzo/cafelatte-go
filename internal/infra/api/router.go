@@ -41,7 +41,6 @@ func Router(userHandler *handlers.UserHandler,
 	}
 
 	productsGroup := router.Group("/products")
-	productsGroup.Use(middlewares.AuthenticateMiddleware())
 	{
 		productsGroup.GET("/find", productHandler.GetProducts)
 		productsGroup.GET("/find/categories",
