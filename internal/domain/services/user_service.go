@@ -21,7 +21,7 @@ func (s *UserService) CreateUser(user entities.User) (*entities.User, error) {
 			return nil, domain.NewAppErrorWithType(domain.UnexpectedError)
 		}
 
-		return nil, appErr
+		return nil, domain.NewAppError(err, domain.UnexpectedError)
 	}
 
 	return retrvUser, nil
