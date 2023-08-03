@@ -12,5 +12,10 @@ func Connect(dsn string) *sqlx.DB {
 		logrus.Panic(err)
 	}
 
+	err = db.Ping()
+	if err != nil {
+		logrus.Panic(err)
+	}
+
 	return db
 }
