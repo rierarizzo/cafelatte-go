@@ -3,7 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/rierarizzo/cafelatte/internal/domain/constants"
+	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/params"
 )
 

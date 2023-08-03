@@ -3,7 +3,7 @@ package config
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/cmd/logger"
-	"github.com/rierarizzo/cafelatte/internal/domain/constants"
+	"github.com/rierarizzo/cafelatte/internal/constants"
 	"os"
 )
 
