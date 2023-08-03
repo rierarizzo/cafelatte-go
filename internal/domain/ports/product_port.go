@@ -2,16 +2,17 @@ package ports
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 )
 
 type IProductService interface {
-	GetProducts() ([]entities.Product, error)
-	GetProductsByCategory(categoryCode string) ([]entities.Product, error)
-	GetProductCategories() ([]entities.ProductCategory, error)
+	GetProducts() ([]entities.Product, *domain.AppError)
+	GetProductsByCategory(categoryCode string) ([]entities.Product, *domain.AppError)
+	GetProductCategories() ([]entities.ProductCategory, *domain.AppError)
 }
 
 type IProductRepo interface {
-	SelectProducts() ([]entities.Product, error)
-	SelectProductsByCategory(categoryCode string) ([]entities.Product, error)
-	SelectProductCategories() ([]entities.ProductCategory, error)
+	SelectProducts() ([]entities.Product, *domain.AppError)
+	SelectProductsByCategory(categoryCode string) ([]entities.Product, *domain.AppError)
+	SelectProductCategories() ([]entities.ProductCategory, *domain.AppError)
 }

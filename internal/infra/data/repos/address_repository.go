@@ -4,10 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
+	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
+	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -20,7 +23,7 @@ var (
 	insertAddressError = errors.New("errors in inserting address")
 )
 
-func (r AddressRepo) SelectAddressesByUserID(userID int) ([]entities.Address, error) {
+func (r AddressRepo) SelectAddressesByUserID(userID int) ([]entities.Address, *domain.AppError) {
 	var addressesModel []models.AddressModel
 
 	query := "select * from useraddress where UserID=? and Status=true"
@@ -42,10 +45,16 @@ func (r AddressRepo) SelectAddressesByUserID(userID int) ([]entities.Address, er
 }
 
 func (r AddressRepo) InsertUserAddresses(userID int,
-	addresses []entities.Address) ([]entities.Address, error) {
-	returnRepoError := func(err error) error {
-		return domain.NewAppError(errors.Join(insertAddressError, err),
-			domain.RepositoryError)
+	addresses []entities.Address) ([]entities.Address, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
+	returnRepoError := func(err error) *domain.AppError {
+		log.Error(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.NewAppErrorWithType(domain.NotFoundError)
+		}
+
+		return domain.NewAppError(insertAddressError, domain.RepositoryError)
 	}
 
 	tx, err := r.db.Begin()
@@ -111,32 +120,40 @@ func (r AddressRepo) InsertUserAddresses(userID int,
 	return addresses, nil
 }
 
-func (r AddressRepo) SelectCityNameByCityID(cityID int) (string, error) {
+func (r AddressRepo) SelectCityNameByCityID(cityID int) (string, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	var cityName string
 
 	query := "select Name from city where ID=?"
 	err := r.db.Get(&cityName, query, cityID)
 	if err != nil {
+		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return "", domain.NewAppError(errors.Join(selectAddressError, err),
+
+		return "", domain.NewAppError(selectAddressError,
 			domain.RepositoryError)
 	}
 
 	return cityName, nil
 }
 
-func (r AddressRepo) SelectProvinceNameByProvinceID(cityID int) (string, error) {
+func (r AddressRepo) SelectProvinceNameByProvinceID(cityID int) (string, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	var provinceName string
 
 	query := "select Name from province where ID=?"
 	err := r.db.Get(&provinceName, query, cityID)
 	if err != nil {
+		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return "", domain.NewAppError(errors.Join(selectAddressError, err),
+
+		return "", domain.NewAppError(selectAddressError,
 			domain.RepositoryError)
 	}
 

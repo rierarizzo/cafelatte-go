@@ -21,7 +21,7 @@ var (
 	updateUserError = errors.New("errors in updating user")
 )
 
-const selectTemporaryUsers = `select u.ID               as 'UserID',
+const selectTempUsers = `select u.ID               as 'UserID',
 					   u.Username         as 'UserUsername',
 					   u.Name             as 'UserName',
 					   u.Surname          as 'UserSurname',
@@ -62,70 +62,70 @@ const selectTemporaryUsers = `select u.ID               as 'UserID',
 // SelectUsers retrieves a list of users from the database and returns the
 // list of users if successful, along with any error encountered during the
 // process.
-func (r *UserRepo) SelectUsers() ([]entities.User, error) {
+func (r *UserRepo) SelectUsers() ([]entities.User, *domain.AppError) {
 	users := make([]entities.User, 0)
 
-	var temporaryUsers []models.TemporaryUserModel
+	var temp []models.TemporaryUserModel
 
-	err := r.db.Select(&temporaryUsers, selectTemporaryUsers)
+	err := r.db.Select(&temp, selectTempUsers)
 	if err != nil {
 		return nil, domain.NewAppError(errors.Join(selectUserError, err),
 			domain.RepositoryError)
 	}
 
-	if temporaryUsers == nil {
+	if temp == nil {
 		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
-	users = mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
+	users = mappers.FromTemporaryUsersModelToUserSlice(temp)
 	return users, nil
 }
 
-// SelectUserByID retrieves a user from the database based on the provided
+// SelectUserById retrieves a user from the database based on the provided
 // user ID and returns the user if found, along with any error encountered
 // during the process.
-func (r *UserRepo) SelectUserByID(userID int) (*entities.User, error) {
-	var temporaryUsers []models.TemporaryUserModel
+func (r *UserRepo) SelectUserById(userId int) (*entities.User, *domain.AppError) {
+	var temp []models.TemporaryUserModel
 
-	err := r.db.Select(&temporaryUsers, selectTemporaryUsers+" and u.ID=?",
-		userID)
+	err := r.db.Select(&temp, selectTempUsers+" and u.ID=?",
+		userId)
 	if err != nil {
 		return nil, domain.NewAppError(errors.Join(selectUserError, err),
 			domain.RepositoryError)
 	}
 
-	if temporaryUsers == nil {
+	if temp == nil {
 		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
-	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
+	users := mappers.FromTemporaryUsersModelToUserSlice(temp)
 	return &users[0], nil
 }
 
 // SelectUserByEmail retrieves a user from the database based on the
 // provided email and returns the user if found, along with any error
 // encountered during the process.
-func (r *UserRepo) SelectUserByEmail(email string) (*entities.User, error) {
-	var temporaryUsers []models.TemporaryUserModel
+func (r *UserRepo) SelectUserByEmail(email string) (*entities.User, *domain.AppError) {
+	var temp []models.TemporaryUserModel
 
-	err := r.db.Select(&temporaryUsers, selectTemporaryUsers+" and u.Email=?",
+	err := r.db.Select(&temp, selectTempUsers+" and u.Email=?",
 		email)
 	if err != nil {
 		return nil, domain.NewAppError(errors.Join(selectUserError, err),
 			domain.RepositoryError)
 	}
 
-	if temporaryUsers == nil {
+	if temp == nil {
 		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
-	users := mappers.FromTemporaryUsersModelToUserSlice(temporaryUsers)
+	users := mappers.FromTemporaryUsersModelToUserSlice(temp)
 	return &users[0], nil
 }
 
 // InsertUser inserts a new user into the database and returns the inserted
 // user if successful, along with any error encountered during the process.
-func (r *UserRepo) InsertUser(user entities.User) (*entities.User, error) {
+func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppError) {
 	userModel := mappers.FromUserToUserModel(user)
 
 	result, err := r.db.Exec(`insert into user (
@@ -153,7 +153,7 @@ func (r *UserRepo) InsertUser(user entities.User) (*entities.User, error) {
 // UpdateUser updates the details of a user in the database based on the
 // provided user ID and user object and returns an error, if any,
 // encountered during the process.
-func (r *UserRepo) UpdateUser(userID int, user entities.User) error {
+func (r *UserRepo) UpdateUser(userID int, user entities.User) *domain.AppError {
 	userModel := mappers.FromUserToUserModel(user)
 
 	query := `update user set 

@@ -5,6 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	sec "github.com/rierarizzo/cafelatte/internal/infra/security/claims"
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/sirupsen/logrus"
@@ -19,7 +20,7 @@ var (
 	parseTokenError           = errors.New("error in parsing token")
 )
 
-func CreateJWTToken(user entities.User) (*string, error) {
+func CreateJWTToken(user entities.User) (*string, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	secret := []byte(os.Getenv(constants.EnvSecretKey))
@@ -45,7 +46,8 @@ func CreateJWTToken(user entities.User) (*string, error) {
 	if err != nil {
 		log.Error(err)
 
-		return nil, parseTokenError
+		return nil, domain.NewAppError(parseTokenError,
+			domain.TokenGenerationError)
 	}
 
 	return &tokenString, nil

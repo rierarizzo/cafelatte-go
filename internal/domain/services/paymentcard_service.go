@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
@@ -12,48 +11,50 @@ type PaymentCardService struct {
 	paymentCardRepo ports.IPaymentCardRepository
 }
 
-func (s PaymentCardService) GetCardsByUserID(userID int) ([]entities.PaymentCard, error) {
-	cards, err := s.paymentCardRepo.SelectCardsByUserID(userID)
-	if err != nil {
-		var appErr *domain.AppError
-		wrapped := errors.As(err, &appErr)
-		if (wrapped && appErr.Type != domain.NotFoundError) || !wrapped {
-			return nil, domain.NewAppError(err, domain.UnexpectedError)
+func (s PaymentCardService) GetCardsByUserID(userID int) ([]entities.PaymentCard, *domain.AppError) {
+	cards, appErr := s.paymentCardRepo.SelectCardsByUserID(userID)
+	if appErr != nil {
+		if appErr.Type != domain.NotFoundError {
+			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
 		}
 
-		return nil, err
+		return nil, appErr
 	}
 
 	return cards, nil
 }
 
 func (s PaymentCardService) AddUserPaymentCard(userID int,
-	cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
+	cards []entities.PaymentCard) ([]entities.PaymentCard, *domain.AppError) {
 	for k, v := range cards {
-		if err := v.ValidateExpirationDate(); err != nil {
-			return nil, domain.NewAppError(err, domain.ValidationError)
+		if appErr := v.ValidateExpirationDate(); appErr != nil {
+			return nil, appErr
 		}
 
-		if err := v.ValidatePaymentCard(); err != nil {
-			return nil, domain.NewAppError(err, domain.ValidationError)
+		if appErr := v.ValidatePaymentCard(); appErr != nil {
+			return nil, appErr
 		}
 
-		hash, err := utils.HashText(v.Number)
-		if err != nil {
-			return nil, domain.NewAppErrorWithType(domain.HashGenerationError)
+		hash, appErr := utils.HashText(v.Number)
+		if appErr != nil {
+			return nil, appErr
 		}
 		cards[k].Number = hash
 
-		hash, err = utils.HashText(v.CVV)
-		if err != nil {
-			return nil, domain.NewAppErrorWithType(domain.HashGenerationError)
+		hash, appErr = utils.HashText(v.CVV)
+		if appErr != nil {
+			return nil, appErr
 		}
 		cards[k].CVV = hash
 	}
 
-	cards, err := s.paymentCardRepo.InsertUserPaymentCards(userID, cards)
-	if err != nil {
-		return nil, domain.NewAppError(err, domain.UnexpectedError)
+	cards, appErr := s.paymentCardRepo.InsertUserPaymentCards(userID, cards)
+	if appErr != nil {
+		if appErr.Type != domain.NotFoundError {
+			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
+		}
+
+		return nil, appErr
 	}
 
 	return cards, nil

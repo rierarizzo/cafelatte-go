@@ -3,6 +3,7 @@ package entities
 import (
 	"errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/constants"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 	"github.com/sirupsen/logrus"
@@ -29,12 +30,12 @@ var (
 	invalidUserEmailError       = errors.New("invalid email")
 )
 
-func (u *User) HashPassword() error {
-	hash, err := utils.HashText(u.Password)
-	if err != nil {
-		return err
+func (u *User) HashPassword() *domain.AppError {
+	hashed, appErr := utils.HashText(u.Password)
+	if appErr != nil {
+		return appErr
 	}
-	u.Password = hash
+	u.Password = hashed
 
 	return nil
 }
@@ -63,20 +64,20 @@ func (u *User) validateEmail() error {
 	return nil
 }
 
-func (u *User) ValidateUser() error {
+func (u *User) ValidateUser() *domain.AppError {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	if err := u.validateRole(); err != nil {
 		log.Error(err)
-		return err
+		return domain.NewAppError(err, domain.ValidationError)
 	}
 	if err := u.validatePhoneNumber(); err != nil {
 		log.Error(err)
-		return err
+		return domain.NewAppError(err, domain.ValidationError)
 	}
 	if err := u.validateEmail(); err != nil {
 		log.Error(err)
-		return err
+		return domain.NewAppError(err, domain.ValidationError)
 	}
 
 	return nil

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
@@ -12,52 +11,42 @@ type UserService struct {
 	userRepo ports.IUserRepo
 }
 
-func (s *UserService) CreateUser(user entities.User) (*entities.User, error) {
-	retrvUser, err := s.userRepo.InsertUser(user)
-	if err != nil {
-		var appErr *domain.AppError
-		converted := errors.As(err, &appErr)
-		if !converted {
-			return nil, domain.NewAppErrorWithType(domain.UnexpectedError)
-		}
-
-		return nil, domain.NewAppError(err, domain.UnexpectedError)
+func (s *UserService) CreateUser(user entities.User) (*entities.User, *domain.AppError) {
+	rUser, appErr := s.userRepo.InsertUser(user)
+	if appErr != nil {
+		return nil, domain.NewAppError(appErr, domain.UnexpectedError)
 	}
 
-	return retrvUser, nil
+	return rUser, nil
 }
 
 // GetUsers retrieves a list of users from the system and returns the list
 // of users if successful, along with any error encountered during the
 // process.
-func (s *UserService) GetUsers() ([]entities.User, error) {
-	users, err := s.userRepo.SelectUsers()
-	if err != nil {
-		var appErr *domain.AppError
-		converted := errors.As(err, &appErr)
-		if converted && appErr.Type == domain.NotFoundError {
+func (s *UserService) GetUsers() ([]entities.User, *domain.AppError) {
+	rUsers, appErr := s.userRepo.SelectUsers()
+	if appErr != nil {
+		if appErr.Type == domain.NotFoundError {
 			return []entities.User{}, nil
-		} else {
-			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
+
+		return nil, appErr
 	}
 
-	return users, nil
+	return rUsers, nil
 }
 
 // FindUserByEmail retrieves a user from the system based on the
 // provided email and returns the user if found, along with any error
 // encountered during the process.
-func (s *UserService) FindUserByEmail(email string) (*entities.User, error) {
-	user, err := s.userRepo.SelectUserByEmail(email)
-	if err != nil {
-		var appErr *domain.AppError
-		converted := errors.As(err, &appErr)
-		if (converted && appErr.Type != domain.NotFoundError) || !converted {
-			return nil, domain.NewAppError(err, domain.UnexpectedError)
+func (s *UserService) FindUserByEmail(email string) (*entities.User, *domain.AppError) {
+	user, appErr := s.userRepo.SelectUserByEmail(email)
+	if appErr != nil {
+		if appErr.Type != domain.NotFoundError {
+			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
 		}
 
-		return nil, err
+		return nil, appErr
 	}
 
 	return user, nil
@@ -66,16 +55,14 @@ func (s *UserService) FindUserByEmail(email string) (*entities.User, error) {
 // FindUserByID retrieves a user from the system based on the provided user
 // ID and returns the user if found, along with any error encountered during
 // the process.
-func (s *UserService) FindUserByID(id int) (*entities.User, error) {
-	user, err := s.userRepo.SelectUserByID(id)
-	if err != nil {
-		var appErr *domain.AppError
-		converted := errors.As(err, &appErr)
-		if (converted && appErr.Type != domain.NotFoundError) || !converted {
-			return nil, domain.NewAppError(err, domain.UnexpectedError)
+func (s *UserService) FindUserByID(id int) (*entities.User, *domain.AppError) {
+	user, appErr := s.userRepo.SelectUserById(id)
+	if appErr != nil {
+		if appErr.Type != domain.NotFoundError {
+			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
 		}
 
-		return nil, err
+		return nil, appErr
 	}
 
 	return user, nil
@@ -84,16 +71,15 @@ func (s *UserService) FindUserByID(id int) (*entities.User, error) {
 // UpdateUser updates the details of a user in the system based on the
 // provided user ID and user object and returns an error, if any,
 // encountered during the process.
-func (s *UserService) UpdateUser(userID int, user entities.User) error {
-	err := s.userRepo.UpdateUser(userID, user)
-	if err != nil {
-		var appErr *domain.AppError
-		converted := errors.As(err, &appErr)
-		if (converted && appErr.Type != domain.NotFoundError) || !converted {
-			return domain.NewAppError(err, domain.UnexpectedError)
+func (s *UserService) UpdateUser(userID int,
+	user entities.User) *domain.AppError {
+	appErr := s.userRepo.UpdateUser(userID, user)
+	if appErr != nil {
+		if appErr.Type != domain.NotFoundError {
+			return domain.NewAppError(appErr, domain.UnexpectedError)
 		}
 
-		return err
+		return appErr
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package entities
 
 import (
 	"errors"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"time"
 )
 
@@ -48,26 +49,26 @@ func (c *PaymentCard) validateExpirationDateFormat() error {
 	return nil
 }
 
-func (c *PaymentCard) ValidatePaymentCard() error {
+func (c *PaymentCard) ValidatePaymentCard() *domain.AppError {
 	if err := c.validateType(); err != nil {
-		return err
+		return domain.NewAppError(err, domain.ValidationError)
 	}
 	if err := c.validateCVV(); err != nil {
-		return err
+		return domain.NewAppError(err, domain.ValidationError)
 	}
 	if err := c.validateExpirationDateFormat(); err != nil {
-		return err
+		return domain.NewAppError(err, domain.ValidationError)
 	}
 
 	return nil
 }
 
-func (c *PaymentCard) ValidateExpirationDate() error {
+func (c *PaymentCard) ValidateExpirationDate() *domain.AppError {
 	expirationDate := time.Date(c.ExpirationYear, time.Month(c.ExpirationMonth),
 		0, 0, 0, 0, 0, time.UTC)
 
 	if expirationDate.Before(time.Now()) {
-		return expiredCardError
+		return domain.NewAppError(expiredCardError, domain.ValidationError)
 	}
 
 	return nil

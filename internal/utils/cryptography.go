@@ -1,12 +1,17 @@
 package utils
 
 import (
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func HashText(text string) (string, error) {
+func HashText(text string) (string, *domain.AppError) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(text), bcrypt.DefaultCost)
-	return string(bytes), err
+	if err != nil {
+		return "", domain.NewAppErrorWithType(domain.HashGenerationError)
+	}
+
+	return string(bytes), nil
 }
 
 func CheckTextHash(hash string, text string) bool {

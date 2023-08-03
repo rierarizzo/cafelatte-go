@@ -4,10 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
+	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
+	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -20,17 +23,20 @@ var (
 	insertCardError = errors.New("errors in inserting new card")
 )
 
-func (r PaymentCardRepo) SelectCardsByUserID(userID int) ([]entities.PaymentCard, error) {
+func (r PaymentCardRepo) SelectCardsByUserID(userID int) ([]entities.PaymentCard, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	var cardsModel []models.PaymentCardModel
 
 	query := "select * from userpaymentcard where UserID=? and Status=true"
 	err := r.db.Select(&cardsModel, query, userID)
 	if err != nil {
+		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return nil, domain.NewAppError(errors.Join(selectCardError, err),
-			domain.RepositoryError)
+
+		return nil, domain.NewAppError(selectCardError, domain.RepositoryError)
 	}
 
 	var cards []entities.PaymentCard
@@ -42,10 +48,16 @@ func (r PaymentCardRepo) SelectCardsByUserID(userID int) ([]entities.PaymentCard
 }
 
 func (r PaymentCardRepo) InsertUserPaymentCards(userID int,
-	cards []entities.PaymentCard) ([]entities.PaymentCard, error) {
-	returnRepoError := func(err error) error {
-		return domain.NewAppError(errors.Join(insertCardError, err),
-			domain.RepositoryError)
+	cards []entities.PaymentCard) ([]entities.PaymentCard, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
+	returnRepoError := func(err error) *domain.AppError {
+		log.Error(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.NewAppErrorWithType(domain.NotFoundError)
+		}
+
+		return domain.NewAppError(insertCardError, domain.RepositoryError)
 	}
 
 	tx, err := r.db.Begin()

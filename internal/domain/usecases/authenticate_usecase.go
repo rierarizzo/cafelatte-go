@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
@@ -15,58 +14,57 @@ type AuthenticateUsecase struct {
 
 // SignUp registers a new user in the system and returns an AuthorizedUser
 // along with any error encountered during the process.
-func (a AuthenticateUsecase) SignUp(user entities.User) (*entities.AuthorizedUser, error) {
+func (a AuthenticateUsecase) SignUp(user entities.User) (*entities.AuthorizedUser, *domain.AppError) {
 	// Validating user
-	if err := user.ValidateUser(); err != nil {
-		return nil, domain.NewAppError(err, domain.ValidationError)
+	if appErr := user.ValidateUser(); appErr != nil {
+		return nil, appErr
 	}
 	// Hashing password
-	if err := user.HashPassword(); err != nil {
-		return nil, domain.NewAppError(err, domain.HashGenerationError)
+	if appErr := user.HashPassword(); appErr != nil {
+		return nil, appErr
 	}
 	// Inserting user to database
-	retrUser, err := a.userService.CreateUser(user)
-	if err != nil {
-		return nil, domain.NewAppError(err, domain.UnexpectedError)
+	rUser, appErr := a.userService.CreateUser(user)
+	if appErr != nil {
+		return nil, appErr
 	}
 	// Generating JWT
-	authUser, err := AuthorizeUser(*retrUser)
-	if err != nil {
-		return nil, domain.NewAppError(err, domain.TokenGenerationError)
+	authorized, appErr := AuthorizeUser(*rUser)
+	if appErr != nil {
+		return nil, appErr
 	}
 
-	return authUser, nil
+	return authorized, nil
 }
 
-func (a AuthenticateUsecase) SignIn(email, password string) (*entities.AuthorizedUser, error) {
+func (a AuthenticateUsecase) SignIn(email string,
+	password string) (*entities.AuthorizedUser, *domain.AppError) {
 	// Select user from database
-	retrUser, err := a.userService.FindUserByEmail(email)
-	if err != nil {
-		var coreErr *domain.AppError
-		converted := errors.As(err, &coreErr)
-		if converted && coreErr.Type == domain.NotFoundError {
+	rUser, appErr := a.userService.FindUserByEmail(email)
+	if appErr != nil {
+		if appErr.Type == domain.NotFoundError {
 			return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
-		} else {
-			return nil, domain.NewAppError(err, domain.UnexpectedError)
 		}
+
+		return nil, appErr
 	}
 	// Verifying password hash
-	if !utils.CheckTextHash(retrUser.Password, password) {
+	if !utils.CheckTextHash(rUser.Password, password) {
 		return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
 	}
 	// Creating JWT
-	authUser, err := AuthorizeUser(*retrUser)
-	if err != nil {
-		return nil, domain.NewAppError(err, domain.TokenGenerationError)
+	authorized, appErr := AuthorizeUser(*rUser)
+	if appErr != nil {
+		return nil, appErr
 	}
 
-	return authUser, nil
+	return authorized, nil
 }
 
-func AuthorizeUser(user entities.User) (*entities.AuthorizedUser, error) {
-	token, err := security.CreateJWTToken(user)
-	if err != nil {
-		return nil, err
+func AuthorizeUser(user entities.User) (*entities.AuthorizedUser, *domain.AppError) {
+	token, appErr := security.CreateJWTToken(user)
+	if appErr != nil {
+		return nil, appErr
 	}
 
 	authorizedUser := entities.AuthorizedUser{

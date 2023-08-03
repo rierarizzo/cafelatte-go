@@ -21,18 +21,18 @@ var (
 	selectProductCategoryError = errors.New("error in selecting product category")
 )
 
-func (p ProductRepo) SelectProducts() ([]entities.Product, error) {
+func (p ProductRepo) SelectProducts() ([]entities.Product, *domain.AppError) {
 	return selectProducts(p.db, "select * from product where Status=true")
 }
 
-func (p ProductRepo) SelectProductsByCategory(categoryCode string) ([]entities.Product, error) {
+func (p ProductRepo) SelectProductsByCategory(categoryCode string) ([]entities.Product, *domain.AppError) {
 	return selectProducts(p.db,
 		"select * from product where CategoryCode=? and Status=true",
 		categoryCode)
 }
 
 func selectProducts(db *sqlx.DB, query string,
-	args ...interface{}) ([]entities.Product, error) {
+	args ...interface{}) ([]entities.Product, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var products []entities.Product
@@ -64,7 +64,7 @@ func selectProducts(db *sqlx.DB, query string,
 	return products, nil
 }
 
-func (p ProductRepo) SelectProductCategories() ([]entities.ProductCategory, error) {
+func (p ProductRepo) SelectProductCategories() ([]entities.ProductCategory, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var productCategories []entities.ProductCategory
