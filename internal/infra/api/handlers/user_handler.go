@@ -47,6 +47,34 @@ func (h *UserHandler) FindUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, *mappers.FromUserToUserRes(*user))
 }
 
+func (h *UserHandler) UpdateUser(c *gin.Context) {
+	userIDParam := c.Param("userID")
+	userID, err := strconv.Atoi(userIDParam)
+	if err != nil {
+		utils.AbortWithError(c, err)
+		return
+	}
+
+	var updUserReq dto.UpdateUserRequest
+	err = c.BindJSON(&updUserReq)
+	if err != nil {
+		utils.AbortWithError(c, err)
+		return
+	}
+
+	err = h.userService.UpdateUser(userID,
+		mappers.FromUpdateUserReqToUser(updUserReq))
+	if err != nil {
+		utils.AbortWithError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"msg":    "user updated",
+	})
+}
+
 func NewUserHandler(userService ports.IUserService) *UserHandler {
 	return &UserHandler{userService}
 }

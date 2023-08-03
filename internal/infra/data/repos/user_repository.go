@@ -163,8 +163,8 @@ func (r *UserRepo) UpdateUser(userID int, user entities.User) error {
                 PhoneNumber=? 
             where ID=?`
 
-	_, err := r.db.Exec(query, userModel.Name, userModel.Surname,
-		userModel.PhoneNumber, userID)
+	_, err := r.db.Exec(query, userModel.Username, userModel.Name,
+		userModel.Surname, userModel.PhoneNumber, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.NewAppErrorWithType(domain.NotFoundError)

@@ -15,6 +15,13 @@ type SignInRequest struct {
 	Password string `json:"password"`
 }
 
+type UpdateUserRequest struct {
+	Username    string `json:"username"`
+	Name        string `json:"name"`
+	Surname     string `json:"surname"`
+	PhoneNumber string `json:"phone"`
+}
+
 type PaymentCardRequest struct {
 	Type            string `json:"type"`
 	Company         int    `json:"company"`

@@ -32,6 +32,9 @@ const (
 	NotAuthorizedError        = "NotAuthorizedError"
 	notAuthorizedErrorMessage = "not authorized"
 
+	DuplicatedResourceError        = "DuplicatedResourceError"
+	duplicatedResourceErrorMessage = "resource is duplicated"
+
 	UnexpectedError        = "UnexpectedError"
 	unexpectedErrorMessage = "something went wrong"
 )
@@ -72,6 +75,8 @@ func NewAppErrorWithType(errType string) *AppError {
 		err = errors.New(hashGenerationErrorMessage)
 	case NotAuthorizedError:
 		err = errors.New(notAuthorizedErrorMessage)
+	case DuplicatedResourceError:
+		err = errors.New(duplicatedResourceErrorMessage)
 	case UnexpectedError:
 		err = errors.New(unexpectedErrorMessage)
 	}

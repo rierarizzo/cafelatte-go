@@ -57,3 +57,12 @@ func FromAuthorizedUserToAuthorizationRes(authorizedUser entities.AuthorizedUser
 		AccessToken: authorizedUser.AccessToken,
 	}
 }
+
+func FromUpdateUserReqToUser(updUserReq dto.UpdateUserRequest) entities.User {
+	return entities.User{
+		Username:    updUserReq.Username,
+		Name:        updUserReq.Name,
+		Surname:     updUserReq.Surname,
+		PhoneNumber: updUserReq.PhoneNumber,
+	}
+}
