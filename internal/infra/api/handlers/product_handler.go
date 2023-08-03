@@ -20,17 +20,17 @@ func (h ProductHandler) GetProducts(c *gin.Context) {
 	var products []entities.Product
 
 	if category == "" {
-		retrvProducts, err := h.productService.GetProducts()
-		if err != nil {
-			utils.AbortWithError(c, err)
+		retrvProducts, appErr := h.productService.GetProducts()
+		if appErr != nil {
+			utils.AbortWithError(c, appErr)
 			return
 		}
 
 		products = retrvProducts
 	} else {
-		retrvProducts, err := h.productService.GetProductsByCategory(category)
-		if err != nil {
-			utils.AbortWithError(c, err)
+		retrvProducts, appErr := h.productService.GetProductsByCategory(category)
+		if appErr != nil {
+			utils.AbortWithError(c, appErr)
 			return
 		}
 
@@ -46,9 +46,9 @@ func (h ProductHandler) GetProducts(c *gin.Context) {
 }
 
 func (h ProductHandler) GetProductCategories(c *gin.Context) {
-	categories, err := h.productService.GetProductCategories()
-	if err != nil {
-		utils.AbortWithError(c, err)
+	categories, appErr := h.productService.GetProductCategories()
+	if appErr != nil {
+		utils.AbortWithError(c, appErr)
 		return
 	}
 

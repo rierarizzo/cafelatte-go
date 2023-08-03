@@ -8,9 +8,9 @@ import (
 
 func TestHashText(t *testing.T) {
 	text := "alone again, naturally"
-	hash, err := utils.HashText(text)
-	if err != nil {
-		t.Errorf("Error hashing text: %v", err)
+	hash, appErr := utils.HashText(text)
+	if appErr != nil {
+		t.Errorf("Error hashing text: %v", appErr)
 	}
 
 	if len(hash) == 0 {
@@ -18,7 +18,7 @@ func TestHashText(t *testing.T) {
 	}
 
 	// Verificar que el hash generado sea válido
-	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(text))
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(text))
 	if err != nil {
 		t.Errorf("Invalid hash generated: %v", err)
 	}

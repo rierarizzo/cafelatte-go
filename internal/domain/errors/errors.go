@@ -35,6 +35,9 @@ const (
 	DuplicatedResourceError        = "DuplicatedResourceError"
 	duplicatedResourceErrorMessage = "resource is duplicated"
 
+	BadRequestError        = "BadRequestError"
+	badRequestErrorMessage = "bad request"
+
 	UnexpectedError        = "UnexpectedError"
 	unexpectedErrorMessage = "something went wrong"
 )
@@ -77,6 +80,8 @@ func NewAppErrorWithType(errType string) *AppError {
 		err = errors.New(notAuthorizedErrorMessage)
 	case DuplicatedResourceError:
 		err = errors.New(duplicatedResourceErrorMessage)
+	case BadRequestError:
+		err = errors.New(badRequestErrorMessage)
 	case UnexpectedError:
 		err = errors.New(unexpectedErrorMessage)
 	}

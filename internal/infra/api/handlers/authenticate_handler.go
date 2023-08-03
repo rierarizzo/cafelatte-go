@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
@@ -17,13 +18,13 @@ func (h *AuthenticateHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
 	err := c.BindJSON(&signUpRequest)
 	if err != nil {
-		utils.AbortWithError(c, err)
+		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
-	authorizedUser, err := h.authUsecase.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
-	if err != nil {
-		utils.AbortWithError(c, err)
+	authorizedUser, appErr := h.authUsecase.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
+	if appErr != nil {
+		utils.AbortWithError(c, appErr)
 		return
 	}
 
@@ -35,14 +36,14 @@ func (h *AuthenticateHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
 	err := c.BindJSON(&signInRequest)
 	if err != nil {
-		utils.AbortWithError(c, err)
+		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
-	authorizedUser, err := h.authUsecase.SignIn(signInRequest.Email,
+	authorizedUser, appErr := h.authUsecase.SignIn(signInRequest.Email,
 		signInRequest.Password)
-	if err != nil {
-		utils.AbortWithError(c, err)
+	if appErr != nil {
+		utils.AbortWithError(c, appErr)
 		return
 	}
 

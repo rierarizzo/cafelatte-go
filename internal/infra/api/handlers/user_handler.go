@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
@@ -16,9 +17,9 @@ type UserHandler struct {
 }
 
 func (h *UserHandler) GetAllUsers(c *gin.Context) {
-	users, err := h.userService.GetUsers()
-	if err != nil {
-		utils.AbortWithError(c, err)
+	users, appErr := h.userService.GetUsers()
+	if appErr != nil {
+		utils.AbortWithError(c, appErr)
 		return
 	}
 
@@ -34,13 +35,13 @@ func (h *UserHandler) FindUserByID(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
-		utils.AbortWithError(c, err)
+		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
-	user, err := h.userService.FindUserByID(userID)
-	if err != nil {
-		utils.AbortWithError(c, err)
+	user, appErr := h.userService.FindUserByID(userID)
+	if appErr != nil {
+		utils.AbortWithError(c, appErr)
 		return
 	}
 
@@ -51,21 +52,21 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	userIDParam := c.Param("userID")
 	userID, err := strconv.Atoi(userIDParam)
 	if err != nil {
-		utils.AbortWithError(c, err)
+		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
 	var updUserReq dto.UpdateUserRequest
 	err = c.BindJSON(&updUserReq)
 	if err != nil {
-		utils.AbortWithError(c, err)
+		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
-	err = h.userService.UpdateUser(userID,
+	appErr := h.userService.UpdateUser(userID,
 		mappers.FromUpdateUserReqToUser(updUserReq))
-	if err != nil {
-		utils.AbortWithError(c, err)
+	if appErr != nil {
+		utils.AbortWithError(c, appErr)
 		return
 	}
 

@@ -40,25 +40,26 @@ func (u *User) HashPassword() *domain.AppError {
 	return nil
 }
 
-func (u *User) validateRole() error {
+func (u *User) validateRole() *domain.AppError {
 	if u.RoleCode != "A" && u.RoleCode != "E" && u.RoleCode != "C" {
-		return invalidUserRoleError
+		return domain.NewAppError(invalidUserRoleError, domain.ValidationError)
 	}
 
 	return nil
 }
 
-func (u *User) validatePhoneNumber() error {
+func (u *User) validatePhoneNumber() *domain.AppError {
 	if len(u.PhoneNumber) != 10 {
-		return invalidUserPhoneNumberError
+		return domain.NewAppError(invalidUserPhoneNumberError,
+			domain.ValidationError)
 	}
 
 	return nil
 }
 
-func (u *User) validateEmail() error {
+func (u *User) validateEmail() *domain.AppError {
 	if !strings.Contains(u.Email, "@") {
-		return invalidUserEmailError
+		return domain.NewAppError(invalidUserEmailError, domain.ValidationError)
 	}
 
 	return nil
@@ -67,17 +68,17 @@ func (u *User) validateEmail() error {
 func (u *User) ValidateUser() *domain.AppError {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
-	if err := u.validateRole(); err != nil {
-		log.Error(err)
-		return domain.NewAppError(err, domain.ValidationError)
+	if appErr := u.validateRole(); appErr != nil {
+		log.Error(appErr)
+		return appErr
 	}
-	if err := u.validatePhoneNumber(); err != nil {
-		log.Error(err)
-		return domain.NewAppError(err, domain.ValidationError)
+	if appErr := u.validatePhoneNumber(); appErr != nil {
+		log.Error(appErr)
+		return appErr
 	}
-	if err := u.validateEmail(); err != nil {
-		log.Error(err)
-		return domain.NewAppError(err, domain.ValidationError)
+	if appErr := u.validateEmail(); appErr != nil {
+		log.Error(appErr)
+		return appErr
 	}
 
 	return nil

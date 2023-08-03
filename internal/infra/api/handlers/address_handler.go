@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
+	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
@@ -20,7 +21,7 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 	var addressesRequest []dto.AddressRequest
 	err := c.BindJSON(&addressesRequest)
 	if err != nil {
-		utils.AbortWithError(c, err)
+		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
@@ -31,9 +32,10 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 
 	userClaims := c.MustGet(constants.UserClaimsKey).(*entities2.UserClaims)
 
-	addresses, err = h.addressService.AddUserAddresses(userClaims.ID, addresses)
-	if err != nil {
-		utils.AbortWithError(c, err)
+	addresses, appErr := h.addressService.AddUserAddresses(userClaims.ID,
+		addresses)
+	if appErr != nil {
+		utils.AbortWithError(c, appErr)
 		return
 	}
 

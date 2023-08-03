@@ -2,7 +2,10 @@ package entities
 
 import (
 	"errors"
+	"github.com/rierarizzo/cafelatte/internal/domain/constants"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -25,49 +28,58 @@ var (
 	expiredCardError               = errors.New("card is expired")
 )
 
-func (c *PaymentCard) validateType() error {
+func (c *PaymentCard) validateType() *domain.AppError {
 	if c.Type != "C" && c.Type != "D" {
-		return invalidCardTypeError
+		return domain.NewAppError(invalidCardTypeError, domain.ValidationError)
 	}
 
 	return nil
 }
 
-func (c *PaymentCard) validateCVV() error {
+func (c *PaymentCard) validateCVV() *domain.AppError {
 	if len(c.CVV) != 3 && len(c.CVV) != 4 {
-		return invalidCardCVVError
+		return domain.NewAppError(invalidCardCVVError, domain.ValidationError)
 	}
 
 	return nil
 }
 
-func (c *PaymentCard) validateExpirationDateFormat() error {
+func (c *PaymentCard) validateExpirationDateFormat() *domain.AppError {
 	if c.ExpirationMonth < 1 || c.ExpirationMonth > 12 {
-		return invalidCardExpirationDateError
+		return domain.NewAppError(invalidCardExpirationDateError,
+			domain.ValidationError)
 	}
 
 	return nil
 }
 
 func (c *PaymentCard) ValidatePaymentCard() *domain.AppError {
-	if err := c.validateType(); err != nil {
-		return domain.NewAppError(err, domain.ValidationError)
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
+	if appErr := c.validateType(); appErr != nil {
+		log.Error(appErr)
+		return appErr
 	}
-	if err := c.validateCVV(); err != nil {
-		return domain.NewAppError(err, domain.ValidationError)
+	if appErr := c.validateCVV(); appErr != nil {
+		log.Error(appErr)
+		return appErr
 	}
-	if err := c.validateExpirationDateFormat(); err != nil {
-		return domain.NewAppError(err, domain.ValidationError)
+	if appErr := c.validateExpirationDateFormat(); appErr != nil {
+		log.Error(appErr)
+		return appErr
 	}
 
 	return nil
 }
 
 func (c *PaymentCard) ValidateExpirationDate() *domain.AppError {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	expirationDate := time.Date(c.ExpirationYear, time.Month(c.ExpirationMonth),
 		0, 0, 0, 0, 0, time.UTC)
 
 	if expirationDate.Before(time.Now()) {
+		log.Error(expiredCardError)
 		return domain.NewAppError(expiredCardError, domain.ValidationError)
 	}
 
