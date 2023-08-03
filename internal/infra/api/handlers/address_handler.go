@@ -27,7 +27,7 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 
 	addresses := make([]entities.Address, 0)
 	for _, v := range addressesRequest {
-		addresses = append(addresses, *mappers.FromAddressReqToAddress(v))
+		addresses = append(addresses, mappers.FromAddressReqToAddress(v))
 	}
 
 	userClaims := c.MustGet(constants.UserClaimsKey).(*entities2.UserClaims)
@@ -41,7 +41,7 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 
 	addressesRes := make([]dto.AddressResponse, 0)
 	for _, v := range addresses {
-		addressesRes = append(addressesRes, *mappers.FromAddressToAddressRes(v))
+		addressesRes = append(addressesRes, mappers.FromAddressToAddressRes(v))
 	}
 
 	c.JSON(http.StatusCreated, addressesRes)

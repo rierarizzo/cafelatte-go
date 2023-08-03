@@ -25,7 +25,7 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 
 	userResponse := make([]dto.UserResponse, 0)
 	for _, k := range users {
-		userResponse = append(userResponse, *mappers.FromUserToUserRes(k))
+		userResponse = append(userResponse, mappers.FromUserToUserRes(k))
 	}
 
 	c.JSON(http.StatusOK, userResponse)
@@ -45,7 +45,7 @@ func (h *UserHandler) FindUserByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, *mappers.FromUserToUserRes(*user))
+	c.JSON(http.StatusOK, mappers.FromUserToUserRes(*user))
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {

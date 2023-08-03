@@ -147,7 +147,10 @@ func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppEr
 	lastUserID, _ := result.LastInsertId()
 
 	userModel.ID = int(lastUserID)
-	return mappers.FromUserModelToUser(*userModel), nil
+
+	u := mappers.FromUserModelToUser(userModel)
+	userToReturn := &u
+	return userToReturn, nil
 }
 
 // UpdateUser updates the details of a user in the database based on the

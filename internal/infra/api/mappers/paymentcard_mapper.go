@@ -5,8 +5,8 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
 )
 
-func FromPaymentCardReqToPaymentCard(req dto.PaymentCardRequest) *entities.PaymentCard {
-	return &entities.PaymentCard{
+func FromPaymentCardReqToPaymentCard(req dto.PaymentCardRequest) entities.PaymentCard {
+	return entities.PaymentCard{
 		Type:            req.Type,
 		Company:         req.Company,
 		HolderName:      req.HolderName,
@@ -17,8 +17,8 @@ func FromPaymentCardReqToPaymentCard(req dto.PaymentCardRequest) *entities.Payme
 	}
 }
 
-func FromPaymentCardToPaymentCardRes(card entities.PaymentCard) *dto.PaymentCardResponse {
-	return &dto.PaymentCardResponse{
+func FromPaymentCardToPaymentCardRes(card entities.PaymentCard) dto.PaymentCardResponse {
+	return dto.PaymentCardResponse{
 		Type:       card.Type,
 		Company:    card.Company,
 		HolderName: card.HolderName,

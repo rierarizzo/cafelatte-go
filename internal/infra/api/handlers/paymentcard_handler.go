@@ -27,7 +27,7 @@ func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 
 	cards := make([]entities.PaymentCard, 0)
 	for _, v := range cardsRequest {
-		cards = append(cards, *mappers.FromPaymentCardReqToPaymentCard(v))
+		cards = append(cards, mappers.FromPaymentCardReqToPaymentCard(v))
 	}
 
 	userClaims := c.MustGet(constants.UserClaimsKey).(*entities2.UserClaims)
@@ -41,7 +41,7 @@ func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 
 	cardsRes := make([]dto.PaymentCardResponse, 0)
 	for _, v := range cards {
-		cardsRes = append(cardsRes, *mappers.FromPaymentCardToPaymentCardRes(v))
+		cardsRes = append(cardsRes, mappers.FromPaymentCardToPaymentCardRes(v))
 	}
 
 	c.JSON(http.StatusCreated, cardsRes)

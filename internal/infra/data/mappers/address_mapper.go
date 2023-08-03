@@ -6,8 +6,8 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
 )
 
-func FromAddressToAddressModel(address entities.Address) *models.AddressModel {
-	return &models.AddressModel{
+func FromAddressToAddressModel(address entities.Address) models.AddressModel {
+	return models.AddressModel{
 		ID:         sql.NullInt64{Int64: int64(address.ID)},
 		Type:       address.Type,
 		ProvinceID: address.ProvinceID,
@@ -17,8 +17,8 @@ func FromAddressToAddressModel(address entities.Address) *models.AddressModel {
 	}
 }
 
-func FromAddressModelToAddress(model models.AddressModel) *entities.Address {
-	return &entities.Address{
+func FromAddressModelToAddress(model models.AddressModel) entities.Address {
+	return entities.Address{
 		ID:         int(model.ID.Int64),
 		Type:       model.Type,
 		ProvinceID: model.ProvinceID,

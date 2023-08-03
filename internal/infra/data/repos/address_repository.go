@@ -38,7 +38,7 @@ func (r AddressRepo) SelectAddressesByUserID(userID int) ([]entities.Address, *d
 
 	var addresses []entities.Address
 	for _, v := range addressesModel {
-		addresses = append(addresses, *mappers.FromAddressModelToAddress(v))
+		addresses = append(addresses, mappers.FromAddressModelToAddress(v))
 	}
 
 	return addresses, nil

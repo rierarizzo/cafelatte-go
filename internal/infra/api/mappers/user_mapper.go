@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-func FromSignUpReqToUser(req dto.SignUpRequest) *entities.User {
-	return &entities.User{
+func FromSignUpReqToUser(req dto.SignUpRequest) entities.User {
+	return entities.User{
 		Username:    req.Username,
 		Name:        req.Name,
 		Surname:     req.Surname,
@@ -18,18 +18,18 @@ func FromSignUpReqToUser(req dto.SignUpRequest) *entities.User {
 	}
 }
 
-func FromUserToUserRes(user entities.User) *dto.UserResponse {
+func FromUserToUserRes(user entities.User) dto.UserResponse {
 	addressesRes := make([]dto.AddressResponse, 0)
 	for _, v := range user.Addresses {
-		addressesRes = append(addressesRes, *FromAddressToAddressRes(v))
+		addressesRes = append(addressesRes, FromAddressToAddressRes(v))
 	}
 
 	cardsRes := make([]dto.PaymentCardResponse, 0)
 	for _, v := range user.PaymentCards {
-		cardsRes = append(cardsRes, *FromPaymentCardToPaymentCardRes(v))
+		cardsRes = append(cardsRes, FromPaymentCardToPaymentCardRes(v))
 	}
 
-	return &dto.UserResponse{
+	return dto.UserResponse{
 		ID:           user.ID,
 		CompleteName: strings.Join([]string{user.Name, user.Surname}, " "),
 		Username:     user.Username,
@@ -40,8 +40,8 @@ func FromUserToUserRes(user entities.User) *dto.UserResponse {
 	}
 }
 
-func FromUserToLoggedUser(user entities.User) *dto.LoggedUserResponse {
-	return &dto.LoggedUserResponse{
+func FromUserToLoggedUser(user entities.User) dto.LoggedUserResponse {
+	return dto.LoggedUserResponse{
 		ID:       user.ID,
 		Username: user.Username,
 		Email:    user.Email,
@@ -49,11 +49,11 @@ func FromUserToLoggedUser(user entities.User) *dto.LoggedUserResponse {
 	}
 }
 
-func FromAuthorizedUserToAuthorizationRes(authorizedUser entities.AuthorizedUser) *dto.AuthorizedUserResponse {
+func FromAuthorizedUserToAuthorizationRes(authorizedUser entities.AuthorizedUser) dto.AuthorizedUserResponse {
 	loggedUserRes := FromUserToLoggedUser(authorizedUser.User)
 
-	return &dto.AuthorizedUserResponse{
-		User:        *loggedUserRes,
+	return dto.AuthorizedUserResponse{
+		User:        loggedUserRes,
 		AccessToken: authorizedUser.AccessToken,
 	}
 }

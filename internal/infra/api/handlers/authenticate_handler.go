@@ -22,7 +22,7 @@ func (h *AuthenticateHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	authorizedUser, appErr := h.authUsecase.SignUp(*mappers.FromSignUpReqToUser(signUpRequest))
+	authorizedUser, appErr := h.authUsecase.SignUp(mappers.FromSignUpReqToUser(signUpRequest))
 	if appErr != nil {
 		utils.AbortWithError(c, appErr)
 		return

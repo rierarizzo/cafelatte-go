@@ -41,7 +41,7 @@ func (r PaymentCardRepo) SelectCardsByUserID(userID int) ([]entities.PaymentCard
 
 	var cards []entities.PaymentCard
 	for _, v := range cardsModel {
-		cards = append(cards, *mappers.FromPaymentCardModelToPaymentCard(v))
+		cards = append(cards, mappers.FromPaymentCardModelToPaymentCard(v))
 	}
 
 	return cards, nil

@@ -5,8 +5,8 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
 )
 
-func FromUserModelToUser(model models.UserModel) *entities.User {
-	return &entities.User{
+func FromUserModelToUser(model models.UserModel) entities.User {
+	return entities.User{
 		ID:          model.ID,
 		Username:    model.Username,
 		Name:        model.Name,
@@ -18,8 +18,8 @@ func FromUserModelToUser(model models.UserModel) *entities.User {
 	}
 }
 
-func FromUserToUserModel(user entities.User) *models.UserModel {
-	return &models.UserModel{
+func FromUserToUserModel(user entities.User) models.UserModel {
+	return models.UserModel{
 		ID:          user.ID,
 		Username:    user.Username,
 		Name:        user.Name,
