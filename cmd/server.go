@@ -56,8 +56,8 @@ func Server() {
 	elapsed := time.Since(start).Seconds()
 
 	logrus.WithFields(logrus.Fields{
-		"port":        cf.ServerPort,
-		"timeElapsed": fmt.Sprintf("%.7fs", elapsed),
+		"port":      cf.ServerPort,
+		"startedAt": fmt.Sprintf("%.7fs", elapsed),
 	}).Info("Starting server")
 
 	if err := http.ListenAndServe(fmt.Sprintf(":%s", cf.ServerPort),

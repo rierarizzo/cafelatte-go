@@ -67,7 +67,7 @@ func AuthorizeUser(user entities.User) (*entities.AuthorizedUser, *domain.AppErr
 
 	authorizedUser := entities.AuthorizedUser{
 		User:        user,
-		AccessToken: *token,
+		AccessToken: token,
 	}
 
 	return &authorizedUser, nil

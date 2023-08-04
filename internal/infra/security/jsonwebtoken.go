@@ -20,7 +20,7 @@ var (
 	parseTokenError           = errors.New("error in parsing token")
 )
 
-func CreateJWTToken(user entities.User) (*string, *domain.AppError) {
+func CreateJWTToken(user entities.User) (string, *domain.AppError) {
 	log := logrus.WithField(constants2.RequestIDKey, params.RequestID())
 
 	secret := []byte(os.Getenv(constants2.EnvSecretKey))
@@ -46,11 +46,11 @@ func CreateJWTToken(user entities.User) (*string, *domain.AppError) {
 	if err != nil {
 		log.Error(err)
 
-		return nil, domain.NewAppError(parseTokenError,
+		return "", domain.NewAppError(parseTokenError,
 			domain.TokenGenerationError)
 	}
 
-	return &tokenString, nil
+	return tokenString, nil
 }
 
 func VerifyJWTToken(tokenString string) (*sec.UserClaims, error) {
