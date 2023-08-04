@@ -4,10 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
+	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
+	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/sirupsen/logrus"
 )
 
 // UserRepo represents a repository for user-related operations.
@@ -63,14 +66,16 @@ const selectTempUsers = `select u.ID               as 'UserID',
 // list of users if successful, along with any error encountered during the
 // process.
 func (r *UserRepo) SelectUsers() ([]entities.User, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	users := make([]entities.User, 0)
 
 	var temp []models.TemporaryUserModel
 
 	err := r.db.Select(&temp, selectTempUsers)
 	if err != nil {
-		return nil, domain.NewAppError(errors.Join(selectUserError, err),
-			domain.RepositoryError)
+		log.Error(err)
+		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 
 	if temp == nil {
@@ -85,13 +90,15 @@ func (r *UserRepo) SelectUsers() ([]entities.User, *domain.AppError) {
 // user ID and returns the user if found, along with any error encountered
 // during the process.
 func (r *UserRepo) SelectUserById(userId int) (*entities.User, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	var temp []models.TemporaryUserModel
 
 	err := r.db.Select(&temp, selectTempUsers+" and u.ID=?",
 		userId)
 	if err != nil {
-		return nil, domain.NewAppError(errors.Join(selectUserError, err),
-			domain.RepositoryError)
+		log.Error(err)
+		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 
 	if temp == nil {
@@ -106,13 +113,15 @@ func (r *UserRepo) SelectUserById(userId int) (*entities.User, *domain.AppError)
 // provided email and returns the user if found, along with any error
 // encountered during the process.
 func (r *UserRepo) SelectUserByEmail(email string) (*entities.User, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	var temp []models.TemporaryUserModel
 
 	err := r.db.Select(&temp, selectTempUsers+" and u.Email=?",
 		email)
 	if err != nil {
-		return nil, domain.NewAppError(errors.Join(selectUserError, err),
-			domain.RepositoryError)
+		log.Error(err)
+		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 
 	if temp == nil {
@@ -126,6 +135,8 @@ func (r *UserRepo) SelectUserByEmail(email string) (*entities.User, *domain.AppE
 // InsertUser inserts a new user into the database and returns the inserted
 // user if successful, along with any error encountered during the process.
 func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	userModel := mappers.FromUserToUserModel(user)
 
 	result, err := r.db.Exec(`insert into user (
@@ -140,8 +151,8 @@ func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppEr
 		userModel.Surname, userModel.PhoneNumber, userModel.Email,
 		userModel.Password, userModel.RoleCode)
 	if err != nil {
-		return nil, domain.NewAppError(errors.Join(insertUserError, err),
-			domain.RepositoryError)
+		log.Error(err)
+		return nil, domain.NewAppError(insertUserError, domain.RepositoryError)
 	}
 
 	lastUserID, _ := result.LastInsertId()
@@ -157,6 +168,8 @@ func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppEr
 // provided user ID and user object and returns an error, if any,
 // encountered during the process.
 func (r *UserRepo) UpdateUser(userID int, user entities.User) *domain.AppError {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	userModel := mappers.FromUserToUserModel(user)
 
 	query := `update user set 
@@ -169,11 +182,12 @@ func (r *UserRepo) UpdateUser(userID int, user entities.User) *domain.AppError {
 	_, err := r.db.Exec(query, userModel.Username, userModel.Name,
 		userModel.Surname, userModel.PhoneNumber, userID)
 	if err != nil {
+		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.NewAppErrorWithType(domain.NotFoundError)
 		}
-		return domain.NewAppError(errors.Join(updateUserError, err),
-			domain.RepositoryError)
+
+		return domain.NewAppError(updateUserError, domain.RepositoryError)
 	}
 
 	return nil
