@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	config2 "github.com/rierarizzo/cafelatte/cmd/config"
+	"github.com/rierarizzo/cafelatte/cmd/config"
 	"github.com/rierarizzo/cafelatte/internal/domain/usecases"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"time"
 
 	"github.com/rierarizzo/cafelatte/internal/domain/services"
 	"github.com/rierarizzo/cafelatte/internal/infra/api"
@@ -15,12 +16,14 @@ import (
 )
 
 func Server() {
+	start := time.Now()
+
 	// Map config environment variable to struct
-	config := config2.GetConfig()
-	config2.LoadInitConfig(config)
+	cf := config.GetConfig()
+	config.LoadInitConfig(cf)
 
 	// Connect to database
-	db := data.Connect(config.DSN)
+	db := data.Connect(cf.DSN)
 
 	// Users instance
 	userRepo := repos.NewUserRepository(db)
@@ -50,8 +53,14 @@ func Server() {
 	router := api.Router(userHandler, authHandler, addressHandler,
 		paymentCardHandler, productHandler)
 
-	logrus.WithField("port", config.ServerPort).Info("Starting server")
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", config.ServerPort),
+	elapsed := time.Since(start).Seconds()
+
+	logrus.WithFields(logrus.Fields{
+		"port":        cf.ServerPort,
+		"timeElapsed": fmt.Sprintf("%.7fs", elapsed),
+	}).Info("Starting server")
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", cf.ServerPort),
 		router); err != nil {
 		logrus.Panic(err)
 	}
