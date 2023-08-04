@@ -39,12 +39,12 @@ func (h *AddressHandler) AddUserAddresses(c *gin.Context) {
 		return
 	}
 
-	addressesRes := make([]dto.AddressResponse, 0)
+	response := make([]dto.AddressResponse, 0)
 	for _, v := range addresses {
-		addressesRes = append(addressesRes, mappers.FromAddressToAddressRes(v))
+		response = append(response, mappers.FromAddressToAddressRes(v))
 	}
 
-	c.JSON(http.StatusCreated, addressesRes)
+	utils.RespondWithJSON(c, http.StatusCreated, response)
 }
 
 func NewAddressHandler(addressService ports.IAddressService) *AddressHandler {

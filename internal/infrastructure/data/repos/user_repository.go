@@ -50,20 +50,20 @@ func (r *UserRepository) SelectUsers() ([]entities.User, *domain.AppError) {
 func (r *UserRepository) SelectUserByID(userID int) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
-	var userModel *models.UserModel
+	var userModel models.UserModel
 	query := "select * from user u where u.Status=true and u.ID=?"
 
 	err := r.db.Get(&userModel, query, userID)
 	if err != nil {
 		log.Error(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
+		}
+
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 
-	if userModel == nil {
-		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
-	}
-
-	user := mappers.FromUserModelToUser(*userModel)
+	user := mappers.FromUserModelToUser(userModel)
 	return &user, nil
 }
 
@@ -79,6 +79,10 @@ func (r *UserRepository) SelectUserByEmail(email string) (*entities.User, *domai
 	err := r.db.Get(&userModel, query, email)
 	if err != nil {
 		log.Error(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
+		}
+
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 

@@ -42,7 +42,7 @@ func (h ProductHandler) GetProducts(c *gin.Context) {
 		response = append(response, mappers.FromProductToProductResponse(v))
 	}
 
-	c.JSON(http.StatusOK, response)
+	utils.RespondWithJSON(c, http.StatusOK, response)
 }
 
 func (h ProductHandler) GetProductCategories(c *gin.Context) {
@@ -58,7 +58,7 @@ func (h ProductHandler) GetProductCategories(c *gin.Context) {
 			mappers.FromProductCategoryToProductCategoryResponse(v))
 	}
 
-	c.JSON(http.StatusOK, response)
+	utils.RespondWithJSON(c, http.StatusOK, response)
 }
 
 func NewProductHandler(productService ports.IProductService) *ProductHandler {

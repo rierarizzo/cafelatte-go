@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"net/http"
 	"time"
@@ -41,16 +42,8 @@ func ErrorMiddleware() gin.HandlerFunc {
 	}
 }
 
-type ErrorResponse struct {
-	Status    int       `json:"status"`
-	ErrorType string    `json:"errorType"`
-	ErrorMsg  string    `json:"errorMsg"`
-	IssuedAt  time.Time `json:"issuedAt"`
-	RequestID any       `json:"requestID"`
-}
-
 func writeError(c *gin.Context, httpStatus int, appErr *domain.AppError) {
-	response := ErrorResponse{
+	response := dto.ErrorResponse{
 		Status:    httpStatus,
 		ErrorType: appErr.Type,
 		ErrorMsg:  appErr.Err.Error(),

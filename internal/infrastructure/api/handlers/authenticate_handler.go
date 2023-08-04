@@ -28,8 +28,8 @@ func (h *AuthenticateHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated,
-		mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
+	response := mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser)
+	utils.RespondWithJSON(c, http.StatusCreated, response)
 }
 
 func (h *AuthenticateHandler) SignIn(c *gin.Context) {
@@ -47,8 +47,8 @@ func (h *AuthenticateHandler) SignIn(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK,
-		mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser))
+	response := mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser)
+	utils.RespondWithJSON(c, http.StatusOK, response)
 }
 
 func NewAuthHandler(authUsecase ports.IAuthenticateUsecase) *AuthenticateHandler {

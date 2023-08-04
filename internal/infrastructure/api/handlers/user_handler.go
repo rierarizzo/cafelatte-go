@@ -16,7 +16,7 @@ type UserHandler struct {
 	userService ports.IUserService
 }
 
-func (h *UserHandler) GetAllUsers(c *gin.Context) {
+func (h *UserHandler) GetUsers(c *gin.Context) {
 	users, appErr := h.userService.GetUsers()
 	if appErr != nil {
 		utils.AbortWithError(c, appErr)
@@ -28,12 +28,11 @@ func (h *UserHandler) GetAllUsers(c *gin.Context) {
 		userResponse = append(userResponse, mappers.FromUserToUserRes(k))
 	}
 
-	c.JSON(http.StatusOK, userResponse)
+	utils.RespondWithJSON(c, http.StatusOK, userResponse)
 }
 
 func (h *UserHandler) FindUserByID(c *gin.Context) {
-	userIDParam := c.Param("userID")
-	userID, err := strconv.Atoi(userIDParam)
+	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
@@ -45,12 +44,11 @@ func (h *UserHandler) FindUserByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, mappers.FromUserToUserRes(*user))
+	utils.RespondWithJSON(c, http.StatusOK, mappers.FromUserToUserRes(*user))
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {
-	userIDParam := c.Param("userID")
-	userID, err := strconv.Atoi(userIDParam)
+	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
@@ -70,15 +68,11 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status": http.StatusOK,
-		"msg":    "user updated",
-	})
+	utils.RespondWithJSON(c, http.StatusOK, "user updated")
 }
 
 func (h *UserHandler) DeleteUser(c *gin.Context) {
-	userIDParam := c.Param("userID")
-	userID, err := strconv.Atoi(userIDParam)
+	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
@@ -90,10 +84,7 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"status": http.StatusOK,
-		"msg":    "user deleter",
-	})
+	utils.RespondWithJSON(c, http.StatusOK, "user deleted")
 }
 
 func NewUserHandler(userService ports.IUserService) *UserHandler {

@@ -34,7 +34,7 @@ func Router(userHandler *handlers.UserHandler,
 	usersGroup := router.Group("/users")
 	usersGroup.Use(middlewares.AuthenticateMiddleware())
 	{
-		usersGroup.GET("/find", userHandler.GetAllUsers)
+		usersGroup.GET("/find", userHandler.GetUsers)
 		usersGroup.GET("/find/:userID", userHandler.FindUserByID)
 		usersGroup.POST("/add-addresses", addressHandler.AddUserAddresses)
 		usersGroup.POST("/add-paymentcards", cardHandler.AddUserPaymentCards)

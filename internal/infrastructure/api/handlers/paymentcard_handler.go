@@ -44,7 +44,7 @@ func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
 		cardsRes = append(cardsRes, mappers.FromPaymentCardToPaymentCardRes(v))
 	}
 
-	c.JSON(http.StatusCreated, cardsRes)
+	utils.RespondWithJSON(c, http.StatusCreated, cardsRes)
 }
 
 func NewPaymentCardHandler(paymentCardService ports.IPaymentCardService) *PaymentCardHandler {
