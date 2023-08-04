@@ -19,9 +19,10 @@ type UserRepository struct {
 }
 
 var (
-	insertUserError = errors.New("errors in inserting new user")
-	selectUserError = errors.New("errors in selecting user(s)")
-	updateUserError = errors.New("errors in updating user")
+	insertUserError = errors.New("error in inserting new user")
+	selectUserError = errors.New("error in selecting user(s)")
+	updateUserError = errors.New("error in updating user")
+	deleteUserError = errors.New("error in deleting user")
 )
 
 const selectTempUsers = `select u.ID               as 'UserID',
@@ -165,6 +166,7 @@ func (r *UserRepository) InsertUser(user entities.User) (*entities.User, *domain
 func (r *UserRepository) UpdateUser(userID int,
 	user entities.User) *domain.AppError {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	userModel := mappers.FromUserToUserModel(user)
 	query := `update user set 
                 Username=?, 
@@ -182,6 +184,24 @@ func (r *UserRepository) UpdateUser(userID int,
 		}
 
 		return domain.NewAppError(updateUserError, domain.RepositoryError)
+	}
+
+	return nil
+}
+
+func (r *UserRepository) DeleteUser(userID int) *domain.AppError {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
+	query := `update user set Status=false where ID=?`
+
+	_, err := r.db.Exec(query, userID)
+	if err != nil {
+		log.Error(err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return domain.NewAppErrorWithType(domain.NotFoundError)
+		}
+
+		return domain.NewAppError(deleteUserError, domain.RepositoryError)
 	}
 
 	return nil

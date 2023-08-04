@@ -76,6 +76,26 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 	})
 }
 
+func (h *UserHandler) DeleteUser(c *gin.Context) {
+	userIDParam := c.Param("userID")
+	userID, err := strconv.Atoi(userIDParam)
+	if err != nil {
+		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
+		return
+	}
+
+	appErr := h.userService.DeleteUser(userID)
+	if appErr != nil {
+		utils.AbortWithError(c, appErr)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": http.StatusOK,
+		"msg":    "user deleter",
+	})
+}
+
 func NewUserHandler(userService ports.IUserService) *UserHandler {
 	return &UserHandler{userService}
 }

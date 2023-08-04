@@ -28,6 +28,8 @@ type IUserService interface {
 	// provided user ID and user object and returns an error, if any,
 	// encountered during the process.
 	UpdateUser(userID int, user entities.User) *domain.AppError
+
+	DeleteUser(userID int) *domain.AppError
 }
 
 // IUserRepository represents an interface for a user repository.
@@ -55,4 +57,6 @@ type IUserRepository interface {
 	// provided user ID and user object and returns an error, if any,
 	// encountered during the process.
 	UpdateUser(userID int, user entities.User) *domain.AppError
+
+	DeleteUser(userID int) *domain.AppError
 }

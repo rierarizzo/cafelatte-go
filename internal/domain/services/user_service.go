@@ -85,6 +85,19 @@ func (s *UserService) UpdateUser(userID int,
 	return nil
 }
 
+func (s *UserService) DeleteUser(userID int) *domain.AppError {
+	appErr := s.userRepo.DeleteUser(userID)
+	if appErr != nil {
+		if appErr.Type != domain.NotFoundError {
+			return domain.NewAppError(appErr, domain.UnexpectedError)
+		}
+
+		return appErr
+	}
+
+	return nil
+}
+
 func NewUserService(userRepo ports.IUserRepository) *UserService {
 	return &UserService{userRepo}
 }

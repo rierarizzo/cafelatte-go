@@ -39,6 +39,7 @@ func Router(userHandler *handlers.UserHandler,
 		usersGroup.POST("/add-addresses", addressHandler.AddUserAddresses)
 		usersGroup.POST("/add-paymentcards", cardHandler.AddUserPaymentCards)
 		usersGroup.PUT("/update/:userID", userHandler.UpdateUser)
+		usersGroup.DELETE("/delete/:userID", userHandler.DeleteUser)
 	}
 
 	productsGroup := router.Group("/products")
