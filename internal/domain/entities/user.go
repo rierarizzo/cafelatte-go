@@ -20,9 +20,7 @@ type User struct {
 	Email       string
 	Password    string
 	/* A: Admin, E: Employee, C: Client */
-	RoleCode     string
-	Addresses    []Address
-	PaymentCards []PaymentCard
+	RoleCode string
 }
 
 func (u *User) HashPassword() *domain.AppError {

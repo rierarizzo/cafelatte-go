@@ -4,7 +4,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ConfigLogger(logLevel string) {
+func Logger(logLevel string) {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	logrus.SetReportCaller(false)
 

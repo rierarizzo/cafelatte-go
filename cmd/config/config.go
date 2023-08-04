@@ -22,7 +22,7 @@ func GetConfig() *Config {
 
 func LoadInitConfig(config *Config) {
 	// Config logger
-	ConfigLogger(config.LogLevel)
+	Logger(config.LogLevel)
 
 	// Debug or release
 	gin.SetMode(gin.ReleaseMode)

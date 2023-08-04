@@ -18,11 +18,6 @@ type AddressRepository struct {
 	db *sqlx.DB
 }
 
-var (
-	selectAddressError = errors.New("errors in selecting address(es)")
-	insertAddressError = errors.New("errors in inserting address")
-)
-
 func (r AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Address, *domain.AppError) {
 	var addressesModel []models.AddressModel
 
@@ -159,6 +154,11 @@ func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (string, *
 
 	return provinceName, nil
 }
+
+var (
+	selectAddressError = errors.New("select address error")
+	insertAddressError = errors.New("insert address error")
+)
 
 func NewAddressRepository(db *sqlx.DB) *AddressRepository {
 	return &AddressRepository{db}

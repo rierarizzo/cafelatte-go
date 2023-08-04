@@ -13,55 +13,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// UserRepository represents a repository for user-related operations.
 type UserRepository struct {
 	db *sqlx.DB
 }
-
-var (
-	insertUserError = errors.New("error in inserting new user")
-	selectUserError = errors.New("error in selecting user(s)")
-	updateUserError = errors.New("error in updating user")
-	deleteUserError = errors.New("error in deleting user")
-)
-
-const selectTempUsers = `select u.ID               as 'UserID',
-					   u.Username         as 'UserUsername',
-					   u.Name             as 'UserName',
-					   u.Surname          as 'UserSurname',
-					   u.PhoneNumber      as 'UserPhoneNumber',
-					   u.Email            as 'UserEmail',
-					   u.Password         as 'UserPassword',
-					   u.RoleCode         as 'UserRoleCode',
-					   u.Status           as 'UserStatus',
-					   u.CreatedAt        as 'UserCreatedAt',
-					   u.UpdatedAt        as 'UserUpdatedAt',
-					   ua.ID              as 'AddressID',
-					   ua.Type            as 'AddressType',
-					   ua.ProvinceID      as 'AddressProvinceID',
-					   ua.CityID          as 'AddressCityID',
-					   ua.PostalCode      as 'AddressPostalCode',
-					   ua.Detail          as 'AddressDetail',
-					   ua.Status          as 'AddressStatus',
-					   ua.CreatedAt       as 'AddressCreatedAt',
-					   ua.UpdatedAt       as 'AddressUpdatedAt',
-					   up.ID              as 'CardID',
-					   up.Type            as 'CardType',
-					   up.Company         as 'CardCompany',
-					   up.HolderName      as 'CardHolderName',
-					   up.Number          as 'CardNumber',
-					   up.ExpirationYear  as 'CardExpirationYear',
-					   up.ExpirationMonth as 'CardExpirationMonth',
-					   up.CVV             as 'CardCVV',
-					   up.Status          as 'CardStatus',
-					   up.CreatedAt       as 'CardCreatedAt',
-					   up.UpdatedAt       as 'CardUpdatedAt'
-				from user u
-						 left join useraddress ua on u.ID = ua.UserID
-						 left join userpaymentcard up on u.ID = up.UserID
-				where u.Status = true
-				  and (ua.Status = true or ua.Status is null)
-				  and (up.Status = true or up.Status is null)`
 
 // SelectUsers retrieves a list of users from the database and returns the
 // list of users if successful, along with any error encountered during the
@@ -69,19 +23,24 @@ const selectTempUsers = `select u.ID               as 'UserID',
 func (r *UserRepository) SelectUsers() ([]entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 	users := make([]entities.User, 0)
-	var temp []models.TemporaryUserModel
+	var usersModel []models.UserModel
 
-	err := r.db.Select(&temp, selectTempUsers)
+	query := "select * from user where Status=true"
+
+	err := r.db.Select(&usersModel, query)
 	if err != nil {
 		log.Error(err)
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 
-	if temp == nil {
+	if usersModel == nil {
 		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
-	users = mappers.FromTemporaryUsersModelToUserSlice(temp)
+	for _, v := range usersModel {
+		users = append(users, mappers.FromUserModelToUser(v))
+	}
+
 	return users, nil
 }
 
@@ -90,21 +49,22 @@ func (r *UserRepository) SelectUsers() ([]entities.User, *domain.AppError) {
 // during the process.
 func (r *UserRepository) SelectUserByID(userID int) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-	var temp []models.TemporaryUserModel
-	query := selectTempUsers + " and u.ID=?"
 
-	err := r.db.Select(&temp, query, userID)
+	var userModel *models.UserModel
+	query := "select * from user u where u.Status=true and u.ID=?"
+
+	err := r.db.Get(&userModel, query, userID)
 	if err != nil {
 		log.Error(err)
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 
-	if temp == nil {
+	if userModel == nil {
 		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
-	users := mappers.FromTemporaryUsersModelToUserSlice(temp)
-	return &users[0], nil
+	user := mappers.FromUserModelToUser(*userModel)
+	return &user, nil
 }
 
 // SelectUserByEmail retrieves a user from the database based on the
@@ -112,27 +72,29 @@ func (r *UserRepository) SelectUserByID(userID int) (*entities.User, *domain.App
 // encountered during the process.
 func (r *UserRepository) SelectUserByEmail(email string) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-	var temp []models.TemporaryUserModel
-	query := selectTempUsers + " and u.Email=?"
 
-	err := r.db.Select(&temp, query, email)
+	var userModel *models.UserModel
+	query := "select * from user u where u.Status=true and u.Email=?"
+
+	err := r.db.Get(&userModel, query, email)
 	if err != nil {
 		log.Error(err)
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 
-	if temp == nil {
+	if userModel == nil {
 		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
-	users := mappers.FromTemporaryUsersModelToUserSlice(temp)
-	return &users[0], nil
+	user := mappers.FromUserModelToUser(*userModel)
+	return &user, nil
 }
 
 // InsertUser inserts a new user into the database and returns the inserted
 // user if successful, along with any error encountered during the process.
 func (r *UserRepository) InsertUser(user entities.User) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
 	userModel := mappers.FromUserToUserModel(user)
 	query := `insert into user (
                   Username, 
@@ -206,6 +168,13 @@ func (r *UserRepository) DeleteUser(userID int) *domain.AppError {
 
 	return nil
 }
+
+var (
+	insertUserError = errors.New("insert user error")
+	selectUserError = errors.New("select user error")
+	updateUserError = errors.New("update user error")
+	deleteUserError = errors.New("delete user error")
+)
 
 func NewUserRepository(db *sqlx.DB) *UserRepository {
 	return &UserRepository{db}

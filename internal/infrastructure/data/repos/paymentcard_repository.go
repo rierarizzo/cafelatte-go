@@ -18,11 +18,6 @@ type PaymentCardRepository struct {
 	db *sqlx.DB
 }
 
-var (
-	selectCardError = errors.New("errors in selecting card(s)")
-	insertCardError = errors.New("errors in inserting new card")
-)
-
 func (r PaymentCardRepository) SelectCardsByUserID(userID int) ([]entities.PaymentCard, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
@@ -123,6 +118,11 @@ func (r PaymentCardRepository) InsertUserPaymentCards(userID int,
 
 	return cards, nil
 }
+
+var (
+	selectCardError = errors.New("select payment card error")
+	insertCardError = errors.New("insert payment card error")
+)
 
 func NewPaymentCardRepository(db *sqlx.DB) *PaymentCardRepository {
 	return &PaymentCardRepository{db}

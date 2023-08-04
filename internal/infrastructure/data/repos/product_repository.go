@@ -16,11 +16,6 @@ type ProductRepository struct {
 	db *sqlx.DB
 }
 
-var (
-	selectProductError         = errors.New("error in selecting product")
-	selectProductCategoryError = errors.New("error in selecting product category")
-)
-
 func (p ProductRepository) SelectProducts() ([]entities.Product, *domain.AppError) {
 	return selectProducts(p.db, "select * from product where Status=true")
 }
@@ -90,6 +85,11 @@ func (p ProductRepository) SelectProductCategories() ([]entities.ProductCategory
 
 	return productCategories, nil
 }
+
+var (
+	selectProductError         = errors.New("select product error")
+	selectProductCategoryError = errors.New("select product category error")
+)
 
 func NewProductRepository(db *sqlx.DB) *ProductRepository {
 	return &ProductRepository{db}

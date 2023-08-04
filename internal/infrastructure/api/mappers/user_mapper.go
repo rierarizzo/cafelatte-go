@@ -19,24 +19,12 @@ func FromSignUpReqToUser(req dto.SignUpRequest) entities.User {
 }
 
 func FromUserToUserRes(user entities.User) dto.UserResponse {
-	addressesRes := make([]dto.AddressResponse, 0)
-	for _, v := range user.Addresses {
-		addressesRes = append(addressesRes, FromAddressToAddressRes(v))
-	}
-
-	cardsRes := make([]dto.PaymentCardResponse, 0)
-	for _, v := range user.PaymentCards {
-		cardsRes = append(cardsRes, FromPaymentCardToPaymentCardRes(v))
-	}
-
 	return dto.UserResponse{
 		ID:           user.ID,
 		CompleteName: strings.Join([]string{user.Name, user.Surname}, " "),
 		Username:     user.Username,
 		Email:        user.Email,
 		Role:         user.RoleCode,
-		Addresses:    addressesRes,
-		PaymentCards: cardsRes,
 	}
 }
 
