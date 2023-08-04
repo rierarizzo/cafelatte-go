@@ -67,9 +67,7 @@ const selectTempUsers = `select u.ID               as 'UserID',
 // process.
 func (r *UserRepo) SelectUsers() ([]entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
 	users := make([]entities.User, 0)
-
 	var temp []models.TemporaryUserModel
 
 	err := r.db.Select(&temp, selectTempUsers)
@@ -91,11 +89,10 @@ func (r *UserRepo) SelectUsers() ([]entities.User, *domain.AppError) {
 // during the process.
 func (r *UserRepo) SelectUserById(userId int) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
 	var temp []models.TemporaryUserModel
+	query := selectTempUsers + " and u.ID=?"
 
-	err := r.db.Select(&temp, selectTempUsers+" and u.ID=?",
-		userId)
+	err := r.db.Select(&temp, query, userId)
 	if err != nil {
 		log.Error(err)
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
@@ -114,11 +111,10 @@ func (r *UserRepo) SelectUserById(userId int) (*entities.User, *domain.AppError)
 // encountered during the process.
 func (r *UserRepo) SelectUserByEmail(email string) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
 	var temp []models.TemporaryUserModel
+	query := selectTempUsers + " and u.Email=?"
 
-	err := r.db.Select(&temp, selectTempUsers+" and u.Email=?",
-		email)
+	err := r.db.Select(&temp, query, email)
 	if err != nil {
 		log.Error(err)
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
@@ -136,18 +132,11 @@ func (r *UserRepo) SelectUserByEmail(email string) (*entities.User, *domain.AppE
 // user if successful, along with any error encountered during the process.
 func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
 	userModel := mappers.FromUserToUserModel(user)
+	query := `insert into user (Username, Name, Surname, PhoneNumber, Email, 
+                  Password, RoleCode) values (?,?,?,?,?,?,?)`
 
-	result, err := r.db.Exec(`insert into user (
-                  Username, 
-                  Name, 
-                  Surname, 
-                  PhoneNumber, 
-                  Email, 
-                  Password, 
-                  RoleCode
-        	) values (?,?,?,?,?,?,?)`, userModel.Username, userModel.Name,
+	result, err := r.db.Exec(query, userModel.Username, userModel.Name,
 		userModel.Surname, userModel.PhoneNumber, userModel.Email,
 		userModel.Password, userModel.RoleCode)
 	if err != nil {
@@ -156,7 +145,6 @@ func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppEr
 	}
 
 	lastUserID, _ := result.LastInsertId()
-
 	userModel.ID = int(lastUserID)
 
 	u := mappers.FromUserModelToUser(userModel)
@@ -169,15 +157,9 @@ func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppEr
 // encountered during the process.
 func (r *UserRepo) UpdateUser(userID int, user entities.User) *domain.AppError {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
 	userModel := mappers.FromUserToUserModel(user)
-
-	query := `update user set 
-                Username=?, 
-                Name=?, 
-                Surname=?, 
-                PhoneNumber=? 
-            where ID=?`
+	query := `update user set Username=?, Name=?, Surname=?, PhoneNumber=? 
+            	where ID=?`
 
 	_, err := r.db.Exec(query, userModel.Username, userModel.Name,
 		userModel.Surname, userModel.PhoneNumber, userID)
