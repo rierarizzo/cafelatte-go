@@ -6,13 +6,13 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/sirupsen/logrus"
 )
 
-type ProductRepo struct {
+type ProductRepository struct {
 	db *sqlx.DB
 }
 
@@ -21,11 +21,11 @@ var (
 	selectProductCategoryError = errors.New("error in selecting product category")
 )
 
-func (p ProductRepo) SelectProducts() ([]entities.Product, *domain.AppError) {
+func (p ProductRepository) SelectProducts() ([]entities.Product, *domain.AppError) {
 	return selectProducts(p.db, "select * from product where Status=true")
 }
 
-func (p ProductRepo) SelectProductsByCategory(categoryCode string) ([]entities.Product, *domain.AppError) {
+func (p ProductRepository) SelectProductsByCategory(categoryCode string) ([]entities.Product, *domain.AppError) {
 	return selectProducts(p.db,
 		"select * from product where CategoryCode=? and Status=true",
 		categoryCode)
@@ -64,7 +64,7 @@ func selectProducts(db *sqlx.DB, query string,
 	return products, nil
 }
 
-func (p ProductRepo) SelectProductCategories() ([]entities.ProductCategory, *domain.AppError) {
+func (p ProductRepository) SelectProductCategories() ([]entities.ProductCategory, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var productCategories []entities.ProductCategory
@@ -91,6 +91,6 @@ func (p ProductRepo) SelectProductCategories() ([]entities.ProductCategory, *dom
 	return productCategories, nil
 }
 
-func NewProductRepo(db *sqlx.DB) *ProductRepo {
-	return &ProductRepo{db}
+func NewProductRepo(db *sqlx.DB) *ProductRepository {
+	return &ProductRepository{db}
 }

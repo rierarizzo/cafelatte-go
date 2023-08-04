@@ -4,7 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
-	"github.com/rierarizzo/cafelatte/internal/infra/security"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/security"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
 

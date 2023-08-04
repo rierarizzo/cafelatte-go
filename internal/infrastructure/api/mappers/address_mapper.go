@@ -2,7 +2,7 @@ package mappers
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 )
 
 func FromAddressReqToAddress(req dto.AddressRequest) entities.Address {

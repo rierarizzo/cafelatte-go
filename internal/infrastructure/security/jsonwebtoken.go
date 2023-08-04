@@ -6,7 +6,7 @@ import (
 	constants2 "github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	sec "github.com/rierarizzo/cafelatte/internal/infra/security/claims"
+	sec "github.com/rierarizzo/cafelatte/internal/infrastructure/security/claims"
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/sirupsen/logrus"
 	"os"

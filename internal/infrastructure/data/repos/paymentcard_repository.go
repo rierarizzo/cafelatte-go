@@ -7,14 +7,14 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/sirupsen/logrus"
 	"sync"
 )
 
-type PaymentCardRepo struct {
+type PaymentCardRepository struct {
 	db *sqlx.DB
 }
 
@@ -23,7 +23,7 @@ var (
 	insertCardError = errors.New("errors in inserting new card")
 )
 
-func (r PaymentCardRepo) SelectCardsByUserID(userID int) ([]entities.PaymentCard, *domain.AppError) {
+func (r PaymentCardRepository) SelectCardsByUserID(userID int) ([]entities.PaymentCard, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var cardsModel []models.PaymentCardModel
@@ -47,7 +47,7 @@ func (r PaymentCardRepo) SelectCardsByUserID(userID int) ([]entities.PaymentCard
 	return cards, nil
 }
 
-func (r PaymentCardRepo) InsertUserPaymentCards(userID int,
+func (r PaymentCardRepository) InsertUserPaymentCards(userID int,
 	cards []entities.PaymentCard) ([]entities.PaymentCard, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
@@ -124,6 +124,6 @@ func (r PaymentCardRepo) InsertUserPaymentCards(userID int,
 	return cards, nil
 }
 
-func NewPaymentCardRepository(db *sqlx.DB) *PaymentCardRepo {
-	return &PaymentCardRepo{db}
+func NewPaymentCardRepository(db *sqlx.DB) *PaymentCardRepository {
+	return &PaymentCardRepository{db}
 }

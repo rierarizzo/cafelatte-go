@@ -8,7 +8,7 @@ import (
 
 // UserService represents a user service implementation.
 type UserService struct {
-	userRepo ports.IUserRepo
+	userRepo ports.IUserRepository
 }
 
 func (s *UserService) CreateUser(user entities.User) (*entities.User, *domain.AppError) {
@@ -85,6 +85,6 @@ func (s *UserService) UpdateUser(userID int,
 	return nil
 }
 
-func NewUserService(userRepo ports.IUserRepo) *UserService {
+func NewUserService(userRepo ports.IUserRepository) *UserService {
 	return &UserService{userRepo}
 }

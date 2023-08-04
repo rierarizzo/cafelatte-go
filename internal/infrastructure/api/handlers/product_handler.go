@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
 )

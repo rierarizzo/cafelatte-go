@@ -7,14 +7,14 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/sirupsen/logrus"
 	"sync"
 )
 
-type AddressRepo struct {
+type AddressRepository struct {
 	db *sqlx.DB
 }
 
@@ -23,7 +23,7 @@ var (
 	insertAddressError = errors.New("errors in inserting address")
 )
 
-func (r AddressRepo) SelectAddressesByUserID(userID int) ([]entities.Address, *domain.AppError) {
+func (r AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Address, *domain.AppError) {
 	var addressesModel []models.AddressModel
 
 	query := "select * from useraddress where UserID=? and Status=true"
@@ -44,7 +44,7 @@ func (r AddressRepo) SelectAddressesByUserID(userID int) ([]entities.Address, *d
 	return addresses, nil
 }
 
-func (r AddressRepo) InsertUserAddresses(userID int,
+func (r AddressRepository) InsertUserAddresses(userID int,
 	addresses []entities.Address) ([]entities.Address, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
@@ -120,7 +120,7 @@ func (r AddressRepo) InsertUserAddresses(userID int,
 	return addresses, nil
 }
 
-func (r AddressRepo) SelectCityNameByCityID(cityID int) (string, *domain.AppError) {
+func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var cityName string
@@ -140,7 +140,7 @@ func (r AddressRepo) SelectCityNameByCityID(cityID int) (string, *domain.AppErro
 	return cityName, nil
 }
 
-func (r AddressRepo) SelectProvinceNameByProvinceID(cityID int) (string, *domain.AppError) {
+func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (string, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var provinceName string
@@ -160,6 +160,6 @@ func (r AddressRepo) SelectProvinceNameByProvinceID(cityID int) (string, *domain
 	return provinceName, nil
 }
 
-func NewAddressRepository(db *sqlx.DB) *AddressRepo {
-	return &AddressRepo{db}
+func NewAddressRepository(db *sqlx.DB) *AddressRepository {
+	return &AddressRepository{db}
 }

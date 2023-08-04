@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/rierarizzo/cafelatte/internal/domain/services"
-	"github.com/rierarizzo/cafelatte/internal/infra/api"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/handlers"
-	"github.com/rierarizzo/cafelatte/internal/infra/data"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/repos"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/repos"
 )
 
 func Server() {

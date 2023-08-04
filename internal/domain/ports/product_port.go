@@ -11,7 +11,7 @@ type IProductService interface {
 	GetProductCategories() ([]entities.ProductCategory, *domain.AppError)
 }
 
-type IProductRepo interface {
+type IProductRepository interface {
 	SelectProducts() ([]entities.Product, *domain.AppError)
 	SelectProductsByCategory(categoryCode string) ([]entities.Product, *domain.AppError)
 	SelectProductCategories() ([]entities.ProductCategory, *domain.AppError)

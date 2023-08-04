@@ -2,14 +2,14 @@ package handlers
 
 import (
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 )
 
 type UserHandler struct {

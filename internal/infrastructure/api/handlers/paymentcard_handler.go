@@ -6,9 +6,9 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/dto"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/mappers"
-	entities2 "github.com/rierarizzo/cafelatte/internal/infra/security/claims"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
+	entities2 "github.com/rierarizzo/cafelatte/internal/infrastructure/security/claims"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
 )

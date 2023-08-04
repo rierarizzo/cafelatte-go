@@ -2,11 +2,11 @@ package api
 
 import (
 	"github.com/gin-contrib/cors"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/middlewares"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/middlewares"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/internal/infra/api/handlers"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
 )
 
 func Router(userHandler *handlers.UserHandler,

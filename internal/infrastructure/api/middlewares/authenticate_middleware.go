@@ -3,7 +3,7 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infra/security"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/security"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 	"strings"
 )

@@ -7,14 +7,14 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/mappers"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/sirupsen/logrus"
 )
 
-// UserRepo represents a repository for user-related operations.
-type UserRepo struct {
+// UserRepository represents a repository for user-related operations.
+type UserRepository struct {
 	db *sqlx.DB
 }
 
@@ -65,7 +65,7 @@ const selectTempUsers = `select u.ID               as 'UserID',
 // SelectUsers retrieves a list of users from the database and returns the
 // list of users if successful, along with any error encountered during the
 // process.
-func (r *UserRepo) SelectUsers() ([]entities.User, *domain.AppError) {
+func (r *UserRepository) SelectUsers() ([]entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 	users := make([]entities.User, 0)
 	var temp []models.TemporaryUserModel
@@ -87,7 +87,7 @@ func (r *UserRepo) SelectUsers() ([]entities.User, *domain.AppError) {
 // SelectUserById retrieves a user from the database based on the provided
 // user ID and returns the user if found, along with any error encountered
 // during the process.
-func (r *UserRepo) SelectUserById(userId int) (*entities.User, *domain.AppError) {
+func (r *UserRepository) SelectUserById(userId int) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 	var temp []models.TemporaryUserModel
 	query := selectTempUsers + " and u.ID=?"
@@ -109,7 +109,7 @@ func (r *UserRepo) SelectUserById(userId int) (*entities.User, *domain.AppError)
 // SelectUserByEmail retrieves a user from the database based on the
 // provided email and returns the user if found, along with any error
 // encountered during the process.
-func (r *UserRepo) SelectUserByEmail(email string) (*entities.User, *domain.AppError) {
+func (r *UserRepository) SelectUserByEmail(email string) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 	var temp []models.TemporaryUserModel
 	query := selectTempUsers + " and u.Email=?"
@@ -130,7 +130,7 @@ func (r *UserRepo) SelectUserByEmail(email string) (*entities.User, *domain.AppE
 
 // InsertUser inserts a new user into the database and returns the inserted
 // user if successful, along with any error encountered during the process.
-func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppError) {
+func (r *UserRepository) InsertUser(user entities.User) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 	userModel := mappers.FromUserToUserModel(user)
 	query := `insert into user (Username, Name, Surname, PhoneNumber, Email, 
@@ -155,7 +155,8 @@ func (r *UserRepo) InsertUser(user entities.User) (*entities.User, *domain.AppEr
 // UpdateUser updates the details of a user in the database based on the
 // provided user ID and user object and returns an error, if any,
 // encountered during the process.
-func (r *UserRepo) UpdateUser(userID int, user entities.User) *domain.AppError {
+func (r *UserRepository) UpdateUser(userID int,
+	user entities.User) *domain.AppError {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 	userModel := mappers.FromUserToUserModel(user)
 	query := `update user set Username=?, Name=?, Surname=?, PhoneNumber=? 
@@ -175,6 +176,6 @@ func (r *UserRepo) UpdateUser(userID int, user entities.User) *domain.AppError {
 	return nil
 }
 
-func NewUserRepository(db *sqlx.DB) *UserRepo {
-	return &UserRepo{db}
+func NewUserRepository(db *sqlx.DB) *UserRepository {
+	return &UserRepository{db}
 }

@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/cmd/logger"
 	"github.com/rierarizzo/cafelatte/internal/constants"
 	"os"
 )
@@ -23,7 +22,7 @@ func GetConfig() *Config {
 
 func LoadInitConfig(config *Config) {
 	// Config logger
-	logger.ConfigLogger(config.LogLevel)
+	ConfigLogger(config.LogLevel)
 
 	// Debug or release
 	gin.SetMode(gin.ReleaseMode)

@@ -30,8 +30,8 @@ type IUserService interface {
 	UpdateUser(userID int, user entities.User) *domain.AppError
 }
 
-// IUserRepo represents an interface for a user repository.
-type IUserRepo interface {
+// IUserRepository represents an interface for a user repository.
+type IUserRepository interface {
 	// SelectUsers retrieves a list of users from the database and returns the
 	// list of users if successful, along with any error encountered during the
 	// process.

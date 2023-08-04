@@ -7,7 +7,7 @@ import (
 )
 
 type ProductService struct {
-	productRepo ports.IProductRepo
+	productRepo ports.IProductRepository
 }
 
 func (p ProductService) GetProducts() ([]entities.Product, *domain.AppError) {
@@ -37,6 +37,6 @@ func (p ProductService) GetProductCategories() ([]entities.ProductCategory, *dom
 	return categories, nil
 }
 
-func NewProductService(productRepo ports.IProductRepo) *ProductService {
+func NewProductService(productRepo ports.IProductRepository) *ProductService {
 	return &ProductService{productRepo}
 }

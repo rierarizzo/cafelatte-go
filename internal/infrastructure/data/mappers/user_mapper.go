@@ -2,7 +2,7 @@ package mappers
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
-	"github.com/rierarizzo/cafelatte/internal/infra/data/models"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
 
 func FromUserModelToUser(model models.UserModel) entities.User {
