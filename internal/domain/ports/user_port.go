@@ -37,10 +37,10 @@ type IUserRepository interface {
 	// process.
 	SelectUsers() ([]entities.User, *domain.AppError)
 
-	// SelectUserById retrieves a user from the database based on the provided
+	// SelectUserByID retrieves a user from the database based on the provided
 	// user ID and returns the user if found, along with any error encountered
 	// during the process.
-	SelectUserById(userId int) (*entities.User, *domain.AppError)
+	SelectUserByID(userID int) (*entities.User, *domain.AppError)
 
 	// SelectUserByEmail retrieves a user from the database based on the
 	// provided email and returns the user if found, along with any error

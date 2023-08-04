@@ -84,15 +84,15 @@ func (r *UserRepository) SelectUsers() ([]entities.User, *domain.AppError) {
 	return users, nil
 }
 
-// SelectUserById retrieves a user from the database based on the provided
+// SelectUserByID retrieves a user from the database based on the provided
 // user ID and returns the user if found, along with any error encountered
 // during the process.
-func (r *UserRepository) SelectUserById(userId int) (*entities.User, *domain.AppError) {
+func (r *UserRepository) SelectUserByID(userID int) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 	var temp []models.TemporaryUserModel
 	query := selectTempUsers + " and u.ID=?"
 
-	err := r.db.Select(&temp, query, userId)
+	err := r.db.Select(&temp, query, userID)
 	if err != nil {
 		log.Error(err)
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)

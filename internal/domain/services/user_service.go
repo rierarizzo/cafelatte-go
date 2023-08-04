@@ -56,7 +56,7 @@ func (s *UserService) FindUserByEmail(email string) (*entities.User, *domain.App
 // ID and returns the user if found, along with any error encountered during
 // the process.
 func (s *UserService) FindUserByID(id int) (*entities.User, *domain.AppError) {
-	user, appErr := s.userRepo.SelectUserById(id)
+	user, appErr := s.userRepo.SelectUserByID(id)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
