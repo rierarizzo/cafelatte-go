@@ -15,20 +15,19 @@ type AuthenticateUsecase struct {
 // SignUp registers a new user in the system and returns an AuthorizedUser
 // along with any error encountered during the process.
 func (a AuthenticateUsecase) SignUp(user entities.User) (*entities.AuthorizedUser, *domain.AppError) {
-	// Validating user
 	if appErr := user.ValidateUser(); appErr != nil {
 		return nil, appErr
 	}
-	// Hashing password
+
 	if appErr := user.HashPassword(); appErr != nil {
 		return nil, appErr
 	}
-	// Inserting user to database
+
 	rUser, appErr := a.userService.CreateUser(user)
 	if appErr != nil {
 		return nil, appErr
 	}
-	// Generating JWT
+
 	authorized, appErr := AuthorizeUser(*rUser)
 	if appErr != nil {
 		return nil, appErr
@@ -39,7 +38,6 @@ func (a AuthenticateUsecase) SignUp(user entities.User) (*entities.AuthorizedUse
 
 func (a AuthenticateUsecase) SignIn(email string,
 	password string) (*entities.AuthorizedUser, *domain.AppError) {
-	// Select user from database
 	rUser, appErr := a.userService.FindUserByEmail(email)
 	if appErr != nil {
 		if appErr.Type == domain.NotFoundError {
@@ -48,11 +46,11 @@ func (a AuthenticateUsecase) SignIn(email string,
 
 		return nil, appErr
 	}
-	// Verifying password hash
+
 	if !utils.CheckTextHash(rUser.Password, password) {
 		return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
 	}
-	// Creating JWT
+
 	authorized, appErr := AuthorizeUser(*rUser)
 	if appErr != nil {
 		return nil, appErr

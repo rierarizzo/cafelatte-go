@@ -19,20 +19,23 @@ func ErrorMiddleware() gin.HandlerFunc {
 			ok := errors.As(err, &appErr)
 			if ok {
 				if appErr.Type == domain.NotFoundError {
-					writeError(c, http.StatusNotFound, err)
+					writeError(c, http.StatusNotFound, appErr)
 					return
 				} else if appErr.Type == domain.NotAuthorizedError ||
 					appErr.Type == domain.NotAuthenticatedError ||
 					appErr.Type == domain.TokenValidationError {
-					writeError(c, http.StatusUnauthorized, err)
+					writeError(c, http.StatusUnauthorized, appErr)
 					return
+				} else if appErr.Type == domain.BadRequestError {
+					writeError(c, http.StatusBadRequest, appErr)
 				} else {
-					writeError(c, http.StatusInternalServerError, err)
+					writeError(c, http.StatusInternalServerError, appErr)
 					return
 				}
 			}
 
-			writeError(c, http.StatusInternalServerError, err)
+			writeError(c, http.StatusInternalServerError,
+				domain.NewAppError(err, domain.UnexpectedError))
 			return
 		}
 	}
@@ -46,14 +49,7 @@ type ErrorResponse struct {
 	RequestID any       `json:"requestID"`
 }
 
-func writeError(c *gin.Context, httpStatus int, err error) {
-	var appErr *domain.AppError
-	converted := errors.As(err, &appErr)
-
-	if !converted {
-		appErr = domain.NewAppError(err, domain.UnexpectedError)
-	}
-
+func writeError(c *gin.Context, httpStatus int, appErr *domain.AppError) {
 	response := ErrorResponse{
 		Status:    httpStatus,
 		ErrorType: appErr.Type,

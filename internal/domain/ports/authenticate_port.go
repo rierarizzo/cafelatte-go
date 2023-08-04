@@ -13,5 +13,6 @@ type IAuthenticateUsecase interface {
 	// SignIn authenticates a user with the provided email and password and
 	// returns an AuthorizedUser if the authentication is successful, along
 	// with any error encountered during the process.
-	SignIn(email, password string) (*entities.AuthorizedUser, *domain.AppError)
+	SignIn(email string,
+		password string) (*entities.AuthorizedUser, *domain.AppError)
 }
