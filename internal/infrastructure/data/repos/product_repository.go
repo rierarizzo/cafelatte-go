@@ -91,6 +91,6 @@ func (p ProductRepository) SelectProductCategories() ([]entities.ProductCategory
 	return productCategories, nil
 }
 
-func NewProductRepo(db *sqlx.DB) *ProductRepository {
+func NewProductRepository(db *sqlx.DB) *ProductRepository {
 	return &ProductRepository{db}
 }

@@ -133,8 +133,15 @@ func (r *UserRepository) SelectUserByEmail(email string) (*entities.User, *domai
 func (r *UserRepository) InsertUser(user entities.User) (*entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 	userModel := mappers.FromUserToUserModel(user)
-	query := `insert into user (Username, Name, Surname, PhoneNumber, Email, 
-                  Password, RoleCode) values (?,?,?,?,?,?,?)`
+	query := `insert into user (
+                  Username, 
+                  Name, 
+                  Surname, 
+                  PhoneNumber, 
+                  Email, 
+                  Password, 
+                  RoleCode) 
+			values (?,?,?,?,?,?,?)`
 
 	result, err := r.db.Exec(query, userModel.Username, userModel.Name,
 		userModel.Surname, userModel.PhoneNumber, userModel.Email,
@@ -159,8 +166,12 @@ func (r *UserRepository) UpdateUser(userID int,
 	user entities.User) *domain.AppError {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 	userModel := mappers.FromUserToUserModel(user)
-	query := `update user set Username=?, Name=?, Surname=?, PhoneNumber=? 
-            	where ID=?`
+	query := `update user set 
+                Username=?, 
+                Name=?, 
+                Surname=?, 
+                PhoneNumber=? 
+            where ID=?`
 
 	_, err := r.db.Exec(query, userModel.Username, userModel.Name,
 		userModel.Surname, userModel.PhoneNumber, userID)

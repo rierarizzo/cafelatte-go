@@ -7,6 +7,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 	"github.com/sirupsen/logrus"
+	"slices"
 	"strings"
 )
 
@@ -24,12 +25,6 @@ type User struct {
 	PaymentCards []PaymentCard
 }
 
-var (
-	invalidUserRoleError        = errors.New("invalid role")
-	invalidUserPhoneNumberError = errors.New("invalid phone number")
-	invalidUserEmailError       = errors.New("invalid email")
-)
-
 func (u *User) HashPassword() *domain.AppError {
 	hashed, appErr := utils.HashText(u.Password)
 	if appErr != nil {
@@ -40,8 +35,27 @@ func (u *User) HashPassword() *domain.AppError {
 	return nil
 }
 
+func (u *User) ValidateUser() *domain.AppError {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
+	if appErr := u.validateRole(); appErr != nil {
+		log.Error(appErr)
+		return appErr
+	}
+	if appErr := u.validatePhoneNumber(); appErr != nil {
+		log.Error(appErr)
+		return appErr
+	}
+	if appErr := u.validateEmail(); appErr != nil {
+		log.Error(appErr)
+		return appErr
+	}
+
+	return nil
+}
+
 func (u *User) validateRole() *domain.AppError {
-	if u.RoleCode != "A" && u.RoleCode != "E" && u.RoleCode != "C" {
+	if !slices.Contains([]string{"A", "E", "C"}, u.RoleCode) {
 		return domain.NewAppError(invalidUserRoleError, domain.ValidationError)
 	}
 
@@ -65,21 +79,8 @@ func (u *User) validateEmail() *domain.AppError {
 	return nil
 }
 
-func (u *User) ValidateUser() *domain.AppError {
-	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
-	if appErr := u.validateRole(); appErr != nil {
-		log.Error(appErr)
-		return appErr
-	}
-	if appErr := u.validatePhoneNumber(); appErr != nil {
-		log.Error(appErr)
-		return appErr
-	}
-	if appErr := u.validateEmail(); appErr != nil {
-		log.Error(appErr)
-		return appErr
-	}
-
-	return nil
-}
+var (
+	invalidUserRoleError        = errors.New("invalid role")
+	invalidUserPhoneNumberError = errors.New("invalid phone number")
+	invalidUserEmailError       = errors.New("invalid email")
+)

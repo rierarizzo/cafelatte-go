@@ -45,7 +45,7 @@ func Server() {
 	paymentCardHandler := handlers.NewPaymentCardHandler(paymentCardService)
 
 	// Products instance
-	productRepo := repos.NewProductRepo(db)
+	productRepo := repos.NewProductRepository(db)
 	productService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(productService)
 
