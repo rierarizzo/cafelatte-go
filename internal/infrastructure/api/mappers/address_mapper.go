@@ -15,6 +15,15 @@ func FromAddressReqToAddress(req dto.AddressRequest) entities.Address {
 	}
 }
 
+func FromAddressReqSliceToAddressSlice(req []dto.AddressRequest) []entities.Address {
+	addresses := make([]entities.Address, 0)
+	for _, v := range req {
+		addresses = append(addresses, FromAddressReqToAddress(v))
+	}
+
+	return addresses
+}
+
 func FromAddressToAddressRes(address entities.Address) dto.AddressResponse {
 	return dto.AddressResponse{
 		Type:       address.Type,
@@ -22,4 +31,13 @@ func FromAddressToAddressRes(address entities.Address) dto.AddressResponse {
 		CityID:     address.CityID,
 		Detail:     address.Detail,
 	}
+}
+
+func FromAddressSliceToAddressResSlice(addresses []entities.Address) []dto.AddressResponse {
+	res := make([]dto.AddressResponse, 0)
+	for _, v := range addresses {
+		res = append(res, FromAddressToAddressRes(v))
+	}
+
+	return res
 }

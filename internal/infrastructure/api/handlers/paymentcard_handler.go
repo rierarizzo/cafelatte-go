@@ -2,49 +2,62 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/internal/constants"
-	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
-	entities2 "github.com/rierarizzo/cafelatte/internal/infrastructure/security/claims"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 	"net/http"
+	"strconv"
 )
 
 type PaymentCardHandler struct {
 	paymentCardService ports.IPaymentCardService
 }
 
-func (h *PaymentCardHandler) AddUserPaymentCards(c *gin.Context) {
-	var cardsRequest []dto.PaymentCardRequest
-	err := c.BindJSON(&cardsRequest)
+func (h *PaymentCardHandler) GetCardsByUserID(c *gin.Context) {
+	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
 		return
 	}
 
-	cards := make([]entities.PaymentCard, 0)
-	for _, v := range cardsRequest {
-		cards = append(cards, mappers.FromPaymentCardReqToPaymentCard(v))
+	cards, appErr := h.paymentCardService.GetCardsByUserID(userID)
+	if appErr != nil {
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
+		return
 	}
 
-	userClaims := c.MustGet(constants.UserClaimsKey).(*entities2.UserClaims)
+	utils.RespondWithJSON(c, http.StatusOK,
+		mappers.FromCardSliceToCardResSlice(cards))
+}
 
-	cards, appErr := h.paymentCardService.AddUserPaymentCard(userClaims.ID,
-		cards)
+func (h *PaymentCardHandler) AddUserCards(c *gin.Context) {
+	var req []dto.PaymentCardRequest
+	userID, err := strconv.Atoi(c.Param("userID"))
+	if err != nil {
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
+		return
+	}
+
+	if err := c.BindJSON(&req); err != nil {
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
+		return
+	}
+
+	cards, appErr := h.paymentCardService.AddUserPaymentCard(userID,
+		mappers.FromCardReqSliceToCardSlice(req))
 	if appErr != nil {
 		utils.AbortWithError(c, appErr)
 		return
 	}
 
-	cardsRes := make([]dto.PaymentCardResponse, 0)
-	for _, v := range cards {
-		cardsRes = append(cardsRes, mappers.FromPaymentCardToPaymentCardRes(v))
-	}
-
-	utils.RespondWithJSON(c, http.StatusCreated, cardsRes)
+	utils.RespondWithJSON(c, http.StatusCreated,
+		mappers.FromCardSliceToCardResSlice(cards))
 }
 
 func NewPaymentCardHandler(paymentCardService ports.IPaymentCardService) *PaymentCardHandler {

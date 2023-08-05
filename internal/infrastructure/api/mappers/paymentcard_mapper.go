@@ -5,7 +5,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 )
 
-func FromPaymentCardReqToPaymentCard(req dto.PaymentCardRequest) entities.PaymentCard {
+func FromCardReqToCard(req dto.PaymentCardRequest) entities.PaymentCard {
 	return entities.PaymentCard{
 		Type:            req.Type,
 		Company:         req.Company,
@@ -17,10 +17,28 @@ func FromPaymentCardReqToPaymentCard(req dto.PaymentCardRequest) entities.Paymen
 	}
 }
 
-func FromPaymentCardToPaymentCardRes(card entities.PaymentCard) dto.PaymentCardResponse {
+func FromCardReqSliceToCardSlice(req []dto.PaymentCardRequest) []entities.PaymentCard {
+	cards := make([]entities.PaymentCard, 0)
+	for _, v := range req {
+		cards = append(cards, FromCardReqToCard(v))
+	}
+
+	return cards
+}
+
+func FromCardToCardRes(card entities.PaymentCard) dto.PaymentCardResponse {
 	return dto.PaymentCardResponse{
 		Type:       card.Type,
 		Company:    card.Company,
 		HolderName: card.HolderName,
 	}
+}
+
+func FromCardSliceToCardResSlice(cards []entities.PaymentCard) []dto.PaymentCardResponse {
+	res := make([]dto.PaymentCardResponse, 0)
+	for _, v := range cards {
+		res = append(res, FromCardToCardRes(v))
+	}
+
+	return res
 }

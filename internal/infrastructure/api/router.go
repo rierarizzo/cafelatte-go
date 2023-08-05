@@ -36,8 +36,15 @@ func Router(userHandler *handlers.UserHandler,
 	{
 		usersGroup.GET("/find", userHandler.GetUsers)
 		usersGroup.GET("/find/:userID", userHandler.FindUserByID)
-		usersGroup.POST("/add-addresses", addressHandler.AddUserAddresses)
-		usersGroup.POST("/add-paymentcards", cardHandler.AddUserPaymentCards)
+
+		usersGroup.POST("/add-addresses/:userID",
+			addressHandler.AddUserAddresses)
+		usersGroup.GET("/find-addresses/:userID",
+			addressHandler.GetAddressesByUserID)
+
+		usersGroup.POST("/add-cards/:userID", cardHandler.AddUserCards)
+		usersGroup.GET("/find-cards/:userID", cardHandler.GetCardsByUserID)
+
 		usersGroup.PUT("/update/:userID", userHandler.UpdateUser)
 		usersGroup.DELETE("/delete/:userID", userHandler.DeleteUser)
 	}
