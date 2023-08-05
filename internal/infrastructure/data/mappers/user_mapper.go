@@ -18,6 +18,15 @@ func FromUserModelToUser(model models.UserModel) entities.User {
 	}
 }
 
+func FromUserModelSliceToUserSlice(models []models.UserModel) []entities.User {
+	var users = make([]entities.User, 0)
+	for _, v := range models {
+		users = append(users, FromUserModelToUser(v))
+	}
+
+	return users
+}
+
 func FromUserToUserModel(user entities.User) models.UserModel {
 	return models.UserModel{
 		ID:          user.ID,

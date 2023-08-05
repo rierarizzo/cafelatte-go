@@ -27,3 +27,12 @@ func FromAddressModelToAddress(model models.AddressModel) entities.Address {
 		Detail:     model.Detail,
 	}
 }
+
+func FromAddressModelSliceToAddressSlice(addressesModel []models.AddressModel) []entities.Address {
+	var addresses = make([]entities.Address, 0)
+	for _, v := range addressesModel {
+		addresses = append(addresses, FromAddressModelToAddress(v))
+	}
+
+	return addresses
+}

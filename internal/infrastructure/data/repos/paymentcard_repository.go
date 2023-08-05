@@ -28,25 +28,22 @@ func (r PaymentCardRepository) SelectCardsByUserID(userID int) ([]entities.Payme
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
+			appErr := domain.NewAppErrorWithType(domain.NotFoundError)
+			return nil, appErr
 		}
 
-		return nil, domain.NewAppError(selectCardError, domain.RepositoryError)
+		appErr := domain.NewAppError(selectCardError, domain.RepositoryError)
+		return nil, appErr
 	}
 
-	var cards []entities.PaymentCard
-	for _, v := range cardsModel {
-		cards = append(cards, mappers.FromPaymentCardModelToPaymentCard(v))
-	}
-
-	return cards, nil
+	return mappers.FromCardModelSliceToCardSlice(cardsModel), nil
 }
 
 func (r PaymentCardRepository) InsertUserPaymentCards(userID int,
 	cards []entities.PaymentCard) ([]entities.PaymentCard, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
-	returnRepoError := func(err error) *domain.AppError {
+	returnError := func(err error) *domain.AppError {
 		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.NewAppErrorWithType(domain.NotFoundError)
@@ -57,7 +54,7 @@ func (r PaymentCardRepository) InsertUserPaymentCards(userID int,
 
 	tx, err := r.db.Begin()
 	if err != nil {
-		return nil, returnRepoError(err)
+		return nil, returnError(err)
 	}
 
 	insertStmnt, err := tx.Prepare(`insert into userpaymentcard (
@@ -71,7 +68,7 @@ func (r PaymentCardRepository) InsertUserPaymentCards(userID int,
                              CVV
             ) values (?,?,?,?,?,?,?,?)`)
 	if err != nil {
-		return nil, returnRepoError(err)
+		return nil, returnError(err)
 	}
 
 	sem := make(chan struct{}, 5)
@@ -88,7 +85,7 @@ func (r PaymentCardRepository) InsertUserPaymentCards(userID int,
 				wg.Done()
 				<-sem
 			}()
-			cardModel := mappers.FromPaymentCardToPaymentCardModel(card)
+			cardModel := mappers.FromCardToCardModel(card)
 
 			result, err := insertStmnt.Exec(cardModel.Type, userID,
 				cardModel.Company, cardModel.HolderName, cardModel.Number,
@@ -108,12 +105,12 @@ func (r PaymentCardRepository) InsertUserPaymentCards(userID int,
 	close(errCh)
 	for err := range errCh {
 		_ = tx.Rollback()
-		return nil, returnRepoError(err)
+		return nil, returnError(err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, returnRepoError(err)
+		return nil, returnError(err)
 	}
 
 	return cards, nil

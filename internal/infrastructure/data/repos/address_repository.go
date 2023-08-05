@@ -21,29 +21,27 @@ type AddressRepository struct {
 func (r AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Address, *domain.AppError) {
 	var addressesModel []models.AddressModel
 
-	query := "select * from useraddress where UserID=? and Status=true"
+	var query = "select * from useraddress where UserID=? and Status=true"
+
 	err := r.db.Select(&addressesModel, query, userID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
+			appErr := domain.NewAppErrorWithType(domain.NotFoundError)
+			return nil, appErr
 		}
-		return nil, domain.NewAppError(errors.Join(selectAddressError, err),
-			domain.RepositoryError)
+
+		appErr := domain.NewAppError(selectAddressError, domain.RepositoryError)
+		return nil, appErr
 	}
 
-	var addresses []entities.Address
-	for _, v := range addressesModel {
-		addresses = append(addresses, mappers.FromAddressModelToAddress(v))
-	}
-
-	return addresses, nil
+	return mappers.FromAddressModelSliceToAddressSlice(addressesModel), nil
 }
 
 func (r AddressRepository) InsertUserAddresses(userID int,
 	addresses []entities.Address) ([]entities.Address, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
-	returnRepoError := func(err error) *domain.AppError {
+	returnError := func(err error) *domain.AppError {
 		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.NewAppErrorWithType(domain.NotFoundError)
@@ -54,7 +52,7 @@ func (r AddressRepository) InsertUserAddresses(userID int,
 
 	tx, err := r.db.Begin()
 	if err != nil {
-		return nil, returnRepoError(err)
+		return nil, returnError(err)
 	}
 
 	insertStmnt, err := tx.Prepare(`insert into useraddress (
@@ -66,7 +64,7 @@ func (r AddressRepository) InsertUserAddresses(userID int,
                          Detail
                 ) values (?,?,?,?,?,?)`)
 	if err != nil {
-		return nil, returnRepoError(err)
+		return nil, returnError(err)
 	}
 
 	sem := make(chan struct{}, 5)
@@ -104,12 +102,12 @@ func (r AddressRepository) InsertUserAddresses(userID int,
 
 	for err := range errCh {
 		_ = tx.Rollback()
-		return nil, returnRepoError(err)
+		return nil, returnError(err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, returnRepoError(err)
+		return nil, returnError(err)
 	}
 
 	return addresses, nil
@@ -119,8 +117,8 @@ func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, *domain.A
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var cityName string
+	var query = "select Name from city where ID=?"
 
-	query := "select Name from city where ID=?"
 	err := r.db.Get(&cityName, query, cityID)
 	if err != nil {
 		log.Error(err)
@@ -128,8 +126,8 @@ func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, *domain.A
 			return "", domain.NewAppErrorWithType(domain.NotFoundError)
 		}
 
-		return "", domain.NewAppError(selectAddressError,
-			domain.RepositoryError)
+		appErr := domain.NewAppError(selectAddressError, domain.RepositoryError)
+		return "", appErr
 	}
 
 	return cityName, nil
@@ -139,8 +137,8 @@ func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (string, *
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var provinceName string
+	var query = "select Name from province where ID=?"
 
-	query := "select Name from province where ID=?"
 	err := r.db.Get(&provinceName, query, cityID)
 	if err != nil {
 		log.Error(err)
@@ -148,8 +146,8 @@ func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (string, *
 			return "", domain.NewAppErrorWithType(domain.NotFoundError)
 		}
 
-		return "", domain.NewAppError(selectAddressError,
-			domain.RepositoryError)
+		appErr := domain.NewAppError(selectAddressError, domain.RepositoryError)
+		return "", appErr
 	}
 
 	return provinceName, nil

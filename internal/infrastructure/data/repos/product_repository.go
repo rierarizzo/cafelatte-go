@@ -30,60 +30,48 @@ func selectProducts(db *sqlx.DB, query string,
 	args ...interface{}) ([]entities.Product, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
-	var products []entities.Product
-
-	var productsModel []models.ProductModel
+	var model []models.ProductModel
 
 	var err error
 	if len(args) > 0 {
-		err = db.Select(&productsModel, query, args[0])
+		err = db.Select(&model, query, args[0])
 	} else {
-		err = db.Select(&productsModel, query)
+		err = db.Select(&model, query)
 	}
 
 	if err != nil {
 		log.Errorf("Error in selectProducts: %v", err)
-		return nil, domain.NewAppError(selectProductError,
-			domain.RepositoryError)
+		appErr := domain.NewAppError(selectProductError, domain.RepositoryError)
+		return nil, appErr
 	}
 
-	if productsModel == nil {
+	if model == nil {
 		log.Debug("productsModel is empty")
-		return products, nil
+		return []entities.Product{}, nil
 	}
 
-	for _, v := range productsModel {
-		products = append(products, mappers.FromProductModelToProduct(v))
-	}
-
-	return products, nil
+	return mappers.FromProductModelSliceToProductSlice(model), nil
 }
 
 func (p ProductRepository) SelectProductCategories() ([]entities.ProductCategory, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
-	var productCategories []entities.ProductCategory
+	var model []models.ProductCategoryModel
 
-	var productCategoriesModel []models.ProductCategoryModel
-
-	err := p.db.Select(&productCategoriesModel, "select * from productcategory")
+	err := p.db.Select(&model, "select * from productcategory")
 	if err != nil {
 		log.Errorf("Error in SelectProductCategories: %v", err)
-		return nil, domain.NewAppError(selectProductCategoryError,
+		appErr := domain.NewAppError(selectProductCategoryError,
 			domain.RepositoryError)
+		return nil, appErr
 	}
 
-	if productCategoriesModel == nil {
+	if model == nil {
 		log.Debug("productCategoriesModel is empty")
-		return productCategories, nil
+		return []entities.ProductCategory{}, nil
 	}
 
-	for _, v := range productCategoriesModel {
-		productCategories = append(productCategories,
-			mappers.FromProductCategoryModelToProductCategory(v))
-	}
-
-	return productCategories, nil
+	return mappers.FromProductCategoryModelSliceToProductCategorySlice(model), nil
 }
 
 var (

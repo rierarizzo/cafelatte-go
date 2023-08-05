@@ -23,18 +23,15 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 		return
 	}
 
-	userResponse := make([]dto.UserResponse, 0)
-	for _, k := range users {
-		userResponse = append(userResponse, mappers.FromUserToUserRes(k))
-	}
-
-	utils.RespondWithJSON(c, http.StatusOK, userResponse)
+	utils.RespondWithJSON(c, http.StatusOK,
+		mappers.FromUserSliceToUserResSlice(users))
 }
 
 func (h *UserHandler) FindUserByID(c *gin.Context) {
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
 		return
 	}
 
@@ -48,21 +45,22 @@ func (h *UserHandler) FindUserByID(c *gin.Context) {
 }
 
 func (h *UserHandler) UpdateUser(c *gin.Context) {
+	var req dto.UpdateUserRequest
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
 		return
 	}
 
-	var updUserReq dto.UpdateUserRequest
-	err = c.BindJSON(&updUserReq)
-	if err != nil {
-		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
+	if err := c.BindJSON(&req); err != nil {
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
 		return
 	}
 
 	appErr := h.userService.UpdateUser(userID,
-		mappers.FromUpdateUserReqToUser(updUserReq))
+		mappers.FromUpdateUserReqToUser(req))
 	if appErr != nil {
 		utils.AbortWithError(c, appErr)
 		return
@@ -74,7 +72,8 @@ func (h *UserHandler) UpdateUser(c *gin.Context) {
 func (h *UserHandler) DeleteUser(c *gin.Context) {
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
 		return
 	}
 

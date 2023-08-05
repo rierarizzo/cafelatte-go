@@ -16,39 +16,39 @@ type AuthenticateHandler struct {
 
 func (h *AuthenticateHandler) SignUp(c *gin.Context) {
 	var signUpRequest dto.SignUpRequest
-	err := c.BindJSON(&signUpRequest)
-	if err != nil {
-		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
+	if err := c.BindJSON(&signUpRequest); err != nil {
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
 		return
 	}
 
-	authorizedUser, appErr := h.authUsecase.SignUp(mappers.FromSignUpReqToUser(signUpRequest))
+	authorized, appErr := h.authUsecase.SignUp(mappers.FromSignUpReqToUser(signUpRequest))
 	if appErr != nil {
 		utils.AbortWithError(c, appErr)
 		return
 	}
 
-	response := mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser)
-	utils.RespondWithJSON(c, http.StatusCreated, response)
+	utils.RespondWithJSON(c, http.StatusCreated,
+		mappers.FromAuthorizedUserToAuthorizationRes(*authorized))
 }
 
 func (h *AuthenticateHandler) SignIn(c *gin.Context) {
 	var signInRequest dto.SignInRequest
-	err := c.BindJSON(&signInRequest)
-	if err != nil {
-		utils.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
+	if err := c.BindJSON(&signInRequest); err != nil {
+		appErr := domain.NewAppError(err, domain.BadRequestError)
+		utils.AbortWithError(c, appErr)
 		return
 	}
 
-	authorizedUser, appErr := h.authUsecase.SignIn(signInRequest.Email,
+	authorized, appErr := h.authUsecase.SignIn(signInRequest.Email,
 		signInRequest.Password)
 	if appErr != nil {
 		utils.AbortWithError(c, appErr)
 		return
 	}
 
-	response := mappers.FromAuthorizedUserToAuthorizationRes(*authorizedUser)
-	utils.RespondWithJSON(c, http.StatusOK, response)
+	utils.RespondWithJSON(c, http.StatusOK,
+		mappers.FromAuthorizedUserToAuthorizationRes(*authorized))
 }
 
 func NewAuthHandler(authUsecase ports.IAuthenticateUsecase) *AuthenticateHandler {

@@ -28,6 +28,15 @@ func FromUserToUserRes(user entities.User) dto.UserResponse {
 	}
 }
 
+func FromUserSliceToUserResSlice(users []entities.User) []dto.UserResponse {
+	var res = make([]dto.UserResponse, 0)
+	for _, v := range users {
+		res = append(res, FromUserToUserRes(v))
+	}
+
+	return res
+}
+
 func FromUserToLoggedUser(user entities.User) dto.LoggedUserResponse {
 	return dto.LoggedUserResponse{
 		ID:       user.ID,
