@@ -6,7 +6,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
 )
 
-func FromAddressToAddressModel(address entities.Address) models.AddressModel {
+func AddressToModel(address entities.Address) models.AddressModel {
 	return models.AddressModel{
 		ID:         sql.NullInt64{Int64: int64(address.ID)},
 		Type:       address.Type,
@@ -17,7 +17,7 @@ func FromAddressToAddressModel(address entities.Address) models.AddressModel {
 	}
 }
 
-func FromAddressModelToAddress(model models.AddressModel) entities.Address {
+func ModelToAddress(model models.AddressModel) entities.Address {
 	return entities.Address{
 		ID:         int(model.ID.Int64),
 		Type:       model.Type,
@@ -28,10 +28,10 @@ func FromAddressModelToAddress(model models.AddressModel) entities.Address {
 	}
 }
 
-func FromAddressModelSliceToAddressSlice(addressesModel []models.AddressModel) []entities.Address {
+func ModelSliceToAddresses(addressesModel []models.AddressModel) []entities.Address {
 	var addresses = make([]entities.Address, 0)
 	for _, v := range addressesModel {
-		addresses = append(addresses, FromAddressModelToAddress(v))
+		addresses = append(addresses, ModelToAddress(v))
 	}
 
 	return addresses

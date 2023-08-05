@@ -34,7 +34,7 @@ func (r AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Addre
 		return nil, appErr
 	}
 
-	return mappers.FromAddressModelSliceToAddressSlice(addressesModel), nil
+	return mappers.ModelSliceToAddresses(addressesModel), nil
 }
 
 func (r AddressRepository) InsertUserAddresses(userID int,
@@ -81,7 +81,7 @@ func (r AddressRepository) InsertUserAddresses(userID int,
 				wg.Done()
 				<-sem
 			}()
-			addressModel := mappers.FromAddressToAddressModel(address)
+			addressModel := mappers.AddressToModel(address)
 
 			result, err := insertStmnt.Exec(addressModel.Type, userID,
 				addressModel.ProvinceID, addressModel.CityID,
