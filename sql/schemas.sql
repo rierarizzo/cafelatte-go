@@ -169,7 +169,7 @@ create table product
     ID           int auto_increment,
     Name         varchar(50)   not null,
     Description  varchar(150)  not null,
-    ImageURL     varchar(200),
+    ImageURL     varchar(400),
     Price        decimal(6, 2) not null,
     CategoryCode varchar(6)    not null,
     Stock        int           not null,

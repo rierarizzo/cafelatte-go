@@ -22,6 +22,7 @@ func FromUserToUserRes(user entities.User) dto.UserResponse {
 	return dto.UserResponse{
 		ID:           user.ID,
 		CompleteName: strings.Join([]string{user.Name, user.Surname}, " "),
+		PhoneNumber:  user.PhoneNumber,
 		Username:     user.Username,
 		Email:        user.Email,
 		Role:         user.RoleCode,
