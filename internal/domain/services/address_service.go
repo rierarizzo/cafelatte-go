@@ -4,6 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
+	"github.com/rierarizzo/cafelatte/internal/domain/validators"
 )
 
 type AddressService struct {
@@ -26,7 +27,7 @@ func (s AddressService) GetAddressesByUserID(userID int) ([]entities.Address, *d
 func (s AddressService) AddUserAddresses(userID int,
 	addresses []entities.Address) ([]entities.Address, *domain.AppError) {
 	for _, v := range addresses {
-		if appErr := v.ValidateAddress(); appErr != nil {
+		if appErr := validators.ValidateAddress(&v); appErr != nil {
 			return nil, appErr
 		}
 	}

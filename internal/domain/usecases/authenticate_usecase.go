@@ -4,6 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
+	"github.com/rierarizzo/cafelatte/internal/domain/validators"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/security"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
@@ -15,7 +16,7 @@ type AuthenticateUsecase struct {
 // SignUp registers a new user in the system and returns an AuthorizedUser
 // along with any error encountered during the process.
 func (a AuthenticateUsecase) SignUp(user entities.User) (*entities.AuthorizedUser, *domain.AppError) {
-	if appErr := user.ValidateUser(); appErr != nil {
+	if appErr := validators.ValidateUser(&user); appErr != nil {
 		return nil, appErr
 	}
 

@@ -4,6 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
+	"github.com/rierarizzo/cafelatte/internal/domain/validators"
 	"github.com/rierarizzo/cafelatte/internal/utils"
 )
 
@@ -27,11 +28,11 @@ func (s PaymentCardService) GetCardsByUserID(userID int) ([]entities.PaymentCard
 func (s PaymentCardService) AddUserPaymentCard(userID int,
 	cards []entities.PaymentCard) ([]entities.PaymentCard, *domain.AppError) {
 	for k, v := range cards {
-		if appErr := v.ValidateExpirationDate(); appErr != nil {
+		if appErr := validators.ValidatePaymentCard(&v); appErr != nil {
 			return nil, appErr
 		}
 
-		if appErr := v.ValidatePaymentCard(); appErr != nil {
+		if appErr := validators.ValidateExpirationDate(&v); appErr != nil {
 			return nil, appErr
 		}
 

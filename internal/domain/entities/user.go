@@ -1,14 +1,8 @@
 package entities
 
 import (
-	"errors"
-	"github.com/rierarizzo/cafelatte/internal/constants"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/params"
 	"github.com/rierarizzo/cafelatte/internal/utils"
-	"github.com/sirupsen/logrus"
-	"slices"
-	"strings"
 )
 
 type User struct {
@@ -32,53 +26,3 @@ func (u *User) HashPassword() *domain.AppError {
 
 	return nil
 }
-
-func (u *User) ValidateUser() *domain.AppError {
-	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
-	if appErr := u.validateRole(); appErr != nil {
-		log.Error(appErr)
-		return appErr
-	}
-	if appErr := u.validatePhoneNumber(); appErr != nil {
-		log.Error(appErr)
-		return appErr
-	}
-	if appErr := u.validateEmail(); appErr != nil {
-		log.Error(appErr)
-		return appErr
-	}
-
-	return nil
-}
-
-func (u *User) validateRole() *domain.AppError {
-	if !slices.Contains([]string{"A", "E", "C"}, u.RoleCode) {
-		return domain.NewAppError(invalidUserRoleError, domain.ValidationError)
-	}
-
-	return nil
-}
-
-func (u *User) validatePhoneNumber() *domain.AppError {
-	if len(u.PhoneNumber) != 10 {
-		return domain.NewAppError(invalidUserPhoneNumberError,
-			domain.ValidationError)
-	}
-
-	return nil
-}
-
-func (u *User) validateEmail() *domain.AppError {
-	if !strings.Contains(u.Email, "@") {
-		return domain.NewAppError(invalidUserEmailError, domain.ValidationError)
-	}
-
-	return nil
-}
-
-var (
-	invalidUserRoleError        = errors.New("invalid role")
-	invalidUserPhoneNumberError = errors.New("invalid phone number")
-	invalidUserEmailError       = errors.New("invalid email")
-)
