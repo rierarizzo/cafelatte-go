@@ -20,6 +20,7 @@ func Router(userHandler *handlers.UserHandler,
 	router.Use(cors.New(cors.Config{
 		AllowAllOrigins:  true,
 		AllowCredentials: true,
+		AllowHeaders:     []string{"Origin, X-Requested-With, Content-Type, Accept, Authorization"},
 	}))
 	router.Use(middlewares.RequestIDMiddleware())
 	router.Use(middlewares.LoggingMiddleware())
