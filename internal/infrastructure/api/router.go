@@ -21,6 +21,7 @@ func Router(userHandler *handlers.UserHandler,
 		AllowAllOrigins:  true,
 		AllowCredentials: true,
 		AllowHeaders:     []string{"Origin, X-Requested-With, Content-Type, Accept, Authorization"},
+		AllowMethods:     []string{"POST, GET, OPTIONS, PUT, DELETE, UPDATE"},
 	}))
 	router.Use(middlewares.RequestIDMiddleware())
 	router.Use(middlewares.LoggingMiddleware())
