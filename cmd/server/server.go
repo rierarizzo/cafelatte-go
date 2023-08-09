@@ -11,7 +11,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/repos"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/repositories"
 )
 
 func Server() {
@@ -25,7 +25,7 @@ func Server() {
 	db := data.Connect(cf.DSN)
 
 	// Users instance
-	userRepo := repos.NewUserRepository(db)
+	userRepo := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepo)
 	userHandler := handlers.NewUserHandler(userService)
 
@@ -34,17 +34,17 @@ func Server() {
 	authHandler := handlers.NewAuthHandler(authUsecase)
 
 	// Addresses instance
-	addressRepo := repos.NewAddressRepository(db)
+	addressRepo := repositories.NewAddressRepository(db)
 	addressService := services.NewAddressService(addressRepo)
 	addressHandler := handlers.NewAddressHandler(addressService)
 
 	// PaymentCards instance
-	paymentCardRepo := repos.NewPaymentCardRepository(db)
+	paymentCardRepo := repositories.NewPaymentCardRepository(db)
 	paymentCardService := services.NewPaymentCardService(paymentCardRepo)
 	paymentCardHandler := handlers.NewPaymentCardHandler(paymentCardService)
 
 	// Products instance
-	productRepo := repos.NewProductRepository(db)
+	productRepo := repositories.NewProductRepository(db)
 	productService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(productService)
 
