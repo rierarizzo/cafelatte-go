@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: Cafelatte API
+  description: An API for managing users, products, and purchases of an online coffee store.
+  version: 1.0.0
+
+paths:
+  /auth/signup:
+    post:
+      summary: Register a new user in the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The username of the user.
+                name:
+                  type: string
+                  description: The name of the user.
+                surname:
+                  type: string
+                  description: The surname of the user.
+                phone:
+                  type: string
+                  description: The phone number of the user.
+                email:
+                  type: string
+                  description: The email address of the user.
+                password:
+                  type: string
+                  description: The password of the user.
+                role:
+                  type: string
+                  description: The role code of the user.
+      responses:
+        '201':
+          description: User created successfully.
+        '400':
+          description: Malformed or invalid data in the provided user.
+        '500':
+          description: Unexpected server error.
