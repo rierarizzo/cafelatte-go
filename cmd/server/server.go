@@ -1,8 +1,7 @@
-package cmd
+package server
 
 import (
 	"fmt"
-	"github.com/rierarizzo/cafelatte/cmd/config"
 	"github.com/rierarizzo/cafelatte/internal/domain/usecases"
 	"github.com/sirupsen/logrus"
 	"net/http"
@@ -19,8 +18,8 @@ func Server() {
 	start := time.Now()
 
 	// Map config environment variable to struct
-	cf := config.GetConfig()
-	config.LoadInitConfig(cf)
+	cf := GetConfig()
+	LoadInitConfig(cf)
 
 	// Connect to database
 	db := data.Connect(cf.DSN)

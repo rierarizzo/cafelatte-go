@@ -1,8 +1,9 @@
-package config
+package server
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/constants"
+	"github.com/sirupsen/logrus"
 	"os"
 )
 
@@ -26,4 +27,16 @@ func LoadInitConfig(config *Config) {
 
 	// Debug or release
 	gin.SetMode(gin.ReleaseMode)
+}
+
+func Logger(logLevel string) {
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logrus.SetReportCaller(false)
+
+	level, err := logrus.ParseLevel(logLevel)
+	if err != nil {
+		logrus.Panic(err)
+	}
+
+	logrus.SetLevel(level)
 }
