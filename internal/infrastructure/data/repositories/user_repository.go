@@ -24,7 +24,7 @@ func (r *UserRepository) SelectUsers() ([]entities.User, *domain.AppError) {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var usersModel []models.UserModel
-	var query = "select * from user where Status=true"
+	var query = "select * from User where Status=true"
 
 	err := r.db.Select(&usersModel, query)
 	if err != nil {
@@ -46,7 +46,7 @@ func (r *UserRepository) SelectUserByID(userID int) (*entities.User, *domain.App
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var userModel models.UserModel
-	var query = "select * from user u where u.Status=true and u.ID=?"
+	var query = "select * from User u where u.Status=true and u.ID=?"
 
 	err := r.db.Get(&userModel, query, userID)
 	if err != nil {
@@ -69,7 +69,7 @@ func (r *UserRepository) SelectUserByEmail(email string) (*entities.User, *domai
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var userModel models.UserModel
-	var query = "select * from user u where u.Status=true and u.Email=?"
+	var query = "select * from User u where u.Status=true and u.Email=?"
 
 	err := r.db.Get(&userModel, query, email)
 	if err != nil {
@@ -91,7 +91,7 @@ func (r *UserRepository) InsertUser(user entities.User) (*entities.User, *domain
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var userModel = mappers.FromUserToUserModel(user)
-	var query = `insert into user (
+	var query = `insert into User (
                   Username, 
                   Name, 
                   Surname, 
@@ -125,7 +125,7 @@ func (r *UserRepository) UpdateUser(userID int,
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var userModel = mappers.FromUserToUserModel(user)
-	var query = `update user set 
+	var query = `update User set 
                 Username=?, 
                 Name=?, 
                 Surname=?, 
@@ -149,7 +149,7 @@ func (r *UserRepository) UpdateUser(userID int,
 func (r *UserRepository) DeleteUser(userID int) *domain.AppError {
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
-	var query = `update user set Status=false where ID=?`
+	var query = `update User set Status=false where ID=?`
 
 	_, err := r.db.Exec(query, userID)
 	if err != nil {

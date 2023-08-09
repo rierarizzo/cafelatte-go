@@ -23,7 +23,7 @@ func (r PaymentCardRepository) SelectCardsByUserID(userID int) ([]entities.Payme
 
 	var cardsModel []models.PaymentCardModel
 
-	query := "select * from userpaymentcard where UserID=? and Status=true"
+	query := "select * from UserPaymentCard where UserID=? and Status=true"
 	err := r.db.Select(&cardsModel, query, userID)
 	if err != nil {
 		log.Error(err)
@@ -57,7 +57,7 @@ func (r PaymentCardRepository) InsertUserPaymentCards(userID int,
 		return nil, returnError(err)
 	}
 
-	insertStmnt, err := tx.Prepare(`insert into userpaymentcard (
+	insertStmnt, err := tx.Prepare(`insert into UserPaymentCard (
                              Type, 
                              UserID, 
                              Company, 

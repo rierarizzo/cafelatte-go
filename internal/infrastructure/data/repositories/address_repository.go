@@ -21,7 +21,7 @@ type AddressRepository struct {
 func (r AddressRepository) SelectAddressesByUserID(userID int) ([]entities.Address, *domain.AppError) {
 	var addressesModel []models.AddressModel
 
-	var query = "select * from useraddress where UserID=? and Status=true"
+	var query = "select * from UserAddress where UserID=? and Status=true"
 
 	err := r.db.Select(&addressesModel, query, userID)
 	if err != nil {
@@ -55,7 +55,7 @@ func (r AddressRepository) InsertUserAddresses(userID int,
 		return nil, returnError(err)
 	}
 
-	insertStmnt, err := tx.Prepare(`insert into useraddress (
+	insertStmnt, err := tx.Prepare(`insert into UserAddress (
                          Type, 
                          UserID, 
                          ProvinceID, 
@@ -117,7 +117,7 @@ func (r AddressRepository) SelectCityNameByCityID(cityID int) (string, *domain.A
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var cityName string
-	var query = "select Name from city where ID=?"
+	var query = "select Name from City where ID=?"
 
 	err := r.db.Get(&cityName, query, cityID)
 	if err != nil {
@@ -137,7 +137,7 @@ func (r AddressRepository) SelectProvinceNameByProvinceID(cityID int) (string, *
 	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
 
 	var provinceName string
-	var query = "select Name from province where ID=?"
+	var query = "select Name from Province where ID=?"
 
 	err := r.db.Get(&provinceName, query, cityID)
 	if err != nil {

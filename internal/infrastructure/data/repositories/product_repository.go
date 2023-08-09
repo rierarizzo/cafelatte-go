@@ -17,12 +17,12 @@ type ProductRepository struct {
 }
 
 func (p ProductRepository) SelectProducts() ([]entities.Product, *domain.AppError) {
-	return selectProducts(p.db, "select * from product where Status=true")
+	return selectProducts(p.db, "select * from Product where Status=true")
 }
 
 func (p ProductRepository) SelectProductsByCategory(categoryCode string) ([]entities.Product, *domain.AppError) {
 	return selectProducts(p.db,
-		"select * from product where CategoryCode=? and Status=true",
+		"select * from Product where CategoryCode=? and Status=true",
 		categoryCode)
 }
 
