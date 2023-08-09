@@ -24,12 +24,12 @@ func (a AuthenticateUsecase) SignUp(user entities.User) (*entities.AuthorizedUse
 		return nil, appErr
 	}
 
-	rUser, appErr := a.userService.CreateUser(user)
+	returnedUser, appErr := a.userService.CreateUser(user)
 	if appErr != nil {
 		return nil, appErr
 	}
 
-	authorized, appErr := AuthorizeUser(*rUser)
+	authorized, appErr := AuthorizeUser(*returnedUser)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -39,7 +39,7 @@ func (a AuthenticateUsecase) SignUp(user entities.User) (*entities.AuthorizedUse
 
 func (a AuthenticateUsecase) SignIn(email string,
 	password string) (*entities.AuthorizedUser, *domain.AppError) {
-	rUser, appErr := a.userService.FindUserByEmail(email)
+	returnedUser, appErr := a.userService.FindUserByEmail(email)
 	if appErr != nil {
 		if appErr.Type == domain.NotFoundError {
 			return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
@@ -48,11 +48,11 @@ func (a AuthenticateUsecase) SignIn(email string,
 		return nil, appErr
 	}
 
-	if !utils.CheckTextHash(rUser.Password, password) {
+	if !utils.CheckTextHash(returnedUser.Password, password) {
 		return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)
 	}
 
-	authorized, appErr := AuthorizeUser(*rUser)
+	authorized, appErr := AuthorizeUser(*returnedUser)
 	if appErr != nil {
 		return nil, appErr
 	}

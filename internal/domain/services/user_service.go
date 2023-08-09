@@ -12,19 +12,19 @@ type UserService struct {
 }
 
 func (s *UserService) CreateUser(user entities.User) (*entities.User, *domain.AppError) {
-	rUser, appErr := s.userRepo.InsertUser(user)
+	returnedUser, appErr := s.userRepo.InsertUser(user)
 	if appErr != nil {
 		return nil, domain.NewAppError(appErr, domain.UnexpectedError)
 	}
 
-	return rUser, nil
+	return returnedUser, nil
 }
 
 // GetUsers retrieves a list of users from the system and returns the list
 // of users if successful, along with any error encountered during the
 // process.
 func (s *UserService) GetUsers() ([]entities.User, *domain.AppError) {
-	rUsers, appErr := s.userRepo.SelectUsers()
+	returnedUsers, appErr := s.userRepo.SelectUsers()
 	if appErr != nil {
 		if appErr.Type == domain.NotFoundError {
 			return []entities.User{}, nil
@@ -33,7 +33,7 @@ func (s *UserService) GetUsers() ([]entities.User, *domain.AppError) {
 		return nil, appErr
 	}
 
-	return rUsers, nil
+	return returnedUsers, nil
 }
 
 // FindUserByEmail retrieves a user from the system based on the
