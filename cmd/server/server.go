@@ -48,9 +48,15 @@ func Server() {
 	productService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(productService)
 
+	// Purchase instance
+	orderRepo := repositories.NewOrderRepository(db)
+	orderService := services.NewOrderService(orderRepo)
+	purchaseUsecase := usecases.NewPurchaseUsecase(orderService)
+	purchaseHandler := handlers.NewPurchaseHandler(purchaseUsecase)
+
 	// Initialize router with all paths
 	router := api.Router(userHandler, authHandler, addressHandler,
-		paymentCardHandler, productHandler)
+		paymentCardHandler, productHandler, purchaseHandler)
 
 	elapsed := time.Since(start).Seconds()
 

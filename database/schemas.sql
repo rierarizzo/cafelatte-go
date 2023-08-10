@@ -148,7 +148,7 @@ create table PurchaseOrder
     Notes             varchar(200),
     TotalAmount       decimal(10, 2) default 0.00,
     OrderedAt         datetime       default current_timestamp,
-    OrderStatus       char(2),
+    OrderStatus       char(2)        default 'PE',
     CreatedAt         datetime       default current_timestamp,
     UpdatedAt         datetime       default current_timestamp on update current_timestamp,
     primary key (ID),
@@ -161,7 +161,7 @@ create table PurchaseOrder
     index IdxOrderStatus (OrderStatus) -- Índice en OrderStatus para búsquedas por estado
 );
 
-create table ProductPurchased
+create table PurchasedProduct
 (
     ID        int auto_increment,
     OrderID   int not null,

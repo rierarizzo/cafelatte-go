@@ -13,7 +13,8 @@ func Router(userHandler *handlers.UserHandler,
 	authHandler *handlers.AuthenticateHandler,
 	addressHandler *handlers.AddressHandler,
 	cardHandler *handlers.PaymentCardHandler,
-	productHandler *handlers.ProductHandler) http.Handler {
+	productHandler *handlers.ProductHandler,
+	purchaseHandler *handlers.PurchaseHandler) http.Handler {
 
 	router := gin.New()
 
@@ -56,6 +57,12 @@ func Router(userHandler *handlers.UserHandler,
 		productsGroup.GET("/find", productHandler.GetProducts)
 		productsGroup.GET("/find/categories",
 			productHandler.GetProductCategories)
+	}
+
+	purchaseGroup := router.Group("/purchase")
+	purchaseGroup.Use(middlewares.AuthenticateMiddleware())
+	{
+		purchaseGroup.POST("/", purchaseHandler.Purchase)
 	}
 
 	return router

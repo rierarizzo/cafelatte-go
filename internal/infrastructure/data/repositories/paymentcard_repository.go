@@ -65,8 +65,7 @@ func (r PaymentCardRepository) InsertUserPaymentCards(userID int,
                              Number, 
                              ExpirationYear, 
                              ExpirationMonth, 
-                             CVV
-            ) values (?,?,?,?,?,?,?,?)`)
+                             CVV) values (?,?,?,?,?,?,?,?)`)
 	if err != nil {
 		return nil, returnError(err)
 	}
