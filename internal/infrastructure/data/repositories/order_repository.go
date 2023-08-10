@@ -47,7 +47,7 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 	}
 
 	orderID, _ := result.LastInsertId()
-	insertProductStmnt, err := tx.Prepare(`insert into ProductPurchased (
+	insertProductStmnt, err := tx.Prepare(`insert into PurchasedProduct (
                               OrderID, 
                               ProductID, 
                               Quantity) values (?,?,?)`)
@@ -87,7 +87,21 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 		return rollbackTxAndReturnErr(tx, err)
 	}
 
-	// todo: update the "TotalAmount" field
+	var totalAmount float64
+
+	var query = `select sum(pp.Quantity * p.Price) from PurchasedProduct pp 
+				inner join product p on pp.ProductID = p.ID where OrderID=?`
+
+	err = tx.Get(&totalAmount, query, orderID)
+	if err != nil {
+		return rollbackTxAndReturnErr(tx, err)
+	}
+
+	_, err = tx.Exec(`update PurchaseOrder set TotalAmount=? where ID=?`,
+		totalAmount, orderID)
+	if err != nil {
+		return rollbackTxAndReturnErr(tx, err)
+	}
 
 	err = tx.Commit()
 	if err != nil {
