@@ -17,6 +17,14 @@ type OrderRepository struct {
 }
 
 func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int, *domain.AppError) {
+	rollbackTxAndReturnZeroAndErr := func(tx *sqlx.Tx,
+		err error) (int, *domain.AppError) {
+		log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
+		_ = tx.Rollback()
+		log.Error(err)
+		return 0, domain.NewAppError(err, domain.RepositoryError)
+	}
 
 	tx, err := r.db.Beginx()
 	if err != nil {
@@ -78,49 +86,27 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 		return rollbackTxAndReturnZeroAndErr(tx, err)
 	}
 
-	return int(orderID), updateTotalAmount(tx, int(orderID))
-}
-
-func updateTotalAmount(tx *sqlx.Tx, orderID int) *domain.AppError {
-	var totalAmount float64
-
 	var query = `select sum(pp.Quantity * p.Price) from PurchasedProduct pp 
 				inner join Product p on pp.ProductID = p.ID where OrderID=?`
 
-	err := tx.Get(&totalAmount, query, orderID)
+	var totalAmount float64
+	err = tx.Get(&totalAmount, query, orderID)
 	if err != nil {
-		return rollbackTxAndReturnErr(tx, err)
+		return rollbackTxAndReturnZeroAndErr(tx, err)
 	}
 
 	_, err = tx.Exec("update PurchaseOrder set TotalAmount=? where ID=?",
 		totalAmount, orderID)
 	if err != nil {
-		return rollbackTxAndReturnErr(tx, err)
+		return rollbackTxAndReturnZeroAndErr(tx, err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return rollbackTxAndReturnErr(tx, err)
+		return rollbackTxAndReturnZeroAndErr(tx, err)
 	}
 
-	return nil
-}
-
-func rollbackTxAndReturnZeroAndErr(tx *sqlx.Tx,
-	err error) (int, *domain.AppError) {
-	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
-	_ = tx.Rollback()
-	log.Error(err)
-	return 0, domain.NewAppError(err, domain.RepositoryError)
-}
-
-func rollbackTxAndReturnErr(tx *sqlx.Tx, err error) *domain.AppError {
-	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
-	_ = tx.Rollback()
-	log.Error(err)
-	return domain.NewAppError(err, domain.RepositoryError)
+	return int(orderID), nil
 }
 
 func NewOrderRepository(db *sqlx.DB) *OrderRepository {
