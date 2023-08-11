@@ -2,10 +2,9 @@ package paymentcard
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/domain/paymentcard"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/user"
 )
 
-func FromCardReqToCard(req user.PaymentCardRequest) paymentcard.PaymentCard {
+func fromCreateRequestToCard(req CreateRequest) paymentcard.PaymentCard {
 	return paymentcard.PaymentCard{
 		Type:            req.Type,
 		Company:         req.Company,
@@ -17,16 +16,16 @@ func FromCardReqToCard(req user.PaymentCardRequest) paymentcard.PaymentCard {
 	}
 }
 
-func FromCardReqSliceToCardSlice(req []user.PaymentCardRequest) []paymentcard.PaymentCard {
+func fromCreateRequestToCards(req []CreateRequest) []paymentcard.PaymentCard {
 	cards := make([]paymentcard.PaymentCard, 0)
 	for _, v := range req {
-		cards = append(cards, FromCardReqToCard(v))
+		cards = append(cards, fromCreateRequestToCard(v))
 	}
 
 	return cards
 }
 
-func FromCardToCardRes(card paymentcard.PaymentCard) Response {
+func fromCardToResponse(card paymentcard.PaymentCard) Response {
 	return Response{
 		Type:       card.Type,
 		Company:    card.Company,
@@ -34,10 +33,10 @@ func FromCardToCardRes(card paymentcard.PaymentCard) Response {
 	}
 }
 
-func FromCardSliceToCardResSlice(cards []paymentcard.PaymentCard) []Response {
+func fromCardsToResponse(cards []paymentcard.PaymentCard) []Response {
 	res := make([]Response, 0)
 	for _, v := range cards {
-		res = append(res, FromCardToCardRes(v))
+		res = append(res, fromCardToResponse(v))
 	}
 
 	return res

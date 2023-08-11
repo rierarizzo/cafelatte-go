@@ -5,7 +5,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/product"
 )
 
-func FromProductToProductRes(product product.Product) Response {
+func fromProductToResponse(product product.Product) Response {
 	return Response{
 		ID:           product.ID,
 		Name:         product.Name,
@@ -17,26 +17,26 @@ func FromProductToProductRes(product product.Product) Response {
 	}
 }
 
-func FromProductSliceToProductResSlice(products []product.Product) []Response {
+func fromProductsToResponse(products []product.Product) []Response {
 	var res = make([]Response, 0)
 	for _, v := range products {
-		res = append(res, FromProductToProductRes(v))
+		res = append(res, fromProductToResponse(v))
 	}
 
 	return res
 }
 
-func FromProductCategoryToProductCategoryRes(category order.ProductCategory) CategoryResponse {
+func fromProductCategoryToResponse(category order.ProductCategory) CategoryResponse {
 	return CategoryResponse{
 		Code:        category.Code,
 		Description: category.Description,
 	}
 }
 
-func FromProductCategorySliceToProductCategoryResSlice(categories []order.ProductCategory) []CategoryResponse {
+func fromProductCategoriesToResponse(categories []order.ProductCategory) []CategoryResponse {
 	var res = make([]CategoryResponse, 0)
 	for _, v := range categories {
-		res = append(res, FromProductCategoryToProductCategoryRes(v))
+		res = append(res, fromProductCategoryToResponse(v))
 	}
 
 	return res

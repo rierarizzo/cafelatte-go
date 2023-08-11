@@ -32,7 +32,7 @@ func (r Repository) SelectAddressesByUserID(userID int) ([]address.Address, *dom
 		return nil, appErr
 	}
 
-	return ModelSliceToAddresses(addressesModel), nil
+	return fromModelsToAddresses(addressesModel), nil
 }
 
 func (r Repository) InsertUserAddresses(userID int,
@@ -79,7 +79,7 @@ func (r Repository) InsertUserAddresses(userID int,
 				wg.Done()
 				<-sem
 			}()
-			addressModel := ToModel(address)
+			addressModel := fromAddressToModel(address)
 
 			result, err := insertStmnt.Exec(addressModel.Type, userID,
 				addressModel.ProvinceID, addressModel.CityID,

@@ -16,3 +16,8 @@ type Model struct {
 	CreatedAt    time.Time `db:"CreatedAt"`
 	UpdatedAt    time.Time `db:"UpdatedAt"`
 }
+
+type CategoryModel struct {
+	Code        string `db:"Code"`
+	Description string `db:"Description"`
+}

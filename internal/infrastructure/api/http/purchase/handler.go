@@ -13,14 +13,14 @@ type Handler struct {
 }
 
 func (h *Handler) Purchase(c *gin.Context) {
-	var req OrderRequest
+	var req CreateOrderRequest
 	if err := c.BindJSON(&req); err != nil {
 		appErr := domain.NewAppError(err, domain.BadRequestError)
 		http2.AbortWithError(c, appErr)
 		return
 	}
 
-	order := RequestToOrder(req)
+	order := fromCreateOrderRequestToOrder(req)
 
 	orderID, appErr := h.purchaseUsecase.PurchaseOrder(order)
 	if appErr != nil {

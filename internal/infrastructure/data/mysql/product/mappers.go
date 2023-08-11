@@ -3,10 +3,9 @@ package product
 import (
 	"github.com/rierarizzo/cafelatte/internal/domain/order"
 	"github.com/rierarizzo/cafelatte/internal/domain/product"
-	order2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/order"
 )
 
-func FromProductModelToProduct(model Model) product.Product {
+func fromModelToProduct(model Model) product.Product {
 	return product.Product{
 		ID:           model.ID,
 		Name:         model.Name,
@@ -18,27 +17,27 @@ func FromProductModelToProduct(model Model) product.Product {
 	}
 }
 
-func FromProductModelSliceToProductSlice(productModels []Model) []product.Product {
+func fromModelsToProducts(productModels []Model) []product.Product {
 	var products = make([]product.Product, 0)
 	for _, v := range productModels {
-		products = append(products, FromProductModelToProduct(v))
+		products = append(products, fromModelToProduct(v))
 	}
 
 	return products
 }
 
-func FromProductCategoryModelToProductCategory(model order2.ProductCategoryModel) order.ProductCategory {
+func fromCategoryModelToCategory(model CategoryModel) order.ProductCategory {
 	return order.ProductCategory{
 		Code:        model.Code,
 		Description: model.Description,
 	}
 }
 
-func FromProductCategoryModelSliceToProductCategorySlice(catModels []order2.ProductCategoryModel) []order.ProductCategory {
+func fromCategoryModelsToCategories(catModels []CategoryModel) []order.ProductCategory {
 	var categories = make([]order.ProductCategory, 0)
 	for _, v := range catModels {
 		categories = append(categories,
-			FromProductCategoryModelToProductCategory(v))
+			fromCategoryModelToCategory(v))
 	}
 
 	return categories

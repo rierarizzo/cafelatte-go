@@ -5,19 +5,7 @@ import (
 	"strings"
 )
 
-func FromSignUpReqToUser(req SignUpRequest) user.User {
-	return user.User{
-		Username:    req.Username,
-		Name:        req.Name,
-		Surname:     req.Surname,
-		PhoneNumber: req.PhoneNumber,
-		Email:       req.Email,
-		Password:    req.Password,
-		RoleCode:    req.RoleCode,
-	}
-}
-
-func FromUserToUserRes(user user.User) Response {
+func fromUserToResponse(user user.User) Response {
 	return Response{
 		ID:           user.ID,
 		CompleteName: strings.Join([]string{user.Name, user.Surname}, " "),
@@ -28,16 +16,16 @@ func FromUserToUserRes(user user.User) Response {
 	}
 }
 
-func FromUserSliceToUserResSlice(users []user.User) []Response {
+func fromUsersToResponse(users []user.User) []Response {
 	var res = make([]Response, 0)
 	for _, v := range users {
-		res = append(res, FromUserToUserRes(v))
+		res = append(res, fromUserToResponse(v))
 	}
 
 	return res
 }
 
-func FromUpdateUserReqToUser(updUserReq UpdateUserRequest) user.User {
+func fromUpdateRequestToUser(updUserReq UpdateRequest) user.User {
 	return user.User{
 		Username:    updUserReq.Username,
 		Name:        updUserReq.Name,

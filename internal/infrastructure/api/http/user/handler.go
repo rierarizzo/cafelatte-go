@@ -23,7 +23,7 @@ func (h *Handler) GetUsers(c *gin.Context) {
 	}
 
 	http2.RespondWithJSON(c, http.StatusOK,
-		FromUserSliceToUserResSlice(users))
+		fromUsersToResponse(users))
 }
 
 func (h *Handler) FindUserByID(c *gin.Context) {
@@ -40,11 +40,11 @@ func (h *Handler) FindUserByID(c *gin.Context) {
 		return
 	}
 
-	http2.RespondWithJSON(c, http.StatusOK, FromUserToUserRes(*user))
+	http2.RespondWithJSON(c, http.StatusOK, fromUserToResponse(*user))
 }
 
 func (h *Handler) UpdateUser(c *gin.Context) {
-	var req UpdateUserRequest
+	var req UpdateRequest
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		appErr := domain.NewAppError(err, domain.BadRequestError)
@@ -59,7 +59,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 	}
 
 	appErr := h.userService.UpdateUser(userID,
-		FromUpdateUserReqToUser(req))
+		fromUpdateRequestToUser(req))
 	if appErr != nil {
 		http2.AbortWithError(c, appErr)
 		return

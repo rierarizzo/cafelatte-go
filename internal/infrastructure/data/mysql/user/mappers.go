@@ -4,7 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/user"
 )
 
-func FromUserModelToUser(model Model) user.User {
+func fromModelToUser(model Model) user.User {
 	return user.User{
 		ID:          model.ID,
 		Username:    model.Username,
@@ -17,16 +17,16 @@ func FromUserModelToUser(model Model) user.User {
 	}
 }
 
-func FromUserModelSliceToUserSlice(models []Model) []user.User {
+func fromModelsToUsers(models []Model) []user.User {
 	var users = make([]user.User, 0)
 	for _, v := range models {
-		users = append(users, FromUserModelToUser(v))
+		users = append(users, fromModelToUser(v))
 	}
 
 	return users
 }
 
-func FromUserToUserModel(user user.User) Model {
+func fromUserToModel(user user.User) Model {
 	return Model{
 		ID:          user.ID,
 		Username:    user.Username,

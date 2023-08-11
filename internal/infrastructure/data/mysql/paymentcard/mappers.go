@@ -5,7 +5,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/paymentcard"
 )
 
-func FromCardToCardModel(card paymentcard.PaymentCard) Model {
+func fromCardToModel(card paymentcard.PaymentCard) Model {
 	return Model{
 		ID:              sql.NullInt64{Int64: int64(card.ID)},
 		Type:            card.Type,
@@ -18,7 +18,7 @@ func FromCardToCardModel(card paymentcard.PaymentCard) Model {
 	}
 }
 
-func FromCardModelToCard(model Model) paymentcard.PaymentCard {
+func fromModelToCard(model Model) paymentcard.PaymentCard {
 	return paymentcard.PaymentCard{
 		ID:              int(model.ID.Int64),
 		Type:            model.Type,
@@ -31,10 +31,10 @@ func FromCardModelToCard(model Model) paymentcard.PaymentCard {
 	}
 }
 
-func FromCardModelSliceToCardSlice(cardsModel []Model) []paymentcard.PaymentCard {
+func fromModelsToCards(cardsModel []Model) []paymentcard.PaymentCard {
 	var cards = make([]paymentcard.PaymentCard, 0)
 	for _, v := range cardsModel {
-		cards = append(cards, FromCardModelToCard(v))
+		cards = append(cards, fromModelToCard(v))
 	}
 
 	return cards

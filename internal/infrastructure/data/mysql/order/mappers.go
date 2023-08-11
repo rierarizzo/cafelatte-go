@@ -5,8 +5,8 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/order"
 )
 
-func ToModel(order order.Order) PurchaseOrderModel {
-	return PurchaseOrderModel{
+func fromOrderToModel(order order.Order) Model {
+	return Model{
 		ID:                order.ID,
 		UserID:            order.UserID,
 		ShippingAddressID: order.ShippingAddressID,
@@ -18,7 +18,7 @@ func ToModel(order order.Order) PurchaseOrderModel {
 	}
 }
 
-func PurchasedProductToModel(product order.PurchasedProduct) PurchasedProductModel {
+func fromPurchasedProductToModel(product order.PurchasedProduct) PurchasedProductModel {
 	return PurchasedProductModel{
 		ID:        product.ID,
 		OrderID:   product.OrderID,

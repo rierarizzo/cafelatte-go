@@ -6,7 +6,6 @@ import (
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/order"
 	"github.com/rierarizzo/cafelatte/internal/domain/product"
-	order2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/order"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
@@ -50,13 +49,13 @@ func selectProducts(db *sqlx.DB, query string,
 		return []product.Product{}, nil
 	}
 
-	return FromProductModelSliceToProductSlice(model), nil
+	return fromModelsToProducts(model), nil
 }
 
 func (p Repository) SelectProductCategories() ([]order.ProductCategory, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
-	var model []order2.ProductCategoryModel
+	var model []CategoryModel
 
 	err := p.db.Select(&model, "select * from ProductCategory")
 	if err != nil {
@@ -71,7 +70,7 @@ func (p Repository) SelectProductCategories() ([]order.ProductCategory, *domain.
 		return []order.ProductCategory{}, nil
 	}
 
-	return FromProductCategoryModelSliceToProductCategorySlice(model), nil
+	return fromCategoryModelsToCategories(model), nil
 }
 
 var (

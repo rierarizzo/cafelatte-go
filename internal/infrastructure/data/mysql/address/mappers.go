@@ -5,7 +5,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/address"
 )
 
-func ToModel(address address.Address) Model {
+func fromAddressToModel(address address.Address) Model {
 	return Model{
 		ID:         sql.NullInt64{Int64: int64(address.ID)},
 		Type:       address.Type,
@@ -16,7 +16,7 @@ func ToModel(address address.Address) Model {
 	}
 }
 
-func ModelToAddress(model Model) address.Address {
+func fromModelToAddress(model Model) address.Address {
 	return address.Address{
 		ID:         int(model.ID.Int64),
 		Type:       model.Type,
@@ -27,10 +27,10 @@ func ModelToAddress(model Model) address.Address {
 	}
 }
 
-func ModelSliceToAddresses(addressesModel []Model) []address.Address {
+func fromModelsToAddresses(addressesModel []Model) []address.Address {
 	var addresses = make([]address.Address, 0)
 	for _, v := range addressesModel {
-		addresses = append(addresses, ModelToAddress(v))
+		addresses = append(addresses, fromModelToAddress(v))
 	}
 
 	return addresses

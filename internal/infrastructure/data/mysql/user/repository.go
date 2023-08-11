@@ -34,7 +34,7 @@ func (r *Repository) SelectUsers() ([]userDomain.User, *domain.AppError) {
 		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
 	}
 
-	return FromUserModelSliceToUserSlice(usersModel), nil
+	return fromModelsToUsers(usersModel), nil
 }
 
 // SelectUserByID retrieves a user from the database based on the provided
@@ -56,7 +56,7 @@ func (r *Repository) SelectUserByID(userID int) (*userDomain.User, *domain.AppEr
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 
-	user := FromUserModelToUser(userModel)
+	user := fromModelToUser(userModel)
 	return &user, nil
 }
 
@@ -79,7 +79,7 @@ func (r *Repository) SelectUserByEmail(email string) (*userDomain.User, *domain.
 		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
 	}
 
-	user := FromUserModelToUser(userModel)
+	user := fromModelToUser(userModel)
 	return &user, nil
 }
 
@@ -88,7 +88,7 @@ func (r *Repository) SelectUserByEmail(email string) (*userDomain.User, *domain.
 func (r *Repository) InsertUser(user userDomain.User) (*userDomain.User, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
-	var userModel = FromUserToUserModel(user)
+	var userModel = fromUserToModel(user)
 	var query = `insert into User (
                   Username, 
                   Name, 
@@ -110,7 +110,7 @@ func (r *Repository) InsertUser(user userDomain.User) (*userDomain.User, *domain
 	lastUserID, _ := result.LastInsertId()
 	userModel.ID = int(lastUserID)
 
-	u := FromUserModelToUser(userModel)
+	u := fromModelToUser(userModel)
 	userToReturn := &u
 	return userToReturn, nil
 }
@@ -122,7 +122,7 @@ func (r *Repository) UpdateUser(userID int,
 	user userDomain.User) *domain.AppError {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
-	var userModel = FromUserToUserModel(user)
+	var userModel = fromUserToModel(user)
 	var query = `update User set 
                 Username=?, 
                 Name=?, 

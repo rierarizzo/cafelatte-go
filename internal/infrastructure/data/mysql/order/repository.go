@@ -29,7 +29,7 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
 		return rollbackTxAndReturnZeroAndErr(tx, err)
 	}
 
-	orderModel := ToModel(order)
+	orderModel := fromOrderToModel(order)
 
 	result, err := tx.Exec(`insert into PurchaseOrder (
                            UserID, 
@@ -66,7 +66,7 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
 				<-sem
 			}()
 
-			product := PurchasedProductToModel(entity)
+			product := fromPurchasedProductToModel(entity)
 
 			_, err := insertProductStmnt.Exec(orderID, product.ProductID,
 				product.Quantity)

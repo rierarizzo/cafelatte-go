@@ -34,7 +34,7 @@ func (r Repository) SelectCardsByUserID(userID int) ([]paymentcard.PaymentCard, 
 		return nil, appErr
 	}
 
-	return FromCardModelSliceToCardSlice(cardsModel), nil
+	return fromModelsToCards(cardsModel), nil
 }
 
 func (r Repository) InsertUserPaymentCards(userID int,
@@ -82,7 +82,7 @@ func (r Repository) InsertUserPaymentCards(userID int,
 				wg.Done()
 				<-sem
 			}()
-			cardModel := FromCardToCardModel(card)
+			cardModel := fromCardToModel(card)
 
 			result, err := insertStmnt.Exec(cardModel.Type, userID,
 				cardModel.Company, cardModel.HolderName, cardModel.Number,

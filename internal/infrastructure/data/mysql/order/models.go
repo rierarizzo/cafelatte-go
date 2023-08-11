@@ -5,21 +5,7 @@ import (
 	"time"
 )
 
-type ProductCategoryModel struct {
-	Code        string `db:"Code"`
-	Description string `db:"Description"`
-}
-
-type PurchasedProductModel struct {
-	ID        int       `db:"ID"`
-	OrderID   int       `db:"OrderID"`
-	ProductID int       `db:"ProductID"`
-	Quantity  int       `db:"Quantity"`
-	CreatedAt time.Time `db:"CreatedAt"`
-	UpdatedAt time.Time `db:"UpdatedAt"`
-}
-
-type PurchaseOrderModel struct {
+type Model struct {
 	ID                int             `db:"ID"`
 	UserID            int             `db:"UserID"`
 	ShippingAddressID int             `db:"ShippingAddressID"`
@@ -30,4 +16,13 @@ type PurchaseOrderModel struct {
 	OrderStatus       string          `db:"OrderStatus"`
 	CreatedAt         time.Time       `db:"CreatedAt"`
 	UpdatedAt         time.Time       `db:"UpdatedAt"`
+}
+
+type PurchasedProductModel struct {
+	ID        int       `db:"ID"`
+	OrderID   int       `db:"OrderID"`
+	ProductID int       `db:"ProductID"`
+	Quantity  int       `db:"Quantity"`
+	CreatedAt time.Time `db:"CreatedAt"`
+	UpdatedAt time.Time `db:"UpdatedAt"`
 }

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/paymentcard"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/user"
 	http2 "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"net/http"
 	"strconv"
@@ -30,11 +29,11 @@ func (h *Handler) GetCardsByUserID(c *gin.Context) {
 	}
 
 	http2.RespondWithJSON(c, http.StatusOK,
-		FromCardSliceToCardResSlice(cards))
+		fromCardsToResponse(cards))
 }
 
 func (h *Handler) AddUserCards(c *gin.Context) {
-	var req []user.PaymentCardRequest
+	var req []CreateRequest
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		appErr := domain.NewAppError(err, domain.BadRequestError)
@@ -49,14 +48,14 @@ func (h *Handler) AddUserCards(c *gin.Context) {
 	}
 
 	cards, appErr := h.paymentCardService.AddUserPaymentCard(userID,
-		FromCardReqSliceToCardSlice(req))
+		fromCreateRequestToCards(req))
 	if appErr != nil {
 		http2.AbortWithError(c, appErr)
 		return
 	}
 
 	http2.RespondWithJSON(c, http.StatusCreated,
-		FromCardSliceToCardResSlice(cards))
+		fromCardsToResponse(cards))
 }
 
 func NewPaymentCardHandler(paymentCardService paymentcard.IPaymentCardService) *Handler {

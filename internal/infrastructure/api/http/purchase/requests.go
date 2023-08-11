@@ -1,14 +1,14 @@
 package purchase
 
-type PurchasedProduct struct {
+type purchasedProduct struct {
 	ProductID int `json:"productID"`
 	Quantity  int `json:"quantity"`
 }
 
-type OrderRequest struct {
+type CreateOrderRequest struct {
 	UserID            int                `json:"userID"`
 	AddressID         int                `json:"addressID"`
 	PaymentMethodID   int                `json:"paymentMethodID"`
 	Notes             string             `json:"notes"`
-	PurchasedProducts []PurchasedProduct `json:"purchasedProducts"`
+	PurchasedProducts []purchasedProduct `json:"purchasedProducts"`
 }

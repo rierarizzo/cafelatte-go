@@ -27,7 +27,7 @@ func (h Handler) GetProducts(c *gin.Context) {
 		}
 
 		http2.RespondWithJSON(c, http.StatusOK,
-			FromProductSliceToProductResSlice(products))
+			fromProductsToResponse(products))
 	} else {
 		log.Debugf("Executing with query: %s", category)
 
@@ -38,7 +38,7 @@ func (h Handler) GetProducts(c *gin.Context) {
 		}
 
 		http2.RespondWithJSON(c, http.StatusOK,
-			FromProductSliceToProductResSlice(products))
+			fromProductsToResponse(products))
 	}
 }
 
@@ -50,7 +50,7 @@ func (h Handler) GetProductCategories(c *gin.Context) {
 	}
 
 	http2.RespondWithJSON(c, http.StatusOK,
-		FromProductCategorySliceToProductCategoryResSlice(categories))
+		fromProductCategoriesToResponse(categories))
 }
 
 func NewProductHandler(productService product.IProductService) *Handler {

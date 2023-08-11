@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/internal/domain/address"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/user"
 	http2 "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"net/http"
 	"strconv"
@@ -29,11 +28,11 @@ func (h *Handler) GetAddressesByUserID(c *gin.Context) {
 	}
 
 	http2.RespondWithJSON(c, http.StatusOK,
-		FromAddressSliceToAddressResSlice(addresses))
+		fromAddressesToResponse(addresses))
 }
 
 func (h *Handler) AddUserAddresses(c *gin.Context) {
-	var req []user.AddressRequest
+	var req []CreateRequest
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		appErr := domain.NewAppError(err, domain.BadRequestError)
@@ -48,14 +47,14 @@ func (h *Handler) AddUserAddresses(c *gin.Context) {
 	}
 
 	addresses, appErr := h.addressService.AddUserAddresses(userID,
-		FromAddressReqSliceToAddressSlice(req))
+		fromCreateRequestToAddresses(req))
 	if appErr != nil {
 		http2.AbortWithError(c, appErr)
 		return
 	}
 
 	http2.RespondWithJSON(c, http.StatusCreated,
-		FromAddressSliceToAddressResSlice(addresses))
+		fromAddressesToResponse(addresses))
 }
 
 func NewAddressHandler(addressService address.IAddressService) *Handler {
