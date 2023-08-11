@@ -1,7 +1,7 @@
 package utils_test
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/utils"
+	"github.com/rierarizzo/cafelatte/pkg/utils"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
 )

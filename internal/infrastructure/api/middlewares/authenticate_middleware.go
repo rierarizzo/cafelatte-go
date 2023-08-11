@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/security"
-	"github.com/rierarizzo/cafelatte/internal/utils"
+	"github.com/rierarizzo/cafelatte/pkg/utils"
 	"strings"
 )
 

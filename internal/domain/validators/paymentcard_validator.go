@@ -2,10 +2,10 @@ package validators
 
 import (
 	"errors"
-	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/rierarizzo/cafelatte/pkg/constants"
+	"github.com/rierarizzo/cafelatte/pkg/params"
 	"github.com/sirupsen/logrus"
 	"time"
 )

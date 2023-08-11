@@ -2,22 +2,30 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/internal/constants"
+	"github.com/rierarizzo/cafelatte/pkg/constants"
 	"github.com/sirupsen/logrus"
 	"os"
 )
 
 type Config struct {
 	ServerPort string
-	DSN        string
 	LogLevel   string
+	DBUser     string
+	DBPassword string
+	DBHost     string
+	DBPort     string
+	DBName     string
 }
 
 func GetConfig() *Config {
 	return &Config{
 		ServerPort: os.Getenv(constants.EnvServerPort),
-		DSN:        os.Getenv(constants.EnvDSN),
 		LogLevel:   os.Getenv(constants.EnvLogLevel),
+		DBUser:     os.Getenv(constants.EnvDBUser),
+		DBPassword: os.Getenv(constants.EnvDBPassword),
+		DBHost:     os.Getenv(constants.EnvDBHost),
+		DBPort:     os.Getenv(constants.EnvDBPort),
+		DBName:     os.Getenv(constants.EnvDBName),
 	}
 }
 

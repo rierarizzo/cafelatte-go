@@ -2,11 +2,11 @@ package repositories
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
-	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/rierarizzo/cafelatte/pkg/constants"
+	"github.com/rierarizzo/cafelatte/pkg/params"
 	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
@@ -33,15 +33,14 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 
 	orderModel := mappers.OrderToModel(order)
 
-	// todo: check why the "notes" field is not saved
 	result, err := tx.Exec(`insert into PurchaseOrder (
                            UserID, 
                            ShippingAddressID, 
                            PaymentMethodID, 
                            Notes,  
-                           OrderedAt) VALUES (?,?,?,?,?)`, orderModel.UserID,
+                           OrderedAt) values (?,?,?,?,?)`, orderModel.UserID,
 		orderModel.ShippingAddressID, orderModel.PaymentMethodID,
-		orderModel.Notes, time.Now())
+		orderModel.Notes.String, time.Now())
 	if err != nil {
 		return rollbackTxAndReturnErr(tx, err)
 	}
@@ -90,7 +89,7 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 	var totalAmount float64
 
 	var query = `select sum(pp.Quantity * p.Price) from PurchasedProduct pp 
-				inner join product p on pp.ProductID = p.ID where OrderID=?`
+				inner join Product p on pp.ProductID = p.ID where OrderID=?`
 
 	err = tx.Get(&totalAmount, query, orderID)
 	if err != nil {

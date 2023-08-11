@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
-	"github.com/rierarizzo/cafelatte/internal/params"
-	"github.com/rierarizzo/cafelatte/internal/utils"
+	"github.com/rierarizzo/cafelatte/pkg/constants"
+	"github.com/rierarizzo/cafelatte/pkg/params"
+	"github.com/rierarizzo/cafelatte/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )

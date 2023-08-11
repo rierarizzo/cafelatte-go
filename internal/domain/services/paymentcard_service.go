@@ -5,7 +5,7 @@ import (
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/domain/validators"
-	"github.com/rierarizzo/cafelatte/internal/utils"
+	"github.com/rierarizzo/cafelatte/pkg/utils"
 )
 
 type PaymentCardService struct {

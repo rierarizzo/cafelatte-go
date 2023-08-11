@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
-	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/rierarizzo/cafelatte/pkg/params"
 	"net/http"
 	"time"
 )

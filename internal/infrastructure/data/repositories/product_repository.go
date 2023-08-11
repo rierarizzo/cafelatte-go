@@ -3,12 +3,12 @@ package repositories
 import (
 	"errors"
 	"github.com/jmoiron/sqlx"
-	"github.com/rierarizzo/cafelatte/internal/constants"
 	"github.com/rierarizzo/cafelatte/internal/domain/entities"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mappers"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/models"
-	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/rierarizzo/cafelatte/pkg/constants"
+	"github.com/rierarizzo/cafelatte/pkg/params"
 	"github.com/sirupsen/logrus"
 )
 
@@ -58,7 +58,7 @@ func (p ProductRepository) SelectProductCategories() ([]entities.ProductCategory
 
 	var model []models.ProductCategoryModel
 
-	err := p.db.Select(&model, "select * from productcategory")
+	err := p.db.Select(&model, "select * from ProductCategory")
 	if err != nil {
 		log.Errorf("Error in SelectProductCategories: %v", err)
 		appErr := domain.NewAppError(selectProductCategoryError,

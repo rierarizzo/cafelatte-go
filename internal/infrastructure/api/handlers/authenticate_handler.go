@@ -6,7 +6,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/ports"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/dto"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
-	"github.com/rierarizzo/cafelatte/internal/utils"
+	"github.com/rierarizzo/cafelatte/pkg/utils"
 	"net/http"
 )
 

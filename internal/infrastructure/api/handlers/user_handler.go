@@ -3,7 +3,7 @@ package handlers
 import (
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/mappers"
-	"github.com/rierarizzo/cafelatte/internal/utils"
+	"github.com/rierarizzo/cafelatte/pkg/utils"
 	"net/http"
 	"strconv"
 

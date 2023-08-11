@@ -22,7 +22,9 @@ func Server() {
 	LoadInitConfig(cf)
 
 	// Connect to database
-	db := data.Connect(cf.DSN)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", cf.DBUser,
+		cf.DBPassword, cf.DBHost, cf.DBPort, cf.DBName)
+	db := data.Connect(dsn)
 
 	// Users instance
 	userRepo := repositories.NewUserRepository(db)

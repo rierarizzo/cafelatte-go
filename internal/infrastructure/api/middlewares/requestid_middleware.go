@@ -3,8 +3,8 @@ package middlewares
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/rierarizzo/cafelatte/internal/constants"
-	"github.com/rierarizzo/cafelatte/internal/params"
+	"github.com/rierarizzo/cafelatte/pkg/constants"
+	"github.com/rierarizzo/cafelatte/pkg/params"
 )
 
 func RequestIDMiddleware() gin.HandlerFunc {
