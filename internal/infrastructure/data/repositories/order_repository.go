@@ -17,18 +17,10 @@ type OrderRepository struct {
 }
 
 func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int, *domain.AppError) {
-	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
-	rollbackTxAndReturnErr := func(tx *sqlx.Tx,
-		err error) (int, *domain.AppError) {
-		_ = tx.Rollback()
-		log.Error(err)
-		return 0, domain.NewAppError(err, domain.RepositoryError)
-	}
 
 	tx, err := r.db.Beginx()
 	if err != nil {
-		return rollbackTxAndReturnErr(tx, err)
+		return rollbackTxAndReturnZeroAndErr(tx, err)
 	}
 
 	orderModel := mappers.OrderToModel(order)
@@ -42,7 +34,7 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 		orderModel.ShippingAddressID, orderModel.PaymentMethodID,
 		orderModel.Notes.String, time.Now())
 	if err != nil {
-		return rollbackTxAndReturnErr(tx, err)
+		return rollbackTxAndReturnZeroAndErr(tx, err)
 	}
 
 	orderID, _ := result.LastInsertId()
@@ -51,7 +43,7 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
                               ProductID, 
                               Quantity) values (?,?,?)`)
 	if err != nil {
-		return rollbackTxAndReturnErr(tx, err)
+		return rollbackTxAndReturnZeroAndErr(tx, err)
 	}
 
 	var sem = make(chan struct{}, 5)
@@ -83,15 +75,19 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 	wg.Wait()
 	close(errCh)
 	for err := range errCh {
-		return rollbackTxAndReturnErr(tx, err)
+		return rollbackTxAndReturnZeroAndErr(tx, err)
 	}
 
+	return int(orderID), updateTotalAmount(tx, int(orderID))
+}
+
+func updateTotalAmount(tx *sqlx.Tx, orderID int) *domain.AppError {
 	var totalAmount float64
 
 	var query = `select sum(pp.Quantity * p.Price) from PurchasedProduct pp 
 				inner join Product p on pp.ProductID = p.ID where OrderID=?`
 
-	err = tx.Get(&totalAmount, query, orderID)
+	err := tx.Get(&totalAmount, query, orderID)
 	if err != nil {
 		return rollbackTxAndReturnErr(tx, err)
 	}
@@ -107,7 +103,24 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 		return rollbackTxAndReturnErr(tx, err)
 	}
 
-	return int(orderID), nil
+	return nil
+}
+
+func rollbackTxAndReturnZeroAndErr(tx *sqlx.Tx,
+	err error) (int, *domain.AppError) {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
+	_ = tx.Rollback()
+	log.Error(err)
+	return 0, domain.NewAppError(err, domain.RepositoryError)
+}
+
+func rollbackTxAndReturnErr(tx *sqlx.Tx, err error) *domain.AppError {
+	log := logrus.WithField(constants.RequestIDKey, params.RequestID())
+
+	_ = tx.Rollback()
+	log.Error(err)
+	return domain.NewAppError(err, domain.RepositoryError)
 }
 
 func NewOrderRepository(db *sqlx.DB) *OrderRepository {
