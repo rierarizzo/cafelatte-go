@@ -2,16 +2,29 @@ package server
 
 import (
 	"fmt"
-	"github.com/rierarizzo/cafelatte/internal/domain/usecases"
+	"github.com/rierarizzo/cafelatte/internal/domain/address"
+	"github.com/rierarizzo/cafelatte/internal/domain/authenticate"
+	"github.com/rierarizzo/cafelatte/internal/domain/order"
+	"github.com/rierarizzo/cafelatte/internal/domain/paymentcard"
+	"github.com/rierarizzo/cafelatte/internal/domain/product"
+	"github.com/rierarizzo/cafelatte/internal/domain/purchase"
+	"github.com/rierarizzo/cafelatte/internal/domain/user"
+	http2 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http"
+	address3 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/address"
+	authenticate2 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticate"
+	paymentcard3 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/paymentcard"
+	product3 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/product"
+	purchase2 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/purchase"
+	user3 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/user"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql"
+	address2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/address"
+	order2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/order"
+	paymentcard2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/paymentcard"
+	product2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/product"
+	user2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/user"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
-
-	"github.com/rierarizzo/cafelatte/internal/domain/services"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/handlers"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/repositories"
 )
 
 func Server() {
@@ -24,40 +37,40 @@ func Server() {
 	// Connect to database
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", cf.DBUser,
 		cf.DBPassword, cf.DBHost, cf.DBPort, cf.DBName)
-	db := data.Connect(dsn)
+	db := mysql.Connect(dsn)
 
 	// Users instance
-	userRepo := repositories.NewUserRepository(db)
-	userService := services.NewUserService(userRepo)
-	userHandler := handlers.NewUserHandler(userService)
+	userRepo := user2.NewUserRepository(db)
+	userService := user.NewUserService(userRepo)
+	userHandler := user3.NewUserHandler(userService)
 
 	// Authentication instance
-	authUsecase := usecases.NewAuthenticateUsecase(userService)
-	authHandler := handlers.NewAuthHandler(authUsecase)
+	authUsecase := authenticate.NewAuthenticateUsecase(userService)
+	authHandler := authenticate2.NewAuthHandler(authUsecase)
 
 	// Addresses instance
-	addressRepo := repositories.NewAddressRepository(db)
-	addressService := services.NewAddressService(addressRepo)
-	addressHandler := handlers.NewAddressHandler(addressService)
+	addressRepo := address2.NewAddressRepository(db)
+	addressService := address.NewAddressService(addressRepo)
+	addressHandler := address3.NewAddressHandler(addressService)
 
 	// PaymentCards instance
-	paymentCardRepo := repositories.NewPaymentCardRepository(db)
-	paymentCardService := services.NewPaymentCardService(paymentCardRepo)
-	paymentCardHandler := handlers.NewPaymentCardHandler(paymentCardService)
+	paymentCardRepo := paymentcard2.NewPaymentCardRepository(db)
+	paymentCardService := paymentcard.NewPaymentCardService(paymentCardRepo)
+	paymentCardHandler := paymentcard3.NewPaymentCardHandler(paymentCardService)
 
 	// Products instance
-	productRepo := repositories.NewProductRepository(db)
-	productService := services.NewProductService(productRepo)
-	productHandler := handlers.NewProductHandler(productService)
+	productRepo := product2.NewProductRepository(db)
+	productService := product.NewProductService(productRepo)
+	productHandler := product3.NewProductHandler(productService)
 
 	// Purchase instance
-	orderRepo := repositories.NewOrderRepository(db)
-	orderService := services.NewOrderService(orderRepo)
-	purchaseUsecase := usecases.NewPurchaseUsecase(orderService)
-	purchaseHandler := handlers.NewPurchaseHandler(purchaseUsecase)
+	orderRepo := order2.NewOrderRepository(db)
+	orderService := order.NewOrderService(orderRepo)
+	purchaseUsecase := purchase.NewPurchaseUsecase(orderService)
+	purchaseHandler := purchase2.NewPurchaseHandler(purchaseUsecase)
 
 	// Initialize router with all paths
-	router := api.Router(userHandler, authHandler, addressHandler,
+	router := http2.Router(userHandler, authHandler, addressHandler,
 		paymentCardHandler, productHandler, purchaseHandler)
 
 	elapsed := time.Since(start).Seconds()
