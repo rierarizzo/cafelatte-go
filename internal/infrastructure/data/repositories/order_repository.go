@@ -19,10 +19,9 @@ type OrderRepository struct {
 func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int, *domain.AppError) {
 	rollbackTxAndReturnZeroAndErr := func(tx *sqlx.Tx,
 		err error) (int, *domain.AppError) {
-		log := logrus.WithField(constants.RequestIDKey, params.RequestID())
-
 		_ = tx.Rollback()
-		log.Error(err)
+		logrus.WithField(constants.RequestIDKey, params.RequestID()).Error(err)
+
 		return 0, domain.NewAppError(err, domain.RepositoryError)
 	}
 
