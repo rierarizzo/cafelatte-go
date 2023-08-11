@@ -96,7 +96,7 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 		return rollbackTxAndReturnErr(tx, err)
 	}
 
-	_, err = tx.Exec(`update PurchaseOrder set TotalAmount=? where ID=?`,
+	_, err = tx.Exec("update PurchaseOrder set TotalAmount=? where ID=?",
 		totalAmount, orderID)
 	if err != nil {
 		return rollbackTxAndReturnErr(tx, err)
