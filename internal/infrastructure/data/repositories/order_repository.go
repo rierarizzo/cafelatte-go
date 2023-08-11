@@ -75,7 +75,6 @@ func (r *OrderRepository) InsertPurchaseOrder(order entities.PurchaseOrder) (int
 				errCh <- err
 				return
 			}
-
 		}(v)
 	}
 
