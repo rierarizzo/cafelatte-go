@@ -9,19 +9,19 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/product"
 	"github.com/rierarizzo/cafelatte/internal/domain/purchase"
 	"github.com/rierarizzo/cafelatte/internal/domain/user"
-	http2 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http"
-	address3 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/address"
-	authenticate2 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticate"
-	paymentcard3 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/paymentcard"
-	product3 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/product"
-	purchase2 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/purchase"
-	user3 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/user"
+	httpRouter "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http"
+	addressHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/address"
+	authenticateHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticate"
+	paymentcardHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/paymentcard"
+	productHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/product"
+	purchaseHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/purchase"
+	userHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/user"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql"
-	address2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/address"
-	order2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/order"
-	paymentcard2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/paymentcard"
-	product2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/product"
-	user2 "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/user"
+	addressData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/address"
+	orderData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/order"
+	paymentcardData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/paymentcard"
+	productData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/product"
+	userData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/user"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
@@ -40,37 +40,37 @@ func Server() {
 	db := mysql.Connect(dsn)
 
 	// Users instance
-	userRepo := user2.NewUserRepository(db)
+	userRepo := userData.NewUserRepository(db)
 	userService := user.NewUserService(userRepo)
-	userHandler := user3.NewUserHandler(userService)
+	userHandler := userHTTP.NewUserHandler(userService)
 
 	// Authentication instance
 	authUsecase := authenticate.NewAuthenticateUsecase(userService)
-	authHandler := authenticate2.NewAuthHandler(authUsecase)
+	authHandler := authenticateHTTP.NewAuthHandler(authUsecase)
 
 	// Addresses instance
-	addressRepo := address2.NewAddressRepository(db)
+	addressRepo := addressData.NewAddressRepository(db)
 	addressService := address.NewAddressService(addressRepo)
-	addressHandler := address3.NewAddressHandler(addressService)
+	addressHandler := addressHTTP.NewAddressHandler(addressService)
 
 	// PaymentCards instance
-	paymentCardRepo := paymentcard2.NewPaymentCardRepository(db)
+	paymentCardRepo := paymentcardData.NewPaymentCardRepository(db)
 	paymentCardService := paymentcard.NewPaymentCardService(paymentCardRepo)
-	paymentCardHandler := paymentcard3.NewPaymentCardHandler(paymentCardService)
+	paymentCardHandler := paymentcardHTTP.NewPaymentCardHandler(paymentCardService)
 
 	// Products instance
-	productRepo := product2.NewProductRepository(db)
+	productRepo := productData.NewProductRepository(db)
 	productService := product.NewProductService(productRepo)
-	productHandler := product3.NewProductHandler(productService)
+	productHandler := productHTTP.NewProductHandler(productService)
 
 	// Purchase instance
-	orderRepo := order2.NewOrderRepository(db)
+	orderRepo := orderData.NewOrderRepository(db)
 	orderService := order.NewOrderService(orderRepo)
 	purchaseUsecase := purchase.NewPurchaseUsecase(orderService)
-	purchaseHandler := purchase2.NewPurchaseHandler(purchaseUsecase)
+	purchaseHandler := purchaseHTTP.NewPurchaseHandler(purchaseUsecase)
 
 	// Initialize router with all paths
-	router := http2.Router(userHandler, authHandler, addressHandler,
+	router := httpRouter.Router(userHandler, authHandler, addressHandler,
 		paymentCardHandler, productHandler, purchaseHandler)
 
 	elapsed := time.Since(start).Seconds()
