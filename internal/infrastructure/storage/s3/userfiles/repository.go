@@ -12,6 +12,11 @@ type Repository struct {
 	s3Client *s3.S3
 }
 
+const (
+	bucketName = "cafelatte-profile_pics"
+	ACL        = "public-read"
+)
+
 func (r *Repository) UpdateProfilePic(userID int,
 	pic *multipart.FileHeader) (string, *domain.AppError) {
 	file, err := pic.Open()
@@ -20,10 +25,10 @@ func (r *Repository) UpdateProfilePic(userID int,
 	}
 
 	params := &s3.PutObjectInput{
-		Bucket: aws.String("my-bucket"),
+		Bucket: aws.String(bucketName),
 		Key:    aws.String("nombre-del-archivo-en-s3.txt"),
 		Body:   file,
-		ACL:    aws.String("public-read"),
+		ACL:    aws.String(ACL),
 	}
 
 	_, err = r.s3Client.PutObject(params)
@@ -31,8 +36,8 @@ func (r *Repository) UpdateProfilePic(userID int,
 		return "", domain.NewAppErrorWithType(domain.RepositoryError)
 	}
 
-	photoURL := fmt.Sprintf("https://my-bucket.s3.amazonaws.com/uploads/user%d/%s",
-		userID, pic.Filename)
+	photoURL := fmt.Sprintf("https://%s.s3.amazonaws.com/uploads/user%d/%s",
+		bucketName, userID, pic.Filename)
 
 	err = file.Close()
 	if err != nil {
