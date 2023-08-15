@@ -2,6 +2,7 @@ package user
 
 import (
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"mime/multipart"
 )
 
 // IUserService represents an interface for a user service.
@@ -58,4 +59,9 @@ type IUserRepository interface {
 	UpdateUser(userID int, user User) *domain.AppError
 
 	DeleteUser(userID int) *domain.AppError
+}
+
+type IUserFilesRepository interface {
+	UpdateProfilePic(userID int,
+		pic *multipart.FileHeader) (string, *domain.AppError)
 }
