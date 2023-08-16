@@ -22,6 +22,8 @@ import (
 	paymentcardData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/paymentcard"
 	productData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/product"
 	userData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/user"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/storage/s3"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/storage/s3/userfiles"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
@@ -39,9 +41,13 @@ func Server() {
 		cf.DBPassword, cf.DBHost, cf.DBPort, cf.DBName)
 	db := mysql.Connect(dsn)
 
+	// Get S3 client
+	s3Client := s3.Connect("us-east-1")
+
 	// Users instance
 	userRepo := userData.NewUserRepository(db)
-	userService := user.NewUserService(userRepo)
+	userFilesRepo := userfiles.NewUserFilesRepository(s3Client)
+	userService := user.NewUserService(userRepo, userFilesRepo)
 	userHandler := userHTTP.NewUserHandler(userService)
 
 	// Authentication instance

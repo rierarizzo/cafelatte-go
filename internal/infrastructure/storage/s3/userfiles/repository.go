@@ -18,7 +18,7 @@ const (
 )
 
 func (r *Repository) UpdateProfilePic(userID int,
-	pic *multipart.FileHeader) (string, *domain.AppError) {
+	pic *multipart.FileHeader, picName string) (string, *domain.AppError) {
 	file, err := pic.Open()
 	if err != nil {
 		return "", domain.NewAppErrorWithType(domain.RepositoryError)
@@ -26,7 +26,7 @@ func (r *Repository) UpdateProfilePic(userID int,
 
 	params := &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
-		Key:    aws.String("nombre-del-archivo-en-s3.txt"),
+		Key:    aws.String(picName),
 		Body:   file,
 		ACL:    aws.String(ACL),
 	}
@@ -45,4 +45,8 @@ func (r *Repository) UpdateProfilePic(userID int,
 	}
 
 	return photoURL, nil
+}
+
+func NewUserFilesRepository(s3Client *s3.S3) *Repository {
+	return &Repository{s3Client}
 }

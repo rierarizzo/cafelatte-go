@@ -30,6 +30,9 @@ type IUserService interface {
 	UpdateUser(userID int, user User) *domain.AppError
 
 	DeleteUser(userID int) *domain.AppError
+
+	UpdateProfilePic(userID int,
+		pic *multipart.FileHeader) (string, *domain.AppError)
 }
 
 // IUserRepository represents an interface for a user repository.
@@ -63,5 +66,5 @@ type IUserRepository interface {
 
 type IUserFilesRepository interface {
 	UpdateProfilePic(userID int,
-		pic *multipart.FileHeader) (string, *domain.AppError)
+		pic *multipart.FileHeader, picname string) (string, *domain.AppError)
 }

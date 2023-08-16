@@ -1,11 +1,15 @@
 package user
 
 import (
+	"fmt"
 	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"mime/multipart"
+	"time"
 )
 
 type Service struct {
-	userRepo IUserRepository
+	userRepo      IUserRepository
+	userFilesRepo IUserFilesRepository
 }
 
 func (s *Service) CreateUser(user User) (*User, *domain.AppError) {
@@ -82,6 +86,19 @@ func (s *Service) UpdateUser(userID int,
 	return nil
 }
 
+func (s *Service) UpdateProfilePic(userID int,
+	pic *multipart.FileHeader) (string, *domain.AppError) {
+	currentTimeInNano := time.Now().UnixNano()
+	picName := fmt.Sprintf("%v-%v", userID, currentTimeInNano)
+
+	picLink, appErr := s.userFilesRepo.UpdateProfilePic(userID, pic, picName)
+	if appErr != nil {
+		return "", domain.NewAppError(appErr, domain.UnexpectedError)
+	}
+
+	return picLink, nil
+}
+
 func (s *Service) DeleteUser(userID int) *domain.AppError {
 	appErr := s.userRepo.DeleteUser(userID)
 	if appErr != nil {
@@ -95,6 +112,10 @@ func (s *Service) DeleteUser(userID int) *domain.AppError {
 	return nil
 }
 
-func NewUserService(userRepo IUserRepository) *Service {
-	return &Service{userRepo}
+func NewUserService(userRepo IUserRepository,
+	userFilesRepo IUserFilesRepository) *Service {
+	return &Service{
+		userRepo:      userRepo,
+		userFilesRepo: userFilesRepo,
+	}
 }
