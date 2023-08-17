@@ -16,21 +16,16 @@ type Repository struct {
 }
 
 func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.AppError) {
-	rollbackTxAndReturnZeroAndErr := func(tx *sqlx.Tx,
-		err error) (int, *domain.AppError) {
+	rllbkAndReturnErr := func(tx *sqlx.Tx, err error) *domain.AppError {
 		_ = tx.Rollback()
 		logrus.WithField(misc.RequestIDKey, request.ID()).Error(err)
 
-		return 0, domain.NewAppError(err, domain.RepositoryError)
+		return domain.NewAppError(err, domain.RepositoryError)
 	}
 
-	tx, err := r.db.Beginx()
-	if err != nil {
-		return rollbackTxAndReturnZeroAndErr(tx, err)
-	}
+	tx, _ := r.db.Beginx()
 
 	orderModel := fromOrderToModel(order)
-
 	result, err := tx.Exec(`insert into PurchaseOrder (
                            UserID, 
                            ShippingAddressID, 
@@ -40,7 +35,7 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
 		orderModel.ShippingAddressID, orderModel.PaymentMethodID,
 		orderModel.Notes.String, time.Now())
 	if err != nil {
-		return rollbackTxAndReturnZeroAndErr(tx, err)
+		return 0, rllbkAndReturnErr(tx, err)
 	}
 
 	orderID, _ := result.LastInsertId()
@@ -49,7 +44,7 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
                               ProductID, 
                               Quantity) values (?,?,?)`)
 	if err != nil {
-		return rollbackTxAndReturnZeroAndErr(tx, err)
+		return 0, rllbkAndReturnErr(tx, err)
 	}
 
 	var sem = make(chan struct{}, 5)
@@ -80,28 +75,25 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
 	wg.Wait()
 	close(errCh)
 	for err := range errCh {
-		return rollbackTxAndReturnZeroAndErr(tx, err)
+		return 0, rllbkAndReturnErr(tx, err)
 	}
 
-	var query = `select sum(pp.Quantity * p.Price) from PurchasedProduct pp 
-				inner join Product p on pp.ProductID = p.ID where OrderID=?`
+	query := `select sum(pp.Quantity * p.Price) from PurchasedProduct pp inner
+				join Product p on pp.ProductID = p.ID where OrderID=?`
 
-	var totalAmount float64
-	err = tx.Get(&totalAmount, query, orderID)
+	var total float64
+	err = tx.Get(&total, query, orderID)
 	if err != nil {
-		return rollbackTxAndReturnZeroAndErr(tx, err)
+		return 0, rllbkAndReturnErr(tx, err)
 	}
 
-	_, err = tx.Exec("update PurchaseOrder set TotalAmount=? where ID=?",
-		totalAmount, orderID)
+	_, err = tx.Exec("update PurchaseOrder set TotalAmount=? where ID=?", total,
+		orderID)
 	if err != nil {
-		return rollbackTxAndReturnZeroAndErr(tx, err)
+		return 0, rllbkAndReturnErr(tx, err)
 	}
 
-	err = tx.Commit()
-	if err != nil {
-		return rollbackTxAndReturnZeroAndErr(tx, err)
-	}
+	_ = tx.Commit()
 
 	return int(orderID), nil
 }
