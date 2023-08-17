@@ -16,7 +16,7 @@ type Repository struct {
 }
 
 func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.AppError) {
-	rllbkAndReturnErr := func(tx *sqlx.Tx, err error) *domain.AppError {
+	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
 		_ = tx.Rollback()
 		logrus.WithField(misc.RequestIDKey, request.ID()).Error(err)
 
@@ -35,7 +35,7 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
 		orderModel.ShippingAddressID, orderModel.PaymentMethodID,
 		orderModel.Notes.String, time.Now())
 	if err != nil {
-		return 0, rllbkAndReturnErr(tx, err)
+		return 0, rollbackAndError(tx, err)
 	}
 
 	orderID, _ := result.LastInsertId()
@@ -44,7 +44,7 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
                               ProductID, 
                               Quantity) values (?,?,?)`)
 	if err != nil {
-		return 0, rllbkAndReturnErr(tx, err)
+		return 0, rollbackAndError(tx, err)
 	}
 
 	var sem = make(chan struct{}, 5)
@@ -75,27 +75,39 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
 	wg.Wait()
 	close(errCh)
 	for err := range errCh {
-		return 0, rllbkAndReturnErr(tx, err)
+		return 0, rollbackAndError(tx, err)
 	}
+
+	err = updateOrderAmount(tx, int(orderID))
+	if err != nil {
+		return 0, rollbackAndError(tx, err)
+	}
+
+	return int(orderID), nil
+}
+
+func updateOrderAmount(tx *sqlx.Tx, orderID int) error {
+	var total float64
 
 	query := `select sum(pp.Quantity * p.Price) from PurchasedProduct pp inner
 				join Product p on pp.ProductID = p.ID where OrderID=?`
-
-	var total float64
-	err = tx.Get(&total, query, orderID)
+	err := tx.Get(&total, query, orderID)
 	if err != nil {
-		return 0, rllbkAndReturnErr(tx, err)
+		return err
 	}
 
-	_, err = tx.Exec("update PurchaseOrder set TotalAmount=? where ID=?", total,
-		orderID)
+	query = "update PurchaseOrder set TotalAmount=? where ID=?"
+	_, err = tx.Exec(query, total, orderID)
 	if err != nil {
-		return 0, rllbkAndReturnErr(tx, err)
+		return err
 	}
 
-	_ = tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
 
-	return int(orderID), nil
+	return nil
 }
 
 func NewOrderRepository(db *sqlx.DB) *Repository {

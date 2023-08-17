@@ -39,7 +39,7 @@ func (r Repository) SelectCardsByUserID(userID int) ([]paymentcard.PaymentCard, 
 
 func (r Repository) InsertUserPaymentCards(userID int,
 	cards []paymentcard.PaymentCard) ([]paymentcard.PaymentCard, *domain.AppError) {
-	rllbkAndReturnErr := func(tx *sqlx.Tx, err error) *domain.AppError {
+	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
 		logrus.WithField(misc.RequestIDKey, request.ID()).Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.NewAppErrorWithType(domain.NotFoundError)
@@ -60,7 +60,7 @@ func (r Repository) InsertUserPaymentCards(userID int,
                              ExpirationMonth, 
                              CVV) values (?,?,?,?,?,?,?,?)`)
 	if err != nil {
-		return nil, rllbkAndReturnErr(tx, err)
+		return nil, rollbackAndError(tx, err)
 	}
 
 	sem := make(chan struct{}, 5)
@@ -96,7 +96,7 @@ func (r Repository) InsertUserPaymentCards(userID int,
 	wg.Wait()
 	close(errCh)
 	for err := range errCh {
-		return nil, rllbkAndReturnErr(tx, err)
+		return nil, rollbackAndError(tx, err)
 	}
 
 	_ = tx.Commit()

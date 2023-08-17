@@ -39,7 +39,9 @@ func (r Repository) InsertUserAddresses(userID int,
 	addresses []address.Address) ([]address.Address, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
-	returnError := func(err error) *domain.AppError {
+	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
+		_ = tx.Rollback()
+
 		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.NewAppErrorWithType(domain.NotFoundError)
@@ -48,9 +50,9 @@ func (r Repository) InsertUserAddresses(userID int,
 		return domain.NewAppError(insertAddressError, domain.RepositoryError)
 	}
 
-	tx, err := r.db.Begin()
+	tx, err := r.db.Beginx()
 	if err != nil {
-		return nil, returnError(err)
+		return nil, rollbackAndError(tx, err)
 	}
 
 	insertStmnt, err := tx.Prepare(`insert into UserAddress (
@@ -62,7 +64,7 @@ func (r Repository) InsertUserAddresses(userID int,
                          Detail
                 ) values (?,?,?,?,?,?)`)
 	if err != nil {
-		return nil, returnError(err)
+		return nil, rollbackAndError(tx, err)
 	}
 
 	sem := make(chan struct{}, 5)
@@ -99,13 +101,12 @@ func (r Repository) InsertUserAddresses(userID int,
 	close(errCh)
 
 	for err := range errCh {
-		_ = tx.Rollback()
-		return nil, returnError(err)
+		return nil, rollbackAndError(tx, err)
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		return nil, returnError(err)
+		return nil, rollbackAndError(tx, err)
 	}
 
 	return addresses, nil
