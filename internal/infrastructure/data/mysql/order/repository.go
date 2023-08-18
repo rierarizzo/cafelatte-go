@@ -62,7 +62,6 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
 			}()
 
 			product := fromPurchasedProductToModel(entity)
-
 			_, err := insertProductStmnt.Exec(orderID, product.ProductID,
 				product.Quantity)
 			if err != nil {
