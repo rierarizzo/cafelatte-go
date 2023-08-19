@@ -1,7 +1,7 @@
 package authenticator
 
 type AuthorizedUserResponse struct {
-	User        LoggedUserResponse `json:"usermanager"`
+	User        LoggedUserResponse `json:"user"`
 	AccessToken string             `json:"accessToken"`
 }
 
