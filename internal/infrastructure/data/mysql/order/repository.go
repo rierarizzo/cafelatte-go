@@ -38,7 +38,7 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppEr
 	}
 
 	orderID, _ := result.LastInsertId()
-	insertProductStmnt, err := tx.Prepare(`insert into PurchasedProduct (
+	insertProductStmnt, err := tx.Prepare(`insert into ProductInOrder (
                               OrderID, 
                               ProductID, 
                               Quantity) values (?,?,?)`)
@@ -47,20 +47,20 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppEr
 	}
 
 	var sem = make(chan struct{}, 5)
-	var errCh = make(chan error, len(order.PurchasedProducts))
+	var errCh = make(chan error, len(order.Products))
 	var wg sync.WaitGroup
 
-	for _, v := range order.PurchasedProducts {
+	for _, v := range order.Products {
 		wg.Add(1)
 		sem <- struct{}{}
 
-		go func(entity domain.PurchasedProduct) {
+		go func(entity domain.ProductInOrder) {
 			defer func() {
 				wg.Done()
 				<-sem
 			}()
 
-			product := fromPurchasedProductToModel(entity)
+			product := fromProductInOrderToModel(entity)
 			_, err := insertProductStmnt.Exec(orderID, product.ProductID,
 				product.Quantity)
 			if err != nil {
@@ -87,7 +87,7 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppEr
 func updateOrderAmount(tx *sqlx.Tx, orderID int) error {
 	var total float64
 
-	query := `select sum(pp.Quantity * p.Price) from PurchasedProduct pp inner
+	query := `select sum(pp.Quantity * p.Price) from ProductInOrder pp inner
 				join Product p on pp.ProductID = p.ID where OrderID=?`
 	err := tx.Get(&total, query, orderID)
 	if err != nil {

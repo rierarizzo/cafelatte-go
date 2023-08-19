@@ -161,7 +161,7 @@ create table PurchaseOrder
     index IdxOrderStatus (OrderStatus) -- Índice en OrderStatus para búsquedas por estado
 );
 
-create table PurchasedProduct
+create table ProductInOrder
 (
     ID        int auto_increment,
     OrderID   int not null,

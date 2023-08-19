@@ -5,9 +5,9 @@ import (
 )
 
 func fromCreateOrderRequestToOrder(req CreateOrderRequest) domain.Order {
-	products := make([]domain.PurchasedProduct, 0)
+	products := make([]domain.ProductInOrder, 0)
 	for _, v := range req.PurchasedProducts {
-		products = append(products, domain.PurchasedProduct{
+		products = append(products, domain.ProductInOrder{
 			ProductID: v.ProductID,
 			Quantity:  v.Quantity,
 		})
@@ -18,6 +18,6 @@ func fromCreateOrderRequestToOrder(req CreateOrderRequest) domain.Order {
 		ShippingAddressID: req.AddressID,
 		PaymentMethodID:   req.PaymentMethodID,
 		Notes:             req.Notes,
-		PurchasedProducts: products,
+		Products:          products,
 	}
 }

@@ -18,7 +18,7 @@ type Model struct {
 	UpdatedAt         time.Time       `db:"UpdatedAt"`
 }
 
-type PurchasedProductModel struct {
+type ProductInOrderModel struct {
 	ID        int       `db:"ID"`
 	OrderID   int       `db:"OrderID"`
 	ProductID int       `db:"ProductID"`

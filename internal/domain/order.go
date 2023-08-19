@@ -13,5 +13,5 @@ type Order struct {
 	TotalAmount       float64
 	OrderedAt         time.Time
 	OrderStatus       string
-	PurchasedProducts []PurchasedProduct
+	Products          []ProductInOrder
 }

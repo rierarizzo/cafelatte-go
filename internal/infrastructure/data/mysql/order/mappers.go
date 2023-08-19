@@ -18,8 +18,8 @@ func fromOrderToModel(order domain.Order) Model {
 	}
 }
 
-func fromPurchasedProductToModel(product domain.PurchasedProduct) PurchasedProductModel {
-	return PurchasedProductModel{
+func fromProductInOrderToModel(product domain.ProductInOrder) ProductInOrderModel {
+	return ProductInOrderModel{
 		ID:        product.ID,
 		OrderID:   product.OrderID,
 		ProductID: product.ProductID,

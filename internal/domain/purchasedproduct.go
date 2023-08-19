@@ -1,6 +1,6 @@
 package domain
 
-type PurchasedProduct struct {
+type ProductInOrder struct {
 	ID        int
 	OrderID   int
 	ProductID int
