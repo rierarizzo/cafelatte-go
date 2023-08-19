@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	"github.com/rierarizzo/cafelatte/internal/domain/address"
-	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
@@ -16,7 +15,7 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (r Repository) SelectAddressesByUserID(userID int) ([]address.Address, *domain.AppError) {
+func (r Repository) SelectAddressesByUserID(userID int) ([]domain.Address, *domain.AppError) {
 	var addressesModel []Model
 
 	var query = "select * from UserAddress where UserID=? and Status=true"
@@ -36,7 +35,7 @@ func (r Repository) SelectAddressesByUserID(userID int) ([]address.Address, *dom
 }
 
 func (r Repository) InsertUserAddresses(userID int,
-	addresses []address.Address) ([]address.Address, *domain.AppError) {
+	addresses []domain.Address) ([]domain.Address, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
@@ -76,7 +75,7 @@ func (r Repository) InsertUserAddresses(userID int,
 		wg.Add(1)
 		sem <- struct{}{}
 
-		go func(address address.Address) {
+		go func(address domain.Address) {
 			defer func() {
 				wg.Done()
 				<-sem
@@ -153,8 +152,8 @@ func (r Repository) SelectProvinceNameByProvinceID(cityID int) (string, *domain.
 }
 
 var (
-	selectAddressError = errors.New("select address error")
-	insertAddressError = errors.New("insert address error")
+	selectAddressError = errors.New("select addressmanager error")
+	insertAddressError = errors.New("insert addressmanager error")
 )
 
 func NewAddressRepository(db *sqlx.DB) *Repository {

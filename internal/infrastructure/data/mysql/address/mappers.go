@@ -2,10 +2,10 @@ package address
 
 import (
 	"database/sql"
-	"github.com/rierarizzo/cafelatte/internal/domain/address"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func fromAddressToModel(address address.Address) Model {
+func fromAddressToModel(address domain.Address) Model {
 	return Model{
 		ID:         sql.NullInt64{Int64: int64(address.ID)},
 		Type:       address.Type,
@@ -16,8 +16,8 @@ func fromAddressToModel(address address.Address) Model {
 	}
 }
 
-func fromModelToAddress(model Model) address.Address {
-	return address.Address{
+func fromModelToAddress(model Model) domain.Address {
+	return domain.Address{
 		ID:         int(model.ID.Int64),
 		Type:       model.Type,
 		ProvinceID: model.ProvinceID,
@@ -27,8 +27,8 @@ func fromModelToAddress(model Model) address.Address {
 	}
 }
 
-func fromModelsToAddresses(addressesModel []Model) []address.Address {
-	var addresses = make([]address.Address, 0)
+func fromModelsToAddresses(addressesModel []Model) []domain.Address {
+	var addresses = make([]domain.Address, 0)
 	for _, v := range addressesModel {
 		addresses = append(addresses, fromModelToAddress(v))
 	}

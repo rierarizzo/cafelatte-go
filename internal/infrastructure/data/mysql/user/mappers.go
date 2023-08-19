@@ -1,11 +1,11 @@
 package user
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/domain/user"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func fromModelToUser(model Model) user.User {
-	return user.User{
+func fromModelToUser(model Model) domain.User {
+	return domain.User{
 		ID:          model.ID,
 		Username:    model.Username,
 		Name:        model.Name,
@@ -17,8 +17,8 @@ func fromModelToUser(model Model) user.User {
 	}
 }
 
-func fromModelsToUsers(models []Model) []user.User {
-	var users = make([]user.User, 0)
+func fromModelsToUsers(models []Model) []domain.User {
+	var users = make([]domain.User, 0)
 	for _, v := range models {
 		users = append(users, fromModelToUser(v))
 	}
@@ -26,7 +26,7 @@ func fromModelsToUsers(models []Model) []user.User {
 	return users
 }
 
-func fromUserToModel(user user.User) Model {
+func fromUserToModel(user domain.User) Model {
 	return Model{
 		ID:          user.ID,
 		Username:    user.Username,

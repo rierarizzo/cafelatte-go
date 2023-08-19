@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	userDomain "github.com/rierarizzo/cafelatte/internal/domain/user"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
@@ -18,7 +17,7 @@ type Repository struct {
 // SelectUsers retrieves a list of users from the database and returns the
 // list of users if successful, along with any error encountered during the
 // process.
-func (r *Repository) SelectUsers() ([]userDomain.User, *domain.AppError) {
+func (r *Repository) SelectUsers() ([]domain.User, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var usersModel []Model
@@ -37,10 +36,10 @@ func (r *Repository) SelectUsers() ([]userDomain.User, *domain.AppError) {
 	return fromModelsToUsers(usersModel), nil
 }
 
-// SelectUserByID retrieves a user from the database based on the provided
-// user ID and returns the user if found, along with any error encountered
+// SelectUserByID retrieves a usermanager from the database based on the provided
+// usermanager ID and returns the usermanager if found, along with any error encountered
 // during the process.
-func (r *Repository) SelectUserByID(userID int) (*userDomain.User, *domain.AppError) {
+func (r *Repository) SelectUserByID(userID int) (*domain.User, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var userModel Model
@@ -60,10 +59,10 @@ func (r *Repository) SelectUserByID(userID int) (*userDomain.User, *domain.AppEr
 	return &user, nil
 }
 
-// SelectUserByEmail retrieves a user from the database based on the
-// provided email and returns the user if found, along with any error
+// SelectUserByEmail retrieves a usermanager from the database based on the
+// provided email and returns the usermanager if found, along with any error
 // encountered during the process.
-func (r *Repository) SelectUserByEmail(email string) (*userDomain.User, *domain.AppError) {
+func (r *Repository) SelectUserByEmail(email string) (*domain.User, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var userModel Model
@@ -83,9 +82,9 @@ func (r *Repository) SelectUserByEmail(email string) (*userDomain.User, *domain.
 	return &user, nil
 }
 
-// InsertUser inserts a new user into the database and returns the inserted
-// user if successful, along with any error encountered during the process.
-func (r *Repository) InsertUser(user userDomain.User) (*userDomain.User, *domain.AppError) {
+// InsertUser inserts a new usermanager into the database and returns the inserted
+// usermanager if successful, along with any error encountered during the process.
+func (r *Repository) InsertUser(user domain.User) (*domain.User, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var userModel = fromUserToModel(user)
@@ -115,11 +114,10 @@ func (r *Repository) InsertUser(user userDomain.User) (*userDomain.User, *domain
 	return userToReturn, nil
 }
 
-// UpdateUser updates the details of a user in the database based on the
-// provided user ID and user object and returns an error, if any,
+// UpdateUser updates the details of a usermanager in the database based on the
+// provided usermanager ID and usermanager object and returns an error, if any,
 // encountered during the process.
-func (r *Repository) UpdateUser(userID int,
-	user userDomain.User) *domain.AppError {
+func (r *Repository) UpdateUser(userID int, user domain.User) *domain.AppError {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var userModel = fromUserToModel(user)
@@ -163,10 +161,10 @@ func (r *Repository) DeleteUser(userID int) *domain.AppError {
 }
 
 var (
-	insertUserError = errors.New("insert user error")
-	selectUserError = errors.New("select user error")
-	updateUserError = errors.New("update user error")
-	deleteUserError = errors.New("delete user error")
+	insertUserError = errors.New("insert usermanager error")
+	selectUserError = errors.New("select usermanager error")
+	updateUserError = errors.New("update usermanager error")
+	deleteUserError = errors.New("delete usermanager error")
 )
 
 func NewUserRepository(db *sqlx.DB) *Repository {

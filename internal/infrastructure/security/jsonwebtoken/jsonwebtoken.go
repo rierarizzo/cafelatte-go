@@ -3,8 +3,7 @@ package jsonwebtoken
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
-	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/domain/user"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/env"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
@@ -20,7 +19,7 @@ var (
 	parseTokenError           = errors.New("error in parsing token")
 )
 
-func CreateJWTToken(user user.User) (string, *domain.AppError) {
+func CreateJWTToken(user domain.User) (string, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	secret := []byte(os.Getenv(env.SecretKey))

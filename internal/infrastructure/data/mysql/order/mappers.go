@@ -2,10 +2,10 @@ package order
 
 import (
 	"database/sql"
-	"github.com/rierarizzo/cafelatte/internal/domain/order"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func fromOrderToModel(order order.Order) Model {
+func fromOrderToModel(order domain.Order) Model {
 	return Model{
 		ID:                order.ID,
 		UserID:            order.UserID,
@@ -18,7 +18,7 @@ func fromOrderToModel(order order.Order) Model {
 	}
 }
 
-func fromPurchasedProductToModel(product order.PurchasedProduct) PurchasedProductModel {
+func fromPurchasedProductToModel(product domain.PurchasedProduct) PurchasedProductModel {
 	return PurchasedProductModel{
 		ID:        product.ID,
 		OrderID:   product.OrderID,

@@ -1,7 +1,7 @@
 package crypt
 
 import (
-	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 	"golang.org/x/crypto/bcrypt"
 )
 

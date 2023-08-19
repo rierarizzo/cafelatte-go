@@ -2,8 +2,7 @@ package order
 
 import (
 	"github.com/jmoiron/sqlx"
-	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	orderDomain "github.com/rierarizzo/cafelatte/internal/domain/order"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
@@ -15,7 +14,7 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.AppError) {
+func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppError) {
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
 		_ = tx.Rollback()
 		logrus.WithField(misc.RequestIDKey, request.ID()).Error(err)
@@ -55,7 +54,7 @@ func (r *Repository) InsertPurchaseOrder(order orderDomain.Order) (int, *domain.
 		wg.Add(1)
 		sem <- struct{}{}
 
-		go func(entity orderDomain.PurchasedProduct) {
+		go func(entity domain.PurchasedProduct) {
 			defer func() {
 				wg.Done()
 				<-sem

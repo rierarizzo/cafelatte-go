@@ -2,10 +2,10 @@ package paymentcard
 
 import (
 	"database/sql"
-	"github.com/rierarizzo/cafelatte/internal/domain/paymentcard"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func fromCardToModel(card paymentcard.PaymentCard) Model {
+func fromCardToModel(card domain.PaymentCard) Model {
 	return Model{
 		ID:              sql.NullInt64{Int64: int64(card.ID)},
 		Type:            card.Type,
@@ -18,8 +18,8 @@ func fromCardToModel(card paymentcard.PaymentCard) Model {
 	}
 }
 
-func fromModelToCard(model Model) paymentcard.PaymentCard {
-	return paymentcard.PaymentCard{
+func fromModelToCard(model Model) domain.PaymentCard {
+	return domain.PaymentCard{
 		ID:              int(model.ID.Int64),
 		Type:            model.Type,
 		Company:         model.Company,
@@ -31,8 +31,8 @@ func fromModelToCard(model Model) paymentcard.PaymentCard {
 	}
 }
 
-func fromModelsToCards(cardsModel []Model) []paymentcard.PaymentCard {
-	var cards = make([]paymentcard.PaymentCard, 0)
+func fromModelsToCards(cardsModel []Model) []domain.PaymentCard {
+	var cards = make([]domain.PaymentCard, 0)
 	for _, v := range cardsModel {
 		cards = append(cards, fromModelToCard(v))
 	}

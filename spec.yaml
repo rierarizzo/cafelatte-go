@@ -7,7 +7,7 @@ info:
 paths:
   /auth/signup:
     post:
-      summary: Register a new user in the system.
+      summary: Register a new usermanager in the system.
       requestBody:
         required: true
         content:
@@ -17,29 +17,29 @@ paths:
               properties:
                 username:
                   type: string
-                  description: The username of the user.
+                  description: The username of the usermanager.
                 name:
                   type: string
-                  description: The name of the user.
+                  description: The name of the usermanager.
                 surname:
                   type: string
-                  description: The surname of the user.
+                  description: The surname of the usermanager.
                 phone:
                   type: string
-                  description: The phone number of the user.
+                  description: The phone number of the usermanager.
                 email:
                   type: string
-                  description: The email address of the user.
+                  description: The email addressmanager of the usermanager.
                 password:
                   type: string
-                  description: The password of the user.
+                  description: The password of the usermanager.
                 role:
                   type: string
-                  description: The role code of the user.
+                  description: The role code of the usermanager.
       responses:
         '201':
           description: User created successfully.
         '400':
-          description: Malformed or invalid data in the provided user.
+          description: Malformed or invalid data in the provided usermanager.
         '500':
           description: Unexpected server error.

@@ -3,7 +3,7 @@ package error
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"net/http"
 	"time"

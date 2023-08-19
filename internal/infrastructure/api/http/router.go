@@ -2,26 +2,26 @@ package http
 
 import (
 	"github.com/gin-contrib/cors"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/address"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticate"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/addressmanager"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/cardmanager"
 	error2 "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/error"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/logging"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/paymentcard"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/product"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/purchase"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/logger"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/productmanager"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/productpurchaser"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/requestid"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/user"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/usermanager"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Router(userHandler *user.Handler,
-	authHandler *authenticate.Handler,
-	addressHandler *address.Handler,
-	cardHandler *paymentcard.Handler,
-	productHandler *product.Handler,
-	purchaseHandler *purchase.Handler) http.Handler {
+func Router(userHandler *usermanager.Handler,
+	authHandler *authenticator.Handler,
+	addressHandler *addressmanager.Handler,
+	cardHandler *cardmanager.Handler,
+	productHandler *productmanager.Handler,
+	purchaseHandler *productpurchaser.Handler) http.Handler {
 
 	router := gin.New()
 
@@ -32,7 +32,7 @@ func Router(userHandler *user.Handler,
 		AllowMethods:     []string{"POST, GET, OPTIONS, PUT, DELETE, UPDATE"},
 	}))
 	router.Use(requestid.Middleware())
-	router.Use(logging.Middleware())
+	router.Use(logger.Middleware())
 	router.Use(error2.Middleware())
 
 	authGroup := router.Group("/auth")
@@ -42,7 +42,7 @@ func Router(userHandler *user.Handler,
 	}
 
 	usersGroup := router.Group("/users")
-	usersGroup.Use(authenticate.Middleware())
+	usersGroup.Use(authenticator.Middleware())
 	{
 		usersGroup.GET("/find", userHandler.GetUsers)
 		usersGroup.GET("/find/:userID", userHandler.FindUserByID)
@@ -66,8 +66,8 @@ func Router(userHandler *user.Handler,
 			productHandler.GetProductCategories)
 	}
 
-	purchaseGroup := router.Group("/purchase")
-	purchaseGroup.Use(authenticate.Middleware())
+	purchaseGroup := router.Group("/productpurchaser")
+	purchaseGroup.Use(authenticator.Middleware())
 	{
 		purchaseGroup.POST("/", purchaseHandler.Purchase)
 	}

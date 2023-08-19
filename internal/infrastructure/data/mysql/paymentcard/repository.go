@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
-	domain "github.com/rierarizzo/cafelatte/internal/domain/errors"
-	"github.com/rierarizzo/cafelatte/internal/domain/paymentcard"
+	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
@@ -16,7 +15,7 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (r Repository) SelectCardsByUserID(userID int) ([]paymentcard.PaymentCard, *domain.AppError) {
+func (r Repository) SelectCardsByUserID(userID int) ([]domain.PaymentCard, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var cardsModel []Model
@@ -38,7 +37,7 @@ func (r Repository) SelectCardsByUserID(userID int) ([]paymentcard.PaymentCard, 
 }
 
 func (r Repository) InsertUserPaymentCards(userID int,
-	cards []paymentcard.PaymentCard) ([]paymentcard.PaymentCard, *domain.AppError) {
+	cards []domain.PaymentCard) ([]domain.PaymentCard, *domain.AppError) {
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
 		logrus.WithField(misc.RequestIDKey, request.ID()).Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
@@ -72,7 +71,7 @@ func (r Repository) InsertUserPaymentCards(userID int,
 		wg.Add(1)
 		sem <- struct{}{}
 
-		go func(card paymentcard.PaymentCard) {
+		go func(card domain.PaymentCard) {
 			defer func() {
 				wg.Done()
 				<-sem
