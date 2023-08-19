@@ -22,7 +22,7 @@ func fromAuthUserToResponse(authorizedUser domain.AuthorizedUser) AuthorizedUser
 	}
 }
 
-func fromSignUpRequestToUser(req SignUpRequest) domain.User {
+func fromRequestToUser(req SignUpRequest) domain.User {
 	return domain.User{
 		Username:    req.Username,
 		Name:        req.Name,

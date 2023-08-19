@@ -11,6 +11,11 @@ import (
 	"sync"
 )
 
+var (
+	selectAddressError = errors.New("select addressmanager error")
+	insertAddressError = errors.New("insert addressmanager error")
+)
+
 type Repository struct {
 	db *sqlx.DB
 }
@@ -150,11 +155,6 @@ func (r Repository) SelectProvinceNameByProvinceID(cityID int) (string, *domain.
 
 	return provinceName, nil
 }
-
-var (
-	selectAddressError = errors.New("select addressmanager error")
-	insertAddressError = errors.New("insert addressmanager error")
-)
 
 func NewAddressRepository(db *sqlx.DB) *Repository {
 	return &Repository{db}

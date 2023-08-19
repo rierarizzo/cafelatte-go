@@ -33,7 +33,7 @@ func (h *Handler) GetCardsByUserID(c *gin.Context) {
 }
 
 func (h *Handler) AddUserCards(c *gin.Context) {
-	var req []CreateRequest
+	var req []RegisterCardRequest
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		appErr := domain.NewAppError(err, domain.BadRequestError)
@@ -48,7 +48,7 @@ func (h *Handler) AddUserCards(c *gin.Context) {
 	}
 
 	cards, appErr := h.paymentCardService.AddUserPaymentCard(userID,
-		fromCreateRequestToCards(req))
+		fromRequestToCards(req))
 	if appErr != nil {
 		http2.AbortWithError(c, appErr)
 		return

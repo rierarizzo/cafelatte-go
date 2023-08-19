@@ -9,6 +9,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	selectProductError         = errors.New("select productmanager error")
+	selectProductCategoryError = errors.New("select productmanager category error")
+)
+
 type Repository struct {
 	db *sqlx.DB
 }
@@ -70,11 +75,6 @@ func (p Repository) SelectProductCategories() ([]domain.ProductCategory, *domain
 
 	return fromCategoryModelsToCategories(model), nil
 }
-
-var (
-	selectProductError         = errors.New("select productmanager error")
-	selectProductCategoryError = errors.New("select productmanager category error")
-)
 
 func NewProductRepository(db *sqlx.DB) *Repository {
 	return &Repository{db}

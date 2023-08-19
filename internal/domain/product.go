@@ -9,3 +9,8 @@ type Product struct {
 	CategoryCode string
 	Stock        int
 }
+
+type ProductCategory struct {
+	Code        string
+	Description string
+}

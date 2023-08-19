@@ -4,7 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func fromCreateRequestToCard(req CreateRequest) domain.PaymentCard {
+func fromRequestToCard(req RegisterCardRequest) domain.PaymentCard {
 	return domain.PaymentCard{
 		Type:            req.Type,
 		Company:         req.Company,
@@ -16,10 +16,10 @@ func fromCreateRequestToCard(req CreateRequest) domain.PaymentCard {
 	}
 }
 
-func fromCreateRequestToCards(req []CreateRequest) []domain.PaymentCard {
+func fromRequestToCards(req []RegisterCardRequest) []domain.PaymentCard {
 	cards := make([]domain.PaymentCard, 0)
 	for _, v := range req {
-		cards = append(cards, fromCreateRequestToCard(v))
+		cards = append(cards, fromRequestToCard(v))
 	}
 
 	return cards

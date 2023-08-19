@@ -15,3 +15,9 @@ type User struct {
 func (u *User) SetPassword(password string) {
 	u.Password = password
 }
+
+// AuthorizedUser represents an user with authorization tokens
+type AuthorizedUser struct {
+	User        User
+	AccessToken string
+}

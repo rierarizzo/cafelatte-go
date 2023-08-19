@@ -9,52 +9,38 @@ import (
 	"time"
 )
 
-func ValidateType(card *domain.PaymentCard) *domain.AppError {
-	if card.Type != "C" && card.Type != "D" {
-		return domain.NewAppError(invalidCardTypeError, domain.ValidationError)
+var (
+	invalidCardTypeError           = errors.New("invalid card type")
+	invalidCardCVVError            = errors.New("invalid CVV")
+	invalidCardExpirationDateError = errors.New("invalid expiration date")
+	expiredCardError               = errors.New("card is expired")
+)
+
+func validateCard(card *domain.PaymentCard) *domain.AppError {
+	log := logrus.WithField(misc.RequestIDKey, request.ID())
+
+	if appErr := validateCardType(card); appErr != nil {
+		log.Error(appErr)
+		return appErr
+	}
+	if appErr := validateCardCVV(card); appErr != nil {
+		log.Error(appErr)
+		return appErr
+	}
+	if appErr := validateCardExpiration(card); appErr != nil {
+		return appErr
 	}
 
 	return nil
 }
 
-func ValidateCVV(card *domain.PaymentCard) *domain.AppError {
-	if len(card.CVV) != 3 && len(card.CVV) != 4 {
-		return domain.NewAppError(invalidCardCVVError, domain.ValidationError)
-	}
+func validateCardExpiration(card *domain.PaymentCard) *domain.AppError {
+	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
-	return nil
-}
-
-func ValidateExpirationDateFormat(card *domain.PaymentCard) *domain.AppError {
 	if card.ExpirationMonth < 1 || card.ExpirationMonth > 12 {
 		return domain.NewAppError(invalidCardExpirationDateError,
 			domain.ValidationError)
 	}
-
-	return nil
-}
-
-func ValidatePaymentCard(card *domain.PaymentCard) *domain.AppError {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
-
-	if appErr := ValidateType(card); appErr != nil {
-		log.Error(appErr)
-		return appErr
-	}
-	if appErr := ValidateCVV(card); appErr != nil {
-		log.Error(appErr)
-		return appErr
-	}
-	if appErr := ValidateExpirationDateFormat(card); appErr != nil {
-		log.Error(appErr)
-		return appErr
-	}
-
-	return nil
-}
-
-func ValidateExpirationDate(card *domain.PaymentCard) *domain.AppError {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	expirationDate := time.Date(card.ExpirationYear,
 		time.Month(card.ExpirationMonth),
@@ -68,9 +54,18 @@ func ValidateExpirationDate(card *domain.PaymentCard) *domain.AppError {
 	return nil
 }
 
-var (
-	invalidCardTypeError           = errors.New("invalid card type")
-	invalidCardCVVError            = errors.New("invalid CVV")
-	invalidCardExpirationDateError = errors.New("invalid expiration date")
-	expiredCardError               = errors.New("card is expired")
-)
+func validateCardType(card *domain.PaymentCard) *domain.AppError {
+	if card.Type != "C" && card.Type != "D" {
+		return domain.NewAppError(invalidCardTypeError, domain.ValidationError)
+	}
+
+	return nil
+}
+
+func validateCardCVV(card *domain.PaymentCard) *domain.AppError {
+	if len(card.CVV) != 3 && len(card.CVV) != 4 {
+		return domain.NewAppError(invalidCardCVVError, domain.ValidationError)
+	}
+
+	return nil
+}

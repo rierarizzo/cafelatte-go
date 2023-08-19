@@ -24,7 +24,7 @@ func (m DefaultManager) GetAddressesByUserID(userID int) ([]domain.Address, *dom
 func (m DefaultManager) AddUserAddresses(userID int,
 	addresses []domain.Address) ([]domain.Address, *domain.AppError) {
 	for _, v := range addresses {
-		if appErr := ValidateAddress(&v); appErr != nil {
+		if appErr := validateAddress(&v); appErr != nil {
 			return nil, appErr
 		}
 	}

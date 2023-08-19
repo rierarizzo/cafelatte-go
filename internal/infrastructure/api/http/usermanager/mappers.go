@@ -25,7 +25,7 @@ func fromUsersToResponse(users []domain.User) []Response {
 	return res
 }
 
-func fromUpdateRequestToUser(updUserReq UpdateRequest) domain.User {
+func fromRequestToUser(updUserReq UpdateUserRequest) domain.User {
 	return domain.User{
 		Username:    updUserReq.Username,
 		Name:        updUserReq.Name,

@@ -20,7 +20,7 @@ func (h *Handler) Purchase(c *gin.Context) {
 		return
 	}
 
-	order := fromCreateOrderRequestToOrder(req)
+	order := fromRequestToOrder(req)
 
 	orderID, appErr := h.purchaser.Purchase(order)
 	if appErr != nil {

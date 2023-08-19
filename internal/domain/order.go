@@ -15,3 +15,10 @@ type Order struct {
 	OrderStatus       string
 	Products          []ProductInOrder
 }
+
+type ProductInOrder struct {
+	ID        int
+	OrderID   int
+	ProductID int
+	Quantity  int
+}

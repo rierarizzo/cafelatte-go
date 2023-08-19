@@ -10,6 +10,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	insertUserError = errors.New("insert usermanager error")
+	selectUserError = errors.New("select usermanager error")
+	updateUserError = errors.New("update usermanager error")
+	deleteUserError = errors.New("delete usermanager error")
+)
+
 type Repository struct {
 	db *sqlx.DB
 }
@@ -159,13 +166,6 @@ func (r *Repository) DeleteUser(userID int) *domain.AppError {
 
 	return nil
 }
-
-var (
-	insertUserError = errors.New("insert usermanager error")
-	selectUserError = errors.New("select usermanager error")
-	updateUserError = errors.New("update usermanager error")
-	deleteUserError = errors.New("delete usermanager error")
-)
 
 func NewUserRepository(db *sqlx.DB) *Repository {
 	return &Repository{db}

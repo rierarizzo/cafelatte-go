@@ -1,6 +1,6 @@
 package cardmanager
 
-type CreateRequest struct {
+type RegisterCardRequest struct {
 	Type            string `json:"type"`
 	Company         int    `json:"company"`
 	HolderName      string `json:"holderName"`

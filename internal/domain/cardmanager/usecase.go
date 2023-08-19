@@ -25,11 +25,7 @@ func (m DefaultManager) GetCardsByUserID(userID int) ([]domain.PaymentCard, *dom
 func (m DefaultManager) AddUserPaymentCard(userID int,
 	cards []domain.PaymentCard) ([]domain.PaymentCard, *domain.AppError) {
 	for k, v := range cards {
-		if appErr := ValidatePaymentCard(&v); appErr != nil {
-			return nil, appErr
-		}
-
-		if appErr := ValidateExpirationDate(&v); appErr != nil {
+		if appErr := validateCard(&v); appErr != nil {
 			return nil, appErr
 		}
 

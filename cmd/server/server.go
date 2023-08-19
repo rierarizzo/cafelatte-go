@@ -17,8 +17,8 @@ import (
 	userHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/usermanager"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql"
 	addressData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/address"
+	cardData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/card"
 	orderData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/order"
-	paymentcardData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/paymentcard"
 	productData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/product"
 	userData "github.com/rierarizzo/cafelatte/internal/infrastructure/data/mysql/user"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/storage/s3"
@@ -60,7 +60,7 @@ func Server() {
 	addressHandler := addressHTTP.NewAddressHandler(defaultAddressManager)
 
 	// PaymentCards instance
-	cardRepository := paymentcardData.NewPaymentCardRepository(db)
+	cardRepository := cardData.NewPaymentCardRepository(db)
 	defaultCardManager := cardmanager.NewDefaultManager(cardRepository)
 	paymentCardHandler := paymentcardHTTP.NewPaymentCardHandler(defaultCardManager)
 

@@ -4,7 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func fromCreateOrderRequestToOrder(req CreateOrderRequest) domain.Order {
+func fromRequestToOrder(req CreateOrderRequest) domain.Order {
 	products := make([]domain.ProductInOrder, 0)
 	for _, v := range req.PurchasedProducts {
 		products = append(products, domain.ProductInOrder{

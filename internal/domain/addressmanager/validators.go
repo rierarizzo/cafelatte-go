@@ -9,10 +9,12 @@ import (
 	"regexp"
 )
 
-func ValidateAddress(address *domain.Address) *domain.AppError {
+var invalidAddressPostalCodeError = errors.New("invalid postal code")
+
+func validateAddress(address *domain.Address) *domain.AppError {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
-	if appErr := ValidatePostalCode(address); appErr != nil {
+	if appErr := validateAddressPostalCode(address); appErr != nil {
 		log.Error(appErr)
 		return appErr
 	}
@@ -20,7 +22,7 @@ func ValidateAddress(address *domain.Address) *domain.AppError {
 	return nil
 }
 
-func ValidatePostalCode(address *domain.Address) *domain.AppError {
+func validateAddressPostalCode(address *domain.Address) *domain.AppError {
 	if len(address.PostalCode) != 6 {
 		return domain.NewAppError(invalidAddressPostalCodeError,
 			domain.ValidationError)
@@ -35,7 +37,3 @@ func ValidatePostalCode(address *domain.Address) *domain.AppError {
 
 	return nil
 }
-
-var (
-	invalidAddressPostalCodeError = errors.New("invalid postal code")
-)

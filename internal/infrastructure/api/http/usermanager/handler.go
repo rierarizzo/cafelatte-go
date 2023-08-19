@@ -44,7 +44,7 @@ func (h *Handler) FindUserByID(c *gin.Context) {
 }
 
 func (h *Handler) UpdateUser(c *gin.Context) {
-	var req UpdateRequest
+	var req UpdateUserRequest
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		appErr := domain.NewAppError(err, domain.BadRequestError)
@@ -59,7 +59,7 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 	}
 
 	appErr := h.userManager.UpdateUser(userID,
-		fromUpdateRequestToUser(req))
+		fromRequestToUser(req))
 	if appErr != nil {
 		http2.AbortWithError(c, appErr)
 		return

@@ -20,7 +20,7 @@ func (h *Handler) SignUp(c *gin.Context) {
 		return
 	}
 
-	authorized, appErr := h.authenticator.SignUp(fromSignUpRequestToUser(signUpRequest))
+	authorized, appErr := h.authenticator.SignUp(fromRequestToUser(signUpRequest))
 	if appErr != nil {
 		httpUtil.AbortWithError(c, appErr)
 		return

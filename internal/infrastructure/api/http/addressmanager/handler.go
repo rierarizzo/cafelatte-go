@@ -32,7 +32,7 @@ func (h *Handler) GetAddressesByUserID(c *gin.Context) {
 }
 
 func (h *Handler) AddUserAddresses(c *gin.Context) {
-	var req []CreateRequest
+	var req []RegisterAddressRequest
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
 		appErr := domain.NewAppError(err, domain.BadRequestError)
@@ -47,7 +47,7 @@ func (h *Handler) AddUserAddresses(c *gin.Context) {
 	}
 
 	addresses, appErr := h.addressService.AddUserAddresses(userID,
-		fromCreateRequestToAddresses(req))
+		fromRequestToAddresses(req))
 	if appErr != nil {
 		httpUtil.AbortWithError(c, appErr)
 		return

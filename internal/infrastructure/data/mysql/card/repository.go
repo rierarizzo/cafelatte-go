@@ -1,4 +1,4 @@
-package paymentcard
+package card
 
 import (
 	"database/sql"
@@ -9,6 +9,11 @@ import (
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
 	"sync"
+)
+
+var (
+	selectCardError = errors.New("select payment card error")
+	insertCardError = errors.New("insert payment card error")
 )
 
 type Repository struct {
@@ -102,11 +107,6 @@ func (r Repository) InsertUserPaymentCards(userID int,
 
 	return cards, nil
 }
-
-var (
-	selectCardError = errors.New("select payment card error")
-	insertCardError = errors.New("insert payment card error")
-)
 
 func NewPaymentCardRepository(db *sqlx.DB) *Repository {
 	return &Repository{db}
