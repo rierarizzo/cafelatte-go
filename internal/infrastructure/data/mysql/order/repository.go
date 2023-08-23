@@ -25,23 +25,17 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppEr
 	tx, _ := r.db.Beginx()
 
 	orderModel := fromOrderToModel(order)
-	result, err := tx.Exec(`insert into PurchaseOrder (
-                           UserID, 
-                           ShippingAddressID, 
-                           PaymentMethodID, 
-                           Notes,  
-                           OrderedAt) values (?,?,?,?,?)`, orderModel.UserID,
-		orderModel.ShippingAddressID, orderModel.PaymentMethodID, orderModel.Notes.String,
-		time.Now())
+	result, err := tx.Exec(`insert into PurchaseOrder (UserID, ShippingAddressID, PaymentMethodID, 
+        Notes, OrderedAt) values (?,?,?,?,?)`, orderModel.UserID,
+		orderModel.ShippingAddressID, orderModel.PaymentMethodID,
+		orderModel.Notes.String, time.Now())
 	if err != nil {
 		return 0, rollbackAndError(tx, err)
 	}
 
 	orderID, _ := result.LastInsertId()
-	insertProductStmnt, err := tx.Prepare(`insert into ProductInOrder (
-                              OrderID, 
-                              ProductID, 
-                              Quantity) values (?,?,?)`)
+	insertProductStmnt, err := tx.Prepare(`insert into ProductInOrder (OrderID, ProductID, 
+        Quantity) values (?,?,?)`)
 	if err != nil {
 		return 0, rollbackAndError(tx, err)
 	}
