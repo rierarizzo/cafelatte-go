@@ -18,17 +18,19 @@ func Middleware() gin.HandlerFunc {
 			var appErr *domain.AppError
 			ok := errors.As(err, &appErr)
 			if ok {
-				if appErr.Type == domain.NotFoundError {
+				switch {
+				case appErr.Type == domain.NotFoundError:
 					writeError(c, http.StatusNotFound, appErr)
 					return
-				} else if appErr.Type == domain.NotAuthorizedError ||
+				case appErr.Type == domain.NotAuthorizedError ||
 					appErr.Type == domain.NotAuthenticatedError ||
-					appErr.Type == domain.TokenValidationError {
+					appErr.Type == domain.TokenValidationError:
 					writeError(c, http.StatusUnauthorized, appErr)
 					return
-				} else if appErr.Type == domain.BadRequestError {
+				case appErr.Type == domain.BadRequestError:
 					writeError(c, http.StatusBadRequest, appErr)
-				} else {
+					return
+				default:
 					writeError(c, http.StatusInternalServerError, appErr)
 					return
 				}

@@ -26,8 +26,7 @@ func (h Handler) GetProducts(c *gin.Context) {
 			return
 		}
 
-		httpUtil.RespondWithJSON(c, http.StatusOK,
-			fromProductsToResponse(products))
+		httpUtil.RespondWithJSON(c, http.StatusOK, fromProductsToResponse(products))
 	} else {
 		log.Debugf("Executing with query: %s", category)
 
@@ -37,8 +36,7 @@ func (h Handler) GetProducts(c *gin.Context) {
 			return
 		}
 
-		httpUtil.RespondWithJSON(c, http.StatusOK,
-			fromProductsToResponse(products))
+		httpUtil.RespondWithJSON(c, http.StatusOK, fromProductsToResponse(products))
 	}
 }
 

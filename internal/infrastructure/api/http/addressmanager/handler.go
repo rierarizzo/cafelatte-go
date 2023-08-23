@@ -16,8 +16,7 @@ type Handler struct {
 func (h *Handler) GetAddressesByUserID(c *gin.Context) {
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		appErr := domain.NewAppError(err, domain.BadRequestError)
-		httpUtil.AbortWithError(c, appErr)
+		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
@@ -27,22 +26,19 @@ func (h *Handler) GetAddressesByUserID(c *gin.Context) {
 		return
 	}
 
-	httpUtil.RespondWithJSON(c, http.StatusOK,
-		fromAddressesToResponse(addresses))
+	httpUtil.RespondWithJSON(c, http.StatusOK, fromAddressesToResponse(addresses))
 }
 
 func (h *Handler) AddUserAddresses(c *gin.Context) {
 	var req []RegisterAddressRequest
 	userID, err := strconv.Atoi(c.Param("userID"))
 	if err != nil {
-		appErr := domain.NewAppError(err, domain.BadRequestError)
-		httpUtil.AbortWithError(c, appErr)
+		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
 	if err := c.BindJSON(&req); err != nil {
-		appErr := domain.NewAppError(err, domain.BadRequestError)
-		httpUtil.AbortWithError(c, appErr)
+		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
@@ -53,8 +49,7 @@ func (h *Handler) AddUserAddresses(c *gin.Context) {
 		return
 	}
 
-	httpUtil.RespondWithJSON(c, http.StatusCreated,
-		fromAddressesToResponse(addresses))
+	httpUtil.RespondWithJSON(c, http.StatusCreated, fromAddressesToResponse(addresses))
 }
 
 func NewAddressHandler(addressService addressmanager.Manager) *Handler {

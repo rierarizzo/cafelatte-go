@@ -15,8 +15,7 @@ type Handler struct {
 func (h *Handler) SignUp(c *gin.Context) {
 	var signUpRequest SignUpRequest
 	if err := c.BindJSON(&signUpRequest); err != nil {
-		appErr := domain.NewAppError(err, domain.BadRequestError)
-		httpUtil.AbortWithError(c, appErr)
+		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
@@ -26,15 +25,13 @@ func (h *Handler) SignUp(c *gin.Context) {
 		return
 	}
 
-	httpUtil.RespondWithJSON(c, http.StatusCreated,
-		fromAuthUserToResponse(*authorized))
+	httpUtil.RespondWithJSON(c, http.StatusCreated, fromAuthUserToResponse(*authorized))
 }
 
 func (h *Handler) SignIn(c *gin.Context) {
 	var signInRequest SignInRequest
 	if err := c.BindJSON(&signInRequest); err != nil {
-		appErr := domain.NewAppError(err, domain.BadRequestError)
-		httpUtil.AbortWithError(c, appErr)
+		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
 		return
 	}
 
@@ -45,8 +42,7 @@ func (h *Handler) SignIn(c *gin.Context) {
 		return
 	}
 
-	httpUtil.RespondWithJSON(c, http.StatusOK,
-		fromAuthUserToResponse(*authorized))
+	httpUtil.RespondWithJSON(c, http.StatusOK, fromAuthUserToResponse(*authorized))
 }
 
 func NewAuthHandler(authenticator authenticator.Authenticator) *Handler {

@@ -18,8 +18,7 @@ func Middleware() gin.HandlerFunc {
 
 		start := time.Now()
 		log.WithFields(logrus.Fields{"method": requestMethod,
-			"path": requestPath,
-		}).Debug("Beginning request")
+			"path": requestPath}).Debug("Beginning request")
 
 		c.Next()
 
