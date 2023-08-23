@@ -6,23 +6,23 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"mime/multipart"
+	"os"
 )
 
 type Repository struct {
 	s3Client *s3.S3
 }
 
-const (
-	bucketName = "cafelatte-profile_pics"
-	ACL        = "public-read"
-)
+const ACL = "public-read"
 
-func (r *Repository) UpdateProfilePic(userID int,
+func (repository *Repository) UpdateProfilePic(userID int,
 	pic *multipart.FileHeader, picName string) (string, *domain.AppError) {
 	file, err := pic.Open()
 	if err != nil {
 		return "", domain.NewAppErrorWithType(domain.RepositoryError)
 	}
+
+	bucketName := os.Getenv("FILES_S3BUCKET")
 
 	params := &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
@@ -31,7 +31,7 @@ func (r *Repository) UpdateProfilePic(userID int,
 		ACL:    aws.String(ACL),
 	}
 
-	_, err = r.s3Client.PutObject(params)
+	_, err = repository.s3Client.PutObject(params)
 	if err != nil {
 		return "", domain.NewAppErrorWithType(domain.RepositoryError)
 	}
