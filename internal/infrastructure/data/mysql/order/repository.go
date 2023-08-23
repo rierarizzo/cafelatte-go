@@ -31,8 +31,8 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppEr
                            PaymentMethodID, 
                            Notes,  
                            OrderedAt) values (?,?,?,?,?)`, orderModel.UserID,
-		orderModel.ShippingAddressID, orderModel.PaymentMethodID,
-		orderModel.Notes.String, time.Now())
+		orderModel.ShippingAddressID, orderModel.PaymentMethodID, orderModel.Notes.String,
+		time.Now())
 	if err != nil {
 		return 0, rollbackAndError(tx, err)
 	}
