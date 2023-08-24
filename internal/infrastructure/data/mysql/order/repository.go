@@ -44,7 +44,7 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppEr
 			}()
 
 			product := fromProductInOrderToModel(entity)
-			_, err := insertProductStmnt.Exec(orderID, product.ProductID,
+			_, err = insertProductStmnt.Exec(orderID, product.ProductID,
 				product.Quantity)
 			if err != nil {
 				errCh <- err
@@ -55,7 +55,7 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppEr
 
 	wg.Wait()
 	close(errCh)
-	for err := range errCh {
+	for err = range errCh {
 		return 0, rollbackAndError(tx, err)
 	}
 
