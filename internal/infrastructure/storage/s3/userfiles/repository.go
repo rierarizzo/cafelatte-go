@@ -15,7 +15,7 @@ type Repository struct {
 
 const ACL = "public-read"
 
-func (repository *Repository) UpdateProfilePic(userID int,
+func (repository *Repository) UpdateProfilePicById(userID int,
 	pic *multipart.FileHeader, picName string) (string, *domain.AppError) {
 	file, err := pic.Open()
 	if err != nil {
@@ -47,6 +47,6 @@ func (repository *Repository) UpdateProfilePic(userID int,
 	return photoURL, nil
 }
 
-func NewUserFilesRepository(s3Client *s3.S3) *Repository {
+func New(s3Client *s3.S3) *Repository {
 	return &Repository{s3Client}
 }

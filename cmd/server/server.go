@@ -25,36 +25,25 @@ func Server() {
 	LoadInitConfig(cf)
 
 	// Connect to database
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", cf.DBUser,
-		cf.DBPassword, cf.DBHost, cf.DBPort, cf.DBName)
-	db := mysqlInfra.Connect(dsn)
+	dbConn := mysqlInfra.Connect(cf)
 
 	// Get S3 client
 	s3Client := s3Infra.Connect("us-east-1")
 
-	// Users instance
-	userRepository := userRepo.NewUserRepository(db)
-	userFilesRepo := userfilesRepo.NewUserFilesRepository(s3Client)
-	defaultUserManager := usermanager.New(userRepository,
-		userFilesRepo)
+	// Repositories
+	userRepository := userRepo.New(dbConn)
+	addressRepository := addressRepo.New(dbConn)
+	cardRepository := cardRepo.New(dbConn)
+	productRepository := productRepo.New(dbConn)
+	orderRepository := orderRepo.New(dbConn)
+	userFilesRepo := userfilesRepo.New(s3Client)
 
-	// Authentication instance
+	// Usecases
+	defaultUserManager := usermanager.New(userRepository, userFilesRepo)
 	defaultAuthenticator := authenticator.New(userRepository)
-
-	// Addresses instance
-	addressRepository := addressRepo.NewAddressRepository(db)
 	defaultAddressManager := addressmanager.New(addressRepository)
-
-	// PaymentCards instance
-	cardRepository := cardRepo.NewPaymentCardRepository(db)
 	defaultCardManager := cardmanager.New(cardRepository)
-
-	// Products instance
-	productRepository := productRepo.NewProductRepository(db)
 	defaultProductManager := productmanager.New(productRepository)
-
-	// Purchase instance
-	orderRepository := orderRepo.NewOrderRepository(db)
 	defaultPurchaser := productpurchaser.New(orderRepository)
 
 	// Initialize router with all paths

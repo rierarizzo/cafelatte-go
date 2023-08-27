@@ -15,8 +15,8 @@ type DefaultManager struct {
 // GetUsers retrieves a list of users from the system and returns the list
 // of users if successful, along with any error encountered during the
 // process.
-func (m *DefaultManager) GetUsers() ([]domain.User, *domain.AppError) {
-	returnedUsers, appErr := m.userRepository.SelectUsers()
+func (manager *DefaultManager) GetUsers() ([]domain.User, *domain.AppError) {
+	returnedUsers, appErr := manager.userRepository.SelectUsers()
 	if appErr != nil {
 		if appErr.Type == domain.NotFoundError {
 			return []domain.User{}, nil
@@ -31,8 +31,8 @@ func (m *DefaultManager) GetUsers() ([]domain.User, *domain.AppError) {
 // FindUserByEmail retrieves a usermanager from the system based on the
 // provided email and returns the usermanager if found, along with any error
 // encountered during the process.
-func (m *DefaultManager) FindUserByEmail(email string) (*domain.User, *domain.AppError) {
-	user, appErr := m.userRepository.SelectUserByEmail(email)
+func (manager *DefaultManager) FindUserByEmail(email string) (*domain.User, *domain.AppError) {
+	user, appErr := manager.userRepository.SelectUserByEmail(email)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
@@ -44,11 +44,11 @@ func (m *DefaultManager) FindUserByEmail(email string) (*domain.User, *domain.Ap
 	return user, nil
 }
 
-// FindUserByID retrieves a usermanager from the system based on the provided usermanager
+// FindUserById retrieves a usermanager from the system based on the provided usermanager
 // ID and returns the usermanager if found, along with any error encountered during
 // the process.
-func (m *DefaultManager) FindUserByID(id int) (*domain.User, *domain.AppError) {
-	user, appErr := m.userRepository.SelectUserByID(id)
+func (manager *DefaultManager) FindUserById(id int) (*domain.User, *domain.AppError) {
+	user, appErr := manager.userRepository.SelectUserById(id)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
@@ -60,12 +60,12 @@ func (m *DefaultManager) FindUserByID(id int) (*domain.User, *domain.AppError) {
 	return user, nil
 }
 
-// UpdateUser updates the details of a usermanager in the system based on the
+// UpdateUserById updates the details of a usermanager in the system based on the
 // provided usermanager ID and usermanager object and returns an error, if any,
 // encountered during the process.
-func (m *DefaultManager) UpdateUser(userID int,
+func (manager *DefaultManager) UpdateUserById(userID int,
 	user domain.User) *domain.AppError {
-	appErr := m.userRepository.UpdateUser(userID, user)
+	appErr := manager.userRepository.UpdateUserById(userID, user)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return domain.NewAppError(appErr, domain.UnexpectedError)
@@ -77,12 +77,12 @@ func (m *DefaultManager) UpdateUser(userID int,
 	return nil
 }
 
-func (m *DefaultManager) UpdateProfilePic(userID int,
+func (manager *DefaultManager) UpdateProfilePicById(userID int,
 	pic *multipart.FileHeader) (string, *domain.AppError) {
 	currentTimeInNano := time.Now().UnixNano()
 	picName := fmt.Sprintf("%v-%v", userID, currentTimeInNano)
 
-	picLink, appErr := m.userFilesStorage.UpdateProfilePic(userID, pic, picName)
+	picLink, appErr := manager.userFilesStorage.UpdateProfilePicById(userID, pic, picName)
 	if appErr != nil {
 		return "", domain.NewAppError(appErr, domain.UnexpectedError)
 	}
@@ -90,8 +90,8 @@ func (m *DefaultManager) UpdateProfilePic(userID int,
 	return picLink, nil
 }
 
-func (m *DefaultManager) DeleteUser(userID int) *domain.AppError {
-	appErr := m.userRepository.DeleteUser(userID)
+func (manager *DefaultManager) DeleteUserById(userID int) *domain.AppError {
+	appErr := manager.userRepository.DeleteUserById(userID)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return domain.NewAppError(appErr, domain.UnexpectedError)

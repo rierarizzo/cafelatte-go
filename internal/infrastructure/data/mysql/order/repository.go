@@ -14,8 +14,8 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppError) {
-	tx, _ := r.db.Beginx()
+func (repository *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppError) {
+	tx, _ := repository.db.Beginx()
 
 	orderID, appErr := generatePurchaseOrderID(tx, order)
 	if appErr != nil {
@@ -113,6 +113,6 @@ func rollbackAndError(tx *sqlx.Tx, err error) *domain.AppError {
 	return domain.NewAppError(err, domain.RepositoryError)
 }
 
-func NewOrderRepository(db *sqlx.DB) *Repository {
+func New(db *sqlx.DB) *Repository {
 	return &Repository{db}
 }

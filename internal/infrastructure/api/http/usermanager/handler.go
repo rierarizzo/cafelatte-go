@@ -40,7 +40,7 @@ func (handler *Handler) FindUserById(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	user, appErr := handler.userManager.FindUserByID(userId)
+	user, appErr := handler.userManager.FindUserById(userId)
 	if appErr != nil {
 		return appErr
 	}
@@ -59,7 +59,7 @@ func (handler *Handler) UpdateUserById(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	if appErr := handler.userManager.UpdateUser(userId,
+	if appErr := handler.userManager.UpdateUserById(userId,
 		fromRequestToUser(req)); appErr != nil {
 		return appErr
 	}
@@ -73,7 +73,7 @@ func (handler *Handler) DeleteUserById(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	if appErr := handler.userManager.DeleteUser(userId); appErr != nil {
+	if appErr := handler.userManager.DeleteUserById(userId); appErr != nil {
 		return appErr
 	}
 

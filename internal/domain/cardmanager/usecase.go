@@ -9,8 +9,8 @@ type DefaultManager struct {
 	cardRepository CardRepository
 }
 
-func (m DefaultManager) GetCardsByUserID(userID int) ([]domain.PaymentCard, *domain.AppError) {
-	cards, appErr := m.cardRepository.SelectCardsByUserID(userID)
+func (manager DefaultManager) GetCardsByUserId(userID int) ([]domain.PaymentCard, *domain.AppError) {
+	cards, appErr := manager.cardRepository.SelectCardsByUserID(userID)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
@@ -22,27 +22,25 @@ func (m DefaultManager) GetCardsByUserID(userID int) ([]domain.PaymentCard, *dom
 	return cards, nil
 }
 
-func (m DefaultManager) AddUserPaymentCard(userID int,
-	cards []domain.PaymentCard) ([]domain.PaymentCard, *domain.AppError) {
-	for k, v := range cards {
-		if appErr := validateCard(&v); appErr != nil {
-			return nil, appErr
-		}
-
-		hash, appErr := crypt.HashText(v.Number)
-		if appErr != nil {
-			return nil, appErr
-		}
-		cards[k].Number = hash
-
-		hash, appErr = crypt.HashText(v.CVV)
-		if appErr != nil {
-			return nil, appErr
-		}
-		cards[k].CVV = hash
+func (manager DefaultManager) AddUserCard(userId int,
+	card domain.PaymentCard) (*domain.PaymentCard, *domain.AppError) {
+	if appErr := validateCard(&card); appErr != nil {
+		return nil, appErr
 	}
 
-	cards, appErr := m.cardRepository.InsertUserPaymentCards(userID, cards)
+	hash, appErr := crypt.HashText(card.Number)
+	if appErr != nil {
+		return nil, appErr
+	}
+	card.Number = hash
+
+	hash, appErr = crypt.HashText(card.CVV)
+	if appErr != nil {
+		return nil, appErr
+	}
+	card.CVV = hash
+
+	data, appErr := manager.cardRepository.InsertUserCard(userId, card)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
@@ -51,7 +49,7 @@ func (m DefaultManager) AddUserPaymentCard(userID int,
 		return nil, appErr
 	}
 
-	return cards, nil
+	return data, nil
 }
 
 func New(cardRepository CardRepository) *DefaultManager {

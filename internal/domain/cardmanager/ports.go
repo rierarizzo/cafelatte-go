@@ -5,13 +5,13 @@ import (
 )
 
 type Manager interface {
-	GetCardsByUserID(userID int) ([]domain.PaymentCard, *domain.AppError)
-	AddUserPaymentCard(userID int,
-		cards []domain.PaymentCard) ([]domain.PaymentCard, *domain.AppError)
+	GetCardsByUserId(userId int) ([]domain.PaymentCard, *domain.AppError)
+	AddUserCard(userId int,
+		card domain.PaymentCard) (*domain.PaymentCard, *domain.AppError)
 }
 
 type CardRepository interface {
 	SelectCardsByUserID(userID int) ([]domain.PaymentCard, *domain.AppError)
-	InsertUserPaymentCards(userID int,
-		cards []domain.PaymentCard) ([]domain.PaymentCard, *domain.AppError)
+	InsertUserCard(userId int,
+		card domain.PaymentCard) (*domain.PaymentCard, *domain.AppError)
 }

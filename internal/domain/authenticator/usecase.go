@@ -11,7 +11,7 @@ type DefaultAuthenticator struct {
 	userRepository usermanager.UserRepository
 }
 
-func (a DefaultAuthenticator) SignUp(user domain.User) (*domain.AuthorizedUser, *domain.AppError) {
+func (authenticator DefaultAuthenticator) SignUp(user domain.User) (*domain.AuthorizedUser, *domain.AppError) {
 	if appErr := validateUser(&user); appErr != nil {
 		return nil, appErr
 	}
@@ -22,7 +22,7 @@ func (a DefaultAuthenticator) SignUp(user domain.User) (*domain.AuthorizedUser, 
 	}
 	user.SetPassword(hashedPass)
 
-	returnedUser, appErr := a.userRepository.InsertUser(user)
+	returnedUser, appErr := authenticator.userRepository.InsertUser(user)
 	if appErr != nil {
 		return nil, appErr
 	}
@@ -35,8 +35,8 @@ func (a DefaultAuthenticator) SignUp(user domain.User) (*domain.AuthorizedUser, 
 	return authorized, nil
 }
 
-func (a DefaultAuthenticator) SignIn(email, password string) (*domain.AuthorizedUser, *domain.AppError) {
-	returnedUser, appErr := a.userRepository.SelectUserByEmail(email)
+func (authenticator DefaultAuthenticator) SignIn(email, password string) (*domain.AuthorizedUser, *domain.AppError) {
+	returnedUser, appErr := authenticator.userRepository.SelectUserByEmail(email)
 	if appErr != nil {
 		if appErr.Type == domain.NotFoundError {
 			return nil, domain.NewAppErrorWithType(domain.NotAuthorizedError)

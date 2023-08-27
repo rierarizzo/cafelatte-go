@@ -18,12 +18,12 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (p Repository) SelectProducts() ([]domain.Product, *domain.AppError) {
-	return selectProducts(p.db, "select * from Product where Status=true")
+func (repository Repository) SelectProducts() ([]domain.Product, *domain.AppError) {
+	return selectProducts(repository.db, "select * from Product where Status=true")
 }
 
-func (p Repository) SelectProductsByCategory(categoryCode string) ([]domain.Product, *domain.AppError) {
-	return selectProducts(p.db,
+func (repository Repository) SelectProductsByCategory(categoryCode string) ([]domain.Product, *domain.AppError) {
+	return selectProducts(repository.db,
 		"select * from Product where CategoryCode=? and Status=true",
 		categoryCode)
 }
@@ -55,12 +55,12 @@ func selectProducts(db *sqlx.DB, query string,
 	return fromModelsToProducts(model), nil
 }
 
-func (p Repository) SelectProductCategories() ([]domain.ProductCategory, *domain.AppError) {
+func (repository Repository) SelectProductCategories() ([]domain.ProductCategory, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var model []CategoryModel
 
-	err := p.db.Select(&model, "select * from ProductCategory")
+	err := repository.db.Select(&model, "select * from ProductCategory")
 	if err != nil {
 		log.Errorf("Error in SelectProductCategories: %v", err)
 		appErr := domain.NewAppError(selectProductCategoryError,
@@ -76,6 +76,6 @@ func (p Repository) SelectProductCategories() ([]domain.ProductCategory, *domain
 	return fromCategoryModelsToCategories(model), nil
 }
 
-func NewProductRepository(db *sqlx.DB) *Repository {
+func New(db *sqlx.DB) *Repository {
 	return &Repository{db}
 }

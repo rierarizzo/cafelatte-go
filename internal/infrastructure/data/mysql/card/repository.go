@@ -8,7 +8,6 @@ import (
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
-	"sync"
 )
 
 var (
@@ -20,13 +19,13 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (r Repository) SelectCardsByUserID(userID int) ([]domain.PaymentCard, *domain.AppError) {
+func (repository Repository) SelectCardsByUserID(userId int) ([]domain.PaymentCard, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var cardsModel []Model
 
 	query := "select * from UserPaymentCard where UserID=? and Status=true"
-	err := r.db.Select(&cardsModel, query, userID)
+	err := repository.db.Select(&cardsModel, query, userId)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
@@ -41,8 +40,8 @@ func (r Repository) SelectCardsByUserID(userID int) ([]domain.PaymentCard, *doma
 	return fromModelsToCards(cardsModel), nil
 }
 
-func (r Repository) InsertUserPaymentCards(userID int,
-	cards []domain.PaymentCard) ([]domain.PaymentCard, *domain.AppError) {
+func (repository Repository) InsertUserCard(userId int,
+	card domain.PaymentCard) (*domain.PaymentCard, *domain.AppError) {
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
 		logrus.WithField(misc.RequestIDKey, request.ID()).Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
@@ -52,9 +51,10 @@ func (r Repository) InsertUserPaymentCards(userID int,
 		return domain.NewAppError(insertCardError, domain.RepositoryError)
 	}
 
-	tx, _ := r.db.Beginx()
+	tx, _ := repository.db.Beginx()
 
-	insertStmnt, err := tx.Prepare(`insert into UserPaymentCard (
+	cardModel := fromCardToModel(card)
+	result, err := tx.Exec(`insert into UserPaymentCard (
                              Type, 
                              UserID, 
                              Company, 
@@ -62,52 +62,21 @@ func (r Repository) InsertUserPaymentCards(userID int,
                              Number, 
                              ExpirationYear, 
                              ExpirationMonth, 
-                             CVV) values (?,?,?,?,?,?,?,?)`)
+                             CVV) values (?,?,?,?,?,?,?,?)`, cardModel.Type, userId,
+		cardModel.Company, cardModel.HolderName, cardModel.Number,
+		cardModel.ExpirationYear, cardModel.ExpirationMonth, cardModel.CVV)
 	if err != nil {
 		return nil, rollbackAndError(tx, err)
 	}
 
-	sem := make(chan struct{}, 5)
-
-	errCh := make(chan error, len(cards))
-	var wg sync.WaitGroup
-
-	for _, v := range cards {
-		wg.Add(1)
-		sem <- struct{}{}
-
-		go func(card domain.PaymentCard) {
-			defer func() {
-				wg.Done()
-				<-sem
-			}()
-			cardModel := fromCardToModel(card)
-
-			result, err := insertStmnt.Exec(cardModel.Type, userID,
-				cardModel.Company, cardModel.HolderName, cardModel.Number,
-				cardModel.ExpirationYear, cardModel.ExpirationMonth,
-				cardModel.CVV)
-			if err != nil {
-				errCh <- err
-				return
-			}
-
-			cardID, _ := result.LastInsertId()
-			card.ID = int(cardID)
-		}(v)
-	}
-
-	wg.Wait()
-	close(errCh)
-	for err := range errCh {
-		return nil, rollbackAndError(tx, err)
-	}
+	cardID, _ := result.LastInsertId()
+	card.ID = int(cardID)
 
 	_ = tx.Commit()
 
-	return cards, nil
+	return &card, nil
 }
 
-func NewPaymentCardRepository(db *sqlx.DB) *Repository {
+func New(db *sqlx.DB) *Repository {
 	return &Repository{db}
 }

@@ -16,16 +16,7 @@ func fromRequestToCard(req RegisterCardRequest) domain.PaymentCard {
 	}
 }
 
-func fromRequestToCards(req []RegisterCardRequest) []domain.PaymentCard {
-	cards := make([]domain.PaymentCard, 0)
-	for _, v := range req {
-		cards = append(cards, fromRequestToCard(v))
-	}
-
-	return cards
-}
-
-func fromCardToResponse(card domain.PaymentCard) Response {
+func fromCardToResponse(card *domain.PaymentCard) Response {
 	return Response{
 		Type:       card.Type,
 		Company:    card.Company,
@@ -36,7 +27,7 @@ func fromCardToResponse(card domain.PaymentCard) Response {
 func fromCardsToResponse(cards []domain.PaymentCard) []Response {
 	res := make([]Response, 0)
 	for _, v := range cards {
-		res = append(res, fromCardToResponse(v))
+		res = append(res, fromCardToResponse(&v))
 	}
 
 	return res

@@ -14,16 +14,7 @@ func fromRequestToAddress(req RegisterAddressRequest) domain.Address {
 	}
 }
 
-func fromRequestToAddresses(req []RegisterAddressRequest) []domain.Address {
-	addresses := make([]domain.Address, 0)
-	for _, v := range req {
-		addresses = append(addresses, fromRequestToAddress(v))
-	}
-
-	return addresses
-}
-
-func fromAddressToResponse(address domain.Address) Response {
+func fromAddressToResponse(address *domain.Address) Response {
 	return Response{
 		Type:       address.Type,
 		ProvinceID: address.ProvinceID,
@@ -35,7 +26,7 @@ func fromAddressToResponse(address domain.Address) Response {
 func fromAddressesToResponse(addresses []domain.Address) []Response {
 	res := make([]Response, 0)
 	for _, v := range addresses {
-		res = append(res, fromAddressToResponse(v))
+		res = append(res, fromAddressToResponse(&v))
 	}
 
 	return res

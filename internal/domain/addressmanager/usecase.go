@@ -8,8 +8,8 @@ type DefaultManager struct {
 	addressRepository AddressRepository
 }
 
-func (m DefaultManager) GetAddressesByUserID(userID int) ([]domain.Address, *domain.AppError) {
-	addresses, appErr := m.addressRepository.SelectAddressesByUserID(userID)
+func (manager DefaultManager) GetAddressesByUserId(userId int) ([]domain.Address, *domain.AppError) {
+	addresses, appErr := manager.addressRepository.SelectAddressesByUserId(userId)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
@@ -21,15 +21,13 @@ func (m DefaultManager) GetAddressesByUserID(userID int) ([]domain.Address, *dom
 	return addresses, nil
 }
 
-func (m DefaultManager) AddUserAddresses(userID int,
-	addresses []domain.Address) ([]domain.Address, *domain.AppError) {
-	for _, v := range addresses {
-		if appErr := validateAddress(&v); appErr != nil {
-			return nil, appErr
-		}
+func (manager DefaultManager) AddUserAddress(userId int,
+	address domain.Address) (*domain.Address, *domain.AppError) {
+	if appErr := validateAddress(&address); appErr != nil {
+		return nil, appErr
 	}
 
-	addresses, appErr := m.addressRepository.InsertUserAddresses(userID, addresses)
+	data, appErr := manager.addressRepository.InsertUserAddress(userId, address)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
@@ -38,7 +36,7 @@ func (m DefaultManager) AddUserAddresses(userID int,
 		return nil, appErr
 	}
 
-	return addresses, nil
+	return data, nil
 }
 
 func New(addressRepository AddressRepository) *DefaultManager {

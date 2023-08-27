@@ -30,7 +30,7 @@ func (handler *Handler) GetCardsByUserId(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	cards, appErr := handler.cardManager.GetCardsByUserID(userId)
+	cards, appErr := handler.cardManager.GetCardsByUserId(userId)
 	if appErr != nil {
 		return appErr
 	}
@@ -39,7 +39,7 @@ func (handler *Handler) GetCardsByUserId(c echo.Context) error {
 }
 
 func (handler *Handler) AddUserCards(c echo.Context) error {
-	var req []RegisterCardRequest
+	var req RegisterCardRequest
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
@@ -49,13 +49,12 @@ func (handler *Handler) AddUserCards(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	cards, appErr := handler.cardManager.AddUserPaymentCard(userId,
-		fromRequestToCards(req))
+	card, appErr := handler.cardManager.AddUserCard(userId, fromRequestToCard(req))
 	if appErr != nil {
 		return appErr
 	}
 
-	return c.JSON(http.StatusCreated, fromCardsToResponse(cards))
+	return c.JSON(http.StatusCreated, fromCardToResponse(card))
 }
 
 func New(paymentCardService cardmanager.Manager) *Handler {
