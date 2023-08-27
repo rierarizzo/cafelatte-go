@@ -21,11 +21,13 @@ import (
 
 func Server() {
 	// Map config environment variable to struct
-	cf := GetConfig()
-	LoadInitConfig(cf)
+	config := GetConfig()
+	LoadInitConfig(config)
 
 	// Connect to database
-	dbConn := mysqlInfra.Connect(cf)
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", config.DBUser,
+		config.DBPassword, config.DBHost, config.DBPort, config.DBName)
+	dbConn := mysqlInfra.Connect(dsn)
 
 	// Get S3 client
 	s3Client := s3Infra.Connect("us-east-1")
@@ -51,5 +53,5 @@ func Server() {
 		defaultAddressManager, defaultCardManager, defaultProductManager,
 		defaultPurchaser)
 
-	router.Logger.Fatal(router.Start(fmt.Sprintf(":%s", cf.ServerPort)))
+	router.Logger.Fatal(router.Start(fmt.Sprintf(":%s", config.ServerPort)))
 }
