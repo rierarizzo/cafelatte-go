@@ -15,7 +15,7 @@ type Handler struct {
 
 func Router(group *echo.Group) func(cardManagerHandler *Handler) {
 	return func(handler *Handler) {
-		cardsGroup := group.Group("/cards")
+		cardsGroup := group.Group("/card")
 
 		cardsGroup.Use(authenticator.Middleware)
 

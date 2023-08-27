@@ -15,7 +15,7 @@ type Handler struct {
 
 func Router(group *echo.Group) func(addressManagerHandler *Handler) {
 	return func(handler *Handler) {
-		addressesGroup := group.Group("/addresses")
+		addressesGroup := group.Group("/address")
 
 		addressesGroup.Use(authenticator.Middleware)
 
