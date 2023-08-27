@@ -35,27 +35,27 @@ func Server() {
 	// Users instance
 	userRepository := userRepo.NewUserRepository(db)
 	userFilesRepo := userfilesRepo.NewUserFilesRepository(s3Client)
-	defaultUserManager := usermanager.NewDefaultManager(userRepository,
+	defaultUserManager := usermanager.New(userRepository,
 		userFilesRepo)
 
 	// Authentication instance
-	defaultAuthenticator := authenticator.NewDefaultAuthenticator(userRepository)
+	defaultAuthenticator := authenticator.New(userRepository)
 
 	// Addresses instance
 	addressRepository := addressRepo.NewAddressRepository(db)
-	defaultAddressManager := addressmanager.NewDefaultManager(addressRepository)
+	defaultAddressManager := addressmanager.New(addressRepository)
 
 	// PaymentCards instance
 	cardRepository := cardRepo.NewPaymentCardRepository(db)
-	defaultCardManager := cardmanager.NewDefaultManager(cardRepository)
+	defaultCardManager := cardmanager.New(cardRepository)
 
 	// Products instance
 	productRepository := productRepo.NewProductRepository(db)
-	defaultProductManager := productmanager.NewDefaultManager(productRepository)
+	defaultProductManager := productmanager.New(productRepository)
 
 	// Purchase instance
 	orderRepository := orderRepo.NewOrderRepository(db)
-	defaultPurchaser := productpurchaser.NewDefaultPurchaser(orderRepository)
+	defaultPurchaser := productpurchaser.New(orderRepository)
 
 	// Initialize router with all paths
 	router := httpRouter.Router(defaultUserManager, defaultAuthenticator,

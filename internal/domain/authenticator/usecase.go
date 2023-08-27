@@ -71,6 +71,6 @@ func AuthorizeUser(user domain.User) (*domain.AuthorizedUser, *domain.AppError) 
 	return &authorizedUser, nil
 }
 
-func NewDefaultAuthenticator(userRepository usermanager.UserRepository) *DefaultAuthenticator {
+func New(userRepository usermanager.UserRepository) *DefaultAuthenticator {
 	return &DefaultAuthenticator{userRepository}
 }

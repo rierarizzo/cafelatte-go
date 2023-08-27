@@ -103,7 +103,7 @@ func (m *DefaultManager) DeleteUser(userID int) *domain.AppError {
 	return nil
 }
 
-func NewDefaultManager(userRepository UserRepository,
+func New(userRepository UserRepository,
 	userFilesStorage UserFilesRepository) *DefaultManager {
 	return &DefaultManager{
 		userRepository:   userRepository,

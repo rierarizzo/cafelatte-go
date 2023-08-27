@@ -17,6 +17,6 @@ func (p *DefaultPurchaser) Purchase(order domain.Order) (int, *domain.AppError) 
 	return orderID, nil
 }
 
-func NewDefaultPurchaser(orderRepository OrderRepository) *DefaultPurchaser {
+func New(orderRepository OrderRepository) *DefaultPurchaser {
 	return &DefaultPurchaser{orderRepository}
 }

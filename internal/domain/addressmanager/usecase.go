@@ -29,8 +29,7 @@ func (m DefaultManager) AddUserAddresses(userID int,
 		}
 	}
 
-	addresses, appErr := m.addressRepository.InsertUserAddresses(userID,
-		addresses)
+	addresses, appErr := m.addressRepository.InsertUserAddresses(userID, addresses)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
@@ -42,6 +41,6 @@ func (m DefaultManager) AddUserAddresses(userID int,
 	return addresses, nil
 }
 
-func NewDefaultManager(addressRepository AddressRepository) *DefaultManager {
+func New(addressRepository AddressRepository) *DefaultManager {
 	return &DefaultManager{addressRepository}
 }

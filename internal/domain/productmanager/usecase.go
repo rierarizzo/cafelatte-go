@@ -35,6 +35,6 @@ func (m DefaultManager) GetProductCategories() ([]domain.ProductCategory, *domai
 	return categories, nil
 }
 
-func NewDefaultManager(productRepository ProductRepository) *DefaultManager {
+func New(productRepository ProductRepository) *DefaultManager {
 	return &DefaultManager{productRepository}
 }

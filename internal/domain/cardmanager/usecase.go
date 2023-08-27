@@ -54,6 +54,6 @@ func (m DefaultManager) AddUserPaymentCard(userID int,
 	return cards, nil
 }
 
-func NewDefaultManager(cardRepository CardRepository) *DefaultManager {
+func New(cardRepository CardRepository) *DefaultManager {
 	return &DefaultManager{cardRepository}
 }
