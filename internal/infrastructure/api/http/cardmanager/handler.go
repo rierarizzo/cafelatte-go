@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/cardmanager"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
 	"net/http"
 	"strconv"
 )
@@ -15,12 +14,8 @@ type Handler struct {
 
 func Router(group *echo.Group) func(cardManagerHandler *Handler) {
 	return func(handler *Handler) {
-		cardsGroup := group.Group("/card")
-
-		cardsGroup.Use(authenticator.Middleware)
-
-		cardsGroup.GET("/find/:userId", handler.GetCardsByUserId)
-		cardsGroup.POST("/register/:userId", handler.AddUserCards)
+		group.GET("/card/find/:userId", handler.GetCardsByUserId)
+		group.POST("/card/register/:userId", handler.AddCard)
 	}
 }
 
@@ -38,7 +33,7 @@ func (handler *Handler) GetCardsByUserId(c echo.Context) error {
 	return c.JSON(http.StatusOK, fromCardsToResponse(cards))
 }
 
-func (handler *Handler) AddUserCards(c echo.Context) error {
+func (handler *Handler) AddCard(c echo.Context) error {
 	var req RegisterCardRequest
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {

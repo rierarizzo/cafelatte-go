@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/addressmanager"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
 	"net/http"
 	"strconv"
 )
@@ -15,12 +14,8 @@ type Handler struct {
 
 func Router(group *echo.Group) func(addressManagerHandler *Handler) {
 	return func(handler *Handler) {
-		addressesGroup := group.Group("/address")
-
-		addressesGroup.Use(authenticator.Middleware)
-
-		addressesGroup.GET("/find/:userId", handler.GetAddressesByUserId)
-		addressesGroup.POST("/register/:userId", handler.AddUserAddresses)
+		group.GET("/address/find/:userId", handler.GetAddressesByUserId)
+		group.POST("/address/register/:userId", handler.AddUserAddresses)
 	}
 }
 

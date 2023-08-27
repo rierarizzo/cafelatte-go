@@ -12,9 +12,8 @@ import (
 	addressmanagerHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/addressmanager"
 	authenticatorHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
 	cardmanagerHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/cardmanager"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/error"
+	errorHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/error"
 	productmanagerHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/productmanager"
-
 	productpurchaserHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/productpurchaser"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/saverequestid"
 	usermanagerHTTP "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/usermanager"
@@ -29,7 +28,8 @@ func Router(userManager usermanagerDomain.Manager,
 	e := echo.New()
 
 	/* Middlewares */
-	e.HTTPErrorHandler = error.CustomHTTPErrorHandler
+	e.HTTPErrorHandler = errorHTTP.CustomHTTPErrorHandler
+
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}, id=${id}, latency=${latency}\n",
 	}))
@@ -39,9 +39,9 @@ func Router(userManager usermanagerDomain.Manager,
 
 	/* Groups */
 	auth := e.Group("/auth")
-	users := e.Group("/users")
 	products := e.Group("/products")
-	purchase := e.Group("/purchase")
+	users := e.Group("/users", authenticatorHTTP.Middleware)
+	purchase := e.Group("/purchase", authenticatorHTTP.Middleware)
 
 	/* Routers */
 	authenticatorHTTP.Router(auth)(authenticatorHTTP.New(authenticator))

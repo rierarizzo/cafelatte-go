@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/productpurchaser"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
 	"net/http"
 )
 
@@ -15,8 +14,6 @@ type Handler struct {
 
 func Router(group *echo.Group) func(purchaserHandler *Handler) {
 	return func(handler *Handler) {
-		group.Use(authenticator.Middleware)
-
 		group.POST("/", handler.Purchase)
 	}
 }
