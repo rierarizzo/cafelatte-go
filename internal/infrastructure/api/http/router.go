@@ -30,7 +30,9 @@ func Router(userManager usermanagerDomain.Manager,
 
 	/* Middlewares */
 	e.HTTPErrorHandler = error.CustomHTTPErrorHandler
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "method=${method}, uri=${uri}, status=${status}, id=${id}, latency=${latency}\n",
+	}))
 	e.Use(middleware.CORS())
 	e.Use(middleware.RequestID())
 	e.Use(saverequestid.Middleware)
