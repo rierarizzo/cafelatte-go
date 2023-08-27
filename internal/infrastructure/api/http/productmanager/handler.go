@@ -1,11 +1,10 @@
 package productmanager
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain/productmanager"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
-	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )
@@ -14,43 +13,46 @@ type Handler struct {
 	productManager productmanager.Manager
 }
 
-func (h Handler) GetProducts(c *gin.Context) {
+func Router(group *echo.Group) func(productManagerHandler *Handler) {
+	return func(handler *Handler) {
+		group.GET("/find", handler.GetProducts)
+		group.GET("/find/categories", handler.GetProductCategories)
+	}
+}
+
+func (handler Handler) GetProducts(c echo.Context) error {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
-	var category = c.Query("category")
+	var category = c.QueryParam("category")
 
 	if category == "" {
-		products, appErr := h.productManager.GetProducts()
+		products, appErr := handler.productManager.GetProducts()
 		if appErr != nil {
-			httpUtil.AbortWithError(c, appErr)
-			return
+			return appErr
 		}
 
-		httpUtil.RespondWithJSON(c, http.StatusOK, fromProductsToResponse(products))
+		return c.JSON(http.StatusOK, fromProductsToResponse(products))
 	} else {
 		log.Debugf("Executing with query: %s", category)
 
-		products, appErr := h.productManager.GetProductsByCategory(category)
+		products, appErr := handler.productManager.GetProductsByCategory(category)
 		if appErr != nil {
-			httpUtil.AbortWithError(c, appErr)
-			return
+			return appErr
 		}
 
-		httpUtil.RespondWithJSON(c, http.StatusOK, fromProductsToResponse(products))
+		return c.JSON(http.StatusOK, fromProductsToResponse(products))
 	}
 }
 
-func (h Handler) GetProductCategories(c *gin.Context) {
-	categories, appErr := h.productManager.GetProductCategories()
+func (handler Handler) GetProductCategories(c echo.Context) error {
+	categories, appErr := handler.productManager.GetProductCategories()
 	if appErr != nil {
-		httpUtil.AbortWithError(c, appErr)
-		return
+		return appErr
 	}
 
-	httpUtil.RespondWithJSON(c, http.StatusOK,
-		fromProductCategoriesToResponse(categories))
+	return c.JSON(http.StatusOK, fromProductCategoriesToResponse(categories))
 }
 
-func NewProductHandler(productManager productmanager.Manager) *Handler {
+func New(productManager productmanager.Manager) *Handler {
 	return &Handler{productManager}
 }

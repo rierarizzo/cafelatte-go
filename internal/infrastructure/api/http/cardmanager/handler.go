@@ -1,57 +1,63 @@
 package cardmanager
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/cardmanager"
-	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
 	"net/http"
 	"strconv"
 )
 
 type Handler struct {
-	paymentCardService cardmanager.Manager
+	cardManager cardmanager.Manager
 }
 
-func (h *Handler) GetCardsByUserID(c *gin.Context) {
-	userID, err := strconv.Atoi(c.Param("userID"))
+func Router(group *echo.Group) func(cardManagerHandler *Handler) {
+	return func(handler *Handler) {
+		cardsGroup := group.Group("/cards")
+
+		cardsGroup.Use(authenticator.Middleware)
+
+		cardsGroup.GET("/find/:userId", handler.GetCardsByUserId)
+		cardsGroup.POST("/register/:userId", handler.AddUserCards)
+	}
+}
+
+func (handler *Handler) GetCardsByUserId(c echo.Context) error {
+	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
-		return
+		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	cards, appErr := h.paymentCardService.GetCardsByUserID(userID)
+	cards, appErr := handler.cardManager.GetCardsByUserID(userId)
 	if appErr != nil {
-		httpUtil.AbortWithError(c, appErr)
-		return
+		return appErr
 	}
 
-	httpUtil.RespondWithJSON(c, http.StatusOK, fromCardsToResponse(cards))
+	return c.JSON(http.StatusOK, fromCardsToResponse(cards))
 }
 
-func (h *Handler) AddUserCards(c *gin.Context) {
+func (handler *Handler) AddUserCards(c echo.Context) error {
 	var req []RegisterCardRequest
-	userID, err := strconv.Atoi(c.Param("userID"))
+	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
-		return
+		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	if err := c.BindJSON(&req); err != nil {
-		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
-		return
+	if err := c.Bind(&req); err != nil {
+		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	cards, appErr := h.paymentCardService.AddUserPaymentCard(userID,
+	cards, appErr := handler.cardManager.AddUserPaymentCard(userId,
 		fromRequestToCards(req))
 	if appErr != nil {
-		httpUtil.AbortWithError(c, appErr)
-		return
+		return appErr
 	}
 
-	httpUtil.RespondWithJSON(c, http.StatusCreated, fromCardsToResponse(cards))
+	return c.JSON(http.StatusCreated, fromCardsToResponse(cards))
 }
 
-func NewPaymentCardHandler(paymentCardService cardmanager.Manager) *Handler {
+func New(paymentCardService cardmanager.Manager) *Handler {
 	return &Handler{paymentCardService}
 }

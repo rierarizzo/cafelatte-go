@@ -1,57 +1,63 @@
 package addressmanager
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/addressmanager"
-	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
 	"net/http"
 	"strconv"
 )
 
 type Handler struct {
-	addressService addressmanager.Manager
+	addressManager addressmanager.Manager
 }
 
-func (h *Handler) GetAddressesByUserID(c *gin.Context) {
-	userID, err := strconv.Atoi(c.Param("userID"))
+func Router(group *echo.Group) func(addressManagerHandler *Handler) {
+	return func(handler *Handler) {
+		addressesGroup := group.Group("/addresses")
+
+		addressesGroup.Use(authenticator.Middleware)
+
+		addressesGroup.GET("/find/:userId", handler.GetAddressesByUserId)
+		addressesGroup.POST("/register/:userId", handler.AddUserAddresses)
+	}
+}
+
+func (handler *Handler) GetAddressesByUserId(c echo.Context) error {
+	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
-		return
+		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	addresses, appErr := h.addressService.GetAddressesByUserID(userID)
+	addresses, appErr := handler.addressManager.GetAddressesByUserID(userId)
 	if appErr != nil {
-		httpUtil.AbortWithError(c, appErr)
-		return
+		return appErr
 	}
 
-	httpUtil.RespondWithJSON(c, http.StatusOK, fromAddressesToResponse(addresses))
+	return c.JSON(http.StatusOK, fromAddressesToResponse(addresses))
 }
 
-func (h *Handler) AddUserAddresses(c *gin.Context) {
+func (handler *Handler) AddUserAddresses(c echo.Context) error {
 	var req []RegisterAddressRequest
-	userID, err := strconv.Atoi(c.Param("userID"))
+	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
-		return
+		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	if err := c.BindJSON(&req); err != nil {
-		httpUtil.AbortWithError(c, domain.NewAppError(err, domain.BadRequestError))
-		return
+	if err := c.Bind(&req); err != nil {
+		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	addresses, appErr := h.addressService.AddUserAddresses(userID,
+	addresses, appErr := handler.addressManager.AddUserAddresses(userId,
 		fromRequestToAddresses(req))
 	if appErr != nil {
-		httpUtil.AbortWithError(c, appErr)
-		return
+		return appErr
 	}
 
-	httpUtil.RespondWithJSON(c, http.StatusCreated, fromAddressesToResponse(addresses))
+	return c.JSON(http.StatusCreated, fromAddressesToResponse(addresses))
 }
 
-func NewAddressHandler(addressService addressmanager.Manager) *Handler {
+func New(addressService addressmanager.Manager) *Handler {
 	return &Handler{addressService}
 }

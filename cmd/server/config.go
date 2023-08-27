@@ -1,7 +1,6 @@
 package server
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/rierarizzo/cafelatte/pkg/constants/env"
 	"github.com/sirupsen/logrus"
 	"os"
@@ -30,11 +29,7 @@ func GetConfig() *Config {
 }
 
 func LoadInitConfig(config *Config) {
-	// Config logger
 	Logger(config.LogLevel)
-
-	// Debug or release
-	gin.SetMode(gin.ReleaseMode)
 }
 
 func Logger(logLevel string) {
