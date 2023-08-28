@@ -15,7 +15,7 @@ type Handler struct {
 func Router(group *echo.Group) func(addressManagerHandler *Handler) {
 	return func(handler *Handler) {
 		group.GET("/address/find/:userId", handler.GetAddressesByUserId)
-		group.POST("/address/register/:userId", handler.AddUserAddresses)
+		group.POST("/address/register/:userId", handler.AddAddress)
 	}
 }
 
@@ -33,7 +33,7 @@ func (handler *Handler) GetAddressesByUserId(c echo.Context) error {
 	return c.JSON(http.StatusOK, fromAddressesToResponse(addresses))
 }
 
-func (handler *Handler) AddUserAddresses(c echo.Context) error {
+func (handler *Handler) AddAddress(c echo.Context) error {
 	var req RegisterAddressRequest
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
