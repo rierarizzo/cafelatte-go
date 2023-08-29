@@ -15,10 +15,10 @@ type Response struct {
 	ErrorType string    `json:"errorType"`
 	ErrorMsg  string    `json:"errorMsg"`
 	IssuedAt  time.Time `json:"issuedAt"`
-	RequestID any       `json:"requestID"`
+	RequestId any       `json:"requestId"`
 }
 
-func CustomHTTPErrorHandler(err error, c echo.Context) {
+func CustomHttpErrorHandler(err error, c echo.Context) {
 	var appErr *domain.AppError
 	ok := errors.As(err, &appErr)
 
@@ -29,7 +29,7 @@ func CustomHTTPErrorHandler(err error, c echo.Context) {
 			ErrorType: appErr.Type,
 			ErrorMsg:  appErr.Err.Error(),
 			IssuedAt:  time.Now(),
-			RequestID: request.ID(),
+			RequestId: request.Id(),
 		}
 
 		_ = c.JSON(statusCode, errorResponse)

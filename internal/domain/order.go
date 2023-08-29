@@ -5,10 +5,10 @@ import (
 )
 
 type Order struct {
-	ID                int
-	UserID            int
-	ShippingAddressID int
-	PaymentMethodID   int
+	Id                int
+	UserId            int
+	ShippingAddressId int
+	PaymentMethodId   int
 	Notes             string
 	TotalAmount       float64
 	OrderedAt         time.Time
@@ -17,8 +17,8 @@ type Order struct {
 }
 
 type ProductInOrder struct {
-	ID        int
-	OrderID   int
-	ProductID int
+	Id        int
+	OrderId   int
+	ProductId int
 	Quantity  int
 }

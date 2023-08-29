@@ -17,7 +17,7 @@ type Repository struct {
 const ACL = "public-read"
 
 func (repository *Repository) UpdateProfilePicById(
-	userID int,
+	userId int,
 	pic *multipart.FileHeader, picName string,
 ) (string, *domain.AppError) {
 	file, err := pic.Open()
@@ -40,7 +40,7 @@ func (repository *Repository) UpdateProfilePicById(
 	}
 
 	photoURL := fmt.Sprintf("https://%s.s3.amazonaws.com/uploads/user%d/%s",
-		bucketName, userID, pic.Filename)
+		bucketName, userId, pic.Filename)
 
 	err = file.Close()
 	if err != nil {

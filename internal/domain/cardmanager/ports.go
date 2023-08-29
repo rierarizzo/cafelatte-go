@@ -13,7 +13,7 @@ type Manager interface {
 }
 
 type CardRepository interface {
-	SelectCardsByUserID(userID int) ([]domain.PaymentCard, *domain.AppError)
+	SelectCardsByUserId(userId int) ([]domain.PaymentCard, *domain.AppError)
 	InsertUserCard(
 		userId int,
 		card domain.PaymentCard,

@@ -8,10 +8,10 @@ import (
 
 func fromOrderToModel(order domain.Order) Model {
 	return Model{
-		ID:                order.ID,
-		UserID:            order.UserID,
-		ShippingAddressID: order.ShippingAddressID,
-		PaymentMethodID:   order.PaymentMethodID,
+		Id:                order.Id,
+		UserId:            order.UserId,
+		ShippingAddressId: order.ShippingAddressId,
+		PaymentMethodId:   order.PaymentMethodId,
 		Notes:             sql.NullString{String: order.Notes},
 		TotalAmount:       sql.NullFloat64{Float64: order.TotalAmount},
 		OrderedAt:         order.OrderedAt,
@@ -21,9 +21,9 @@ func fromOrderToModel(order domain.Order) Model {
 
 func fromProductInOrderToModel(product domain.ProductInOrder) ProductInOrderModel {
 	return ProductInOrderModel{
-		ID:        product.ID,
-		OrderID:   product.OrderID,
-		ProductID: product.ProductID,
+		Id:        product.Id,
+		OrderId:   product.OrderId,
+		ProductId: product.ProductId,
 		Quantity:  product.Quantity,
 	}
 }

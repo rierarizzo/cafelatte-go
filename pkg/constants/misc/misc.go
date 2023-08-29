@@ -1,5 +1,5 @@
 package misc
 
 const (
-	RequestIDKey = "requestID"
+	RequestIdKey = "requestId"
 )

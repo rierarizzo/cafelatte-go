@@ -2,8 +2,8 @@ package addressmanager
 
 type RegisterAddressRequest struct {
 	Type       string `json:"type"`
-	ProvinceID int    `json:"provinceID"`
-	CityID     int    `json:"cityID"`
+	ProvinceId int    `json:"provinceId"`
+	CityId     int    `json:"cityId"`
 	PostalCode string `json:"postalCode"`
 	Detail     string `json:"detail"`
 }

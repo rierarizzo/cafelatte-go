@@ -1,7 +1,7 @@
 package request
 
 type requestParams struct {
-	requestID string
+	requestId string
 }
 
 var instance *requestParams
@@ -14,12 +14,12 @@ func getRequestParamsInstance() *requestParams {
 	return instance
 }
 
-func SetRequestID(reqID string) {
+func SetRequestId(reqId string) {
 	res := getRequestParamsInstance()
-	res.requestID = reqID
+	res.requestId = reqId
 }
 
-func ID() string {
+func Id() string {
 	res := getRequestParamsInstance()
-	return res.requestID
+	return res.requestId
 }

@@ -8,7 +8,7 @@ import (
 
 func Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		request.SetRequestID(c.Response().Header().Get(http.RequestIDHeader))
+		request.SetRequestId(c.Response().Header().Get(http.RequestIdHeader))
 		return next(c)
 	}
 }

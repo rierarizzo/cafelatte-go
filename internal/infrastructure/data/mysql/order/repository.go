@@ -21,12 +21,12 @@ func (repository *Repository) InsertPurchaseOrder(order domain.Order) (
 ) {
 	tx, _ := repository.db.Beginx()
 
-	orderID, appErr := generatePurchaseOrderID(tx, order)
+	orderId, appErr := generatePurchaseOrderId(tx, order)
 	if appErr != nil {
 		return 0, appErr
 	}
 
-	query := "insert into ProductInOrder (OrderID, ProductID, Quantity) values (?,?,?)"
+	query := "insert into ProductInOrder (OrderId, ProductId, Quantity) values (?,?,?)"
 
 	insertProductStmnt, err := tx.Prepare(query)
 	if err != nil {
@@ -48,7 +48,7 @@ func (repository *Repository) InsertPurchaseOrder(order domain.Order) (
 			}()
 
 			product := fromProductInOrderToModel(entity)
-			_, err = insertProductStmnt.Exec(orderID, product.ProductID,
+			_, err = insertProductStmnt.Exec(orderId, product.ProductId,
 				product.Quantity)
 			if err != nil {
 				errCh <- err
@@ -63,44 +63,44 @@ func (repository *Repository) InsertPurchaseOrder(order domain.Order) (
 		return 0, rollbackAndError(tx, err)
 	}
 
-	appErr = updateOrderAmount(tx, orderID)
+	appErr = updateOrderAmount(tx, orderId)
 	if appErr != nil {
 		return 0, appErr
 	}
 
-	return orderID, nil
+	return orderId, nil
 }
 
-func generatePurchaseOrderID(tx *sqlx.Tx, order domain.Order) (
+func generatePurchaseOrderId(tx *sqlx.Tx, order domain.Order) (
 	int,
 	*domain.AppError,
 ) {
 	model := fromOrderToModel(order)
-	query := `insert into PurchaseOrder (UserID, ShippingAddressID, PaymentMethodID, 
+	query := `insert into PurchaseOrder (UserId, ShippingAddressId, PaymentMethodId, 
         Notes, OrderedAt) values (?,?,?,?,?)`
 
-	res, err := tx.Exec(query, model.UserID, model.ShippingAddressID,
-		model.PaymentMethodID, model.Notes.String, time.Now())
+	res, err := tx.Exec(query, model.UserId, model.ShippingAddressId,
+		model.PaymentMethodId, model.Notes.String, time.Now())
 	if err != nil {
 		return 0, rollbackAndError(tx, err)
 	}
-	orderID, _ := res.LastInsertId()
+	orderId, _ := res.LastInsertId()
 
-	return int(orderID), nil
+	return int(orderId), nil
 }
 
-func updateOrderAmount(tx *sqlx.Tx, orderID int) *domain.AppError {
+func updateOrderAmount(tx *sqlx.Tx, orderId int) *domain.AppError {
 	var total float64
 
-	query := `select sum(pp.Quantity * p.Price) from ProductInOrder pp inner
-				join Product p on pp.ProductID = p.ID where OrderID=?`
-	err := tx.Get(&total, query, orderID)
+	query := `select sum(pp.Quantity * p.Price) from ProductInOrder pp 
+    	inner join Product p on pp.ProductId = p.Id where OrderId=?`
+	err := tx.Get(&total, query, orderId)
 	if err != nil {
 		return rollbackAndError(tx, err)
 	}
 
-	query = "update PurchaseOrder set TotalAmount=? where ID=?"
-	_, err = tx.Exec(query, total, orderID)
+	query = "update PurchaseOrder set TotalAmount=? where Id=?"
+	_, err = tx.Exec(query, total, orderId)
 	if err != nil {
 		return rollbackAndError(tx, err)
 	}
@@ -115,7 +115,7 @@ func updateOrderAmount(tx *sqlx.Tx, orderID int) *domain.AppError {
 
 func rollbackAndError(tx *sqlx.Tx, err error) *domain.AppError {
 	_ = tx.Rollback()
-	logrus.WithField(misc.RequestIDKey, request.ID()).Error(err)
+	logrus.WithField(misc.RequestIdKey, request.Id()).Error(err)
 
 	return domain.NewAppError(err, domain.RepositoryError)
 }

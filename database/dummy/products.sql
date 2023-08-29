@@ -1,6 +1,6 @@
 use cafelatte;
 
-insert into Product (Name, Description, ImageURL, Price, CategoryCode, Stock, Status)
+insert into Product (Name, Description, ImageUrl, Price, CategoryCode, Stock, Status)
 values ('Cappuccino', 'A rich, creamy coffee drink made with steamed milk and foamed milk.',
         'https://upload.wikimedia.org/wikipedia/commons/3/3a/Cappuccino.jpg', 4.50, 'HOTBEV',
         50, 1),

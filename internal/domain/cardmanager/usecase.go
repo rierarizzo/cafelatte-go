@@ -9,11 +9,11 @@ type DefaultManager struct {
 	cardRepository CardRepository
 }
 
-func (manager DefaultManager) GetCardsByUserId(userID int) (
+func (manager DefaultManager) GetCardsByUserId(userId int) (
 	[]domain.PaymentCard,
 	*domain.AppError,
 ) {
-	cards, appErr := manager.cardRepository.SelectCardsByUserID(userID)
+	cards, appErr := manager.cardRepository.SelectCardsByUserId(userId)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)

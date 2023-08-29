@@ -1,10 +1,10 @@
 package domain
 
 type Product struct {
-	ID           int
+	Id           int
 	Name         string
 	Description  string
-	ImageURL     string
+	ImageUrl     string
 	Price        float64
 	CategoryCode string
 	Stock        int

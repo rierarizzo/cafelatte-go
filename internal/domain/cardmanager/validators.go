@@ -18,7 +18,7 @@ var (
 )
 
 func validateCard(card *domain.PaymentCard) *domain.AppError {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	if appErr := validateCardType(card); appErr != nil {
 		log.Error(appErr)
@@ -36,7 +36,7 @@ func validateCard(card *domain.PaymentCard) *domain.AppError {
 }
 
 func validateCardExpiration(card *domain.PaymentCard) *domain.AppError {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	if card.ExpirationMonth < 1 || card.ExpirationMonth > 12 {
 		return domain.NewAppError(invalidCardExpirationDateError,

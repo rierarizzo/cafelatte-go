@@ -6,7 +6,7 @@ import (
 
 func fromUserToResponse(user domain.User) LoggedUserResponse {
 	return LoggedUserResponse{
-		ID:       user.ID,
+		Id:       user.Id,
 		Username: user.Username,
 		Email:    user.Email,
 		Role:     user.RoleCode,

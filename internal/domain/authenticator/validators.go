@@ -12,7 +12,7 @@ import (
 )
 
 func validateUser(user *domain.User) *domain.AppError {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	if appErr := validateUserRole(user); appErr != nil {
 		log.Error(appErr)

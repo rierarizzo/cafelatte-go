@@ -9,13 +9,13 @@ values ('A', 'Admin'),
 
 -- Provinces
 insert into Province
-    (ID, Name)
+    (Id, Name)
 values (1, 'Guayas'),
        (2, 'Santa Elena');
 
 -- Cities
 insert into City
-    (ID, ProvinceID, Name)
+    (Id, ProvinceId, Name)
 values (1, 1, 'Guayaquil'),
        (2, 1, 'Durán'),
        (3, 1, 'Yaguachi'),
@@ -31,7 +31,7 @@ values ('H', 'Home'),
 
 -- Card companies
 insert into CardCompany
-    (ID, Name)
+    (Id, Name)
 values (1, 'American Express'),
        (2, 'Visa'),
        (3, 'Mastercard'),

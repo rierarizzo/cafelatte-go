@@ -6,10 +6,10 @@ import (
 
 func fromProductToResponse(product domain.Product) Response {
 	return Response{
-		ID:           product.ID,
+		Id:           product.Id,
 		Name:         product.Name,
 		Description:  product.Description,
-		ImageURL:     product.ImageURL,
+		ImageUrl:     product.ImageUrl,
 		Price:        product.Price,
 		CategoryCode: product.CategoryCode,
 		Stock:        product.Stock,

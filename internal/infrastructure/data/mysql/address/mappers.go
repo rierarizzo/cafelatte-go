@@ -8,10 +8,10 @@ import (
 
 func fromAddressToModel(address domain.Address) Model {
 	return Model{
-		ID:         sql.NullInt64{Int64: int64(address.ID)},
+		Id:         sql.NullInt64{Int64: int64(address.Id)},
 		Type:       address.Type,
-		ProvinceID: address.ProvinceID,
-		CityID:     address.CityID,
+		ProvinceId: address.ProvinceId,
+		CityId:     address.CityId,
 		PostalCode: address.PostalCode,
 		Detail:     address.Detail,
 	}
@@ -19,10 +19,10 @@ func fromAddressToModel(address domain.Address) Model {
 
 func fromModelToAddress(model Model) domain.Address {
 	return domain.Address{
-		ID:         int(model.ID.Int64),
+		Id:         int(model.Id.Int64),
 		Type:       model.Type,
-		ProvinceID: model.ProvinceID,
-		CityID:     model.CityID,
+		ProvinceId: model.ProvinceId,
+		CityId:     model.CityId,
 		PostalCode: model.PostalCode,
 		Detail:     model.Detail,
 	}

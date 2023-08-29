@@ -6,9 +6,9 @@ import (
 )
 
 type Model struct {
-	ID              sql.NullInt64 `db:"ID"`
+	Id              sql.NullInt64 `db:"Id"`
 	Type            string        `db:"Type"`
-	UserID          int           `db:"UserID"`
+	UserId          int           `db:"UserId"`
 	Company         int           `db:"Company"`
 	HolderName      string        `db:"HolderName"`
 	Number          string        `db:"Number"`

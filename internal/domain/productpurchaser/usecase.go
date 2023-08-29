@@ -12,12 +12,12 @@ func (purchaser *DefaultPurchaser) Purchase(order domain.Order) (
 	int,
 	*domain.AppError,
 ) {
-	orderID, appErr := purchaser.orderRepository.InsertPurchaseOrder(order)
+	orderId, appErr := purchaser.orderRepository.InsertPurchaseOrder(order)
 	if appErr != nil {
 		return 0, appErr
 	}
 
-	return orderID, nil
+	return orderId, nil
 }
 
 func New(orderRepository OrderRepository) *DefaultPurchaser {

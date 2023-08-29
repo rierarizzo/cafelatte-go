@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	selectAddressError = errors.New("select addressmanager error")
-	insertAddressError = errors.New("insert addressmanager error")
+	selectAddressError = errors.New("select address error")
+	insertAddressError = errors.New("insert address error")
 )
 
 type Repository struct {
@@ -26,7 +26,7 @@ func (repository Repository) SelectAddressesByUserId(userId int) (
 ) {
 	var addressesModel []Model
 
-	var query = "select * from UserAddress where UserID=? and Status=true"
+	var query = "select * from UserAddress where UserId=? and Status=true"
 
 	err := repository.db.Select(&addressesModel, query, userId)
 	if err != nil {
@@ -46,7 +46,7 @@ func (repository Repository) InsertUserAddress(
 	userId int,
 	address domain.Address,
 ) (*domain.Address, *domain.AppError) {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
 		_ = tx.Rollback()
@@ -65,22 +65,18 @@ func (repository Repository) InsertUserAddress(
 	}
 
 	addressModel := fromAddressToModel(address)
-	result, err := tx.Exec(`insert into UserAddress (
-                         Type, 
-                         UserID, 
-                         ProvinceID, 
-                         CityID, 
-                         PostalCode, 
-                         Detail
-                ) values (?,?,?,?,?,?)`, addressModel.Type, userId,
-		addressModel.ProvinceID, addressModel.CityID, addressModel.PostalCode,
+	query := `insert into UserAddress (Type, UserId, ProvinceId, CityId, PostalCode, 
+        Detail) values (?,?,?,?,?,?)`
+
+	result, err := tx.Exec(query, addressModel.Type, userId,
+		addressModel.ProvinceId, addressModel.CityId, addressModel.PostalCode,
 		addressModel.Detail)
 	if err != nil {
 		return nil, rollbackAndError(tx, err)
 	}
 
-	addressID, _ := result.LastInsertId()
-	address.ID = int(addressID)
+	addressId, _ := result.LastInsertId()
+	address.Id = int(addressId)
 
 	err = tx.Commit()
 	if err != nil {
@@ -94,10 +90,10 @@ func (repository Repository) SelectCityNameById(id int) (
 	string,
 	*domain.AppError,
 ) {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var cityName string
-	var query = "select Name from City where ID=?"
+	var query = "select Name from City where Id=?"
 
 	err := repository.db.Get(&cityName, query, id)
 	if err != nil {
@@ -117,10 +113,10 @@ func (repository Repository) SelectProvinceNameById(id int) (
 	string,
 	*domain.AppError,
 ) {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var provinceName string
-	var query = "select Name from Province where ID=?"
+	var query = "select Name from Province where Id=?"
 
 	err := repository.db.Get(&provinceName, query, id)
 	if err != nil {

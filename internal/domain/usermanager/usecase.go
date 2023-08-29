@@ -49,7 +49,7 @@ func (manager *DefaultManager) FindUserByEmail(email string) (
 }
 
 // FindUserById retrieves a usermanager from the system based on the provided usermanager
-// ID and returns the usermanager if found, along with any error encountered during
+// Id and returns the usermanager if found, along with any error encountered during
 // the process.
 func (manager *DefaultManager) FindUserById(id int) (
 	*domain.User,
@@ -68,13 +68,13 @@ func (manager *DefaultManager) FindUserById(id int) (
 }
 
 // UpdateUserById updates the details of a usermanager in the system based on the
-// provided usermanager ID and usermanager object and returns an error, if any,
+// provided usermanager Id and usermanager object and returns an error, if any,
 // encountered during the process.
 func (manager *DefaultManager) UpdateUserById(
-	userID int,
+	userId int,
 	user domain.User,
 ) *domain.AppError {
-	appErr := manager.userRepository.UpdateUserById(userID, user)
+	appErr := manager.userRepository.UpdateUserById(userId, user)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return domain.NewAppError(appErr, domain.UnexpectedError)
@@ -87,13 +87,13 @@ func (manager *DefaultManager) UpdateUserById(
 }
 
 func (manager *DefaultManager) UpdateProfilePicById(
-	userID int,
+	userId int,
 	pic *multipart.FileHeader,
 ) (string, *domain.AppError) {
 	currentTimeInNano := time.Now().UnixNano()
-	picName := fmt.Sprintf("%v-%v", userID, currentTimeInNano)
+	picName := fmt.Sprintf("%v-%v", userId, currentTimeInNano)
 
-	picLink, appErr := manager.userFilesStorage.UpdateProfilePicById(userID,
+	picLink, appErr := manager.userFilesStorage.UpdateProfilePicById(userId,
 		pic, picName)
 	if appErr != nil {
 		return "", domain.NewAppError(appErr, domain.UnexpectedError)
@@ -102,8 +102,8 @@ func (manager *DefaultManager) UpdateProfilePicById(
 	return picLink, nil
 }
 
-func (manager *DefaultManager) DeleteUserById(userID int) *domain.AppError {
-	appErr := manager.userRepository.DeleteUserById(userID)
+func (manager *DefaultManager) DeleteUserById(userId int) *domain.AppError {
+	appErr := manager.userRepository.DeleteUserById(userId)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return domain.NewAppError(appErr, domain.UnexpectedError)

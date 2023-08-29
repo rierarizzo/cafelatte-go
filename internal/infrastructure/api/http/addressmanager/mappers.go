@@ -7,8 +7,8 @@ import (
 func fromRequestToAddress(req RegisterAddressRequest) domain.Address {
 	return domain.Address{
 		Type:       req.Type,
-		ProvinceID: req.ProvinceID,
-		CityID:     req.CityID,
+		ProvinceId: req.ProvinceId,
+		CityId:     req.CityId,
 		PostalCode: req.PostalCode,
 		Detail:     req.Detail,
 	}
@@ -17,8 +17,8 @@ func fromRequestToAddress(req RegisterAddressRequest) domain.Address {
 func fromAddressToResponse(address *domain.Address) Response {
 	return Response{
 		Type:       address.Type,
-		ProvinceID: address.ProvinceID,
-		CityID:     address.CityID,
+		ProvinceId: address.ProvinceId,
+		CityId:     address.CityId,
 		Detail:     address.Detail,
 	}
 }

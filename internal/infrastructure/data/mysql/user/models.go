@@ -5,7 +5,7 @@ import (
 )
 
 type Model struct {
-	ID          int       `db:"ID"`
+	Id          int       `db:"Id"`
 	Username    string    `db:"Username"`
 	Name        string    `db:"Name"`
 	Surname     string    `db:"Surname"`

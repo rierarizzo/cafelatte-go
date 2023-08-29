@@ -1,14 +1,14 @@
 package productpurchaser
 
 type purchasedProduct struct {
-	ProductID int `json:"productID"`
+	ProductId int `json:"productId"`
 	Quantity  int `json:"quantity"`
 }
 
 type CreateOrderRequest struct {
-	UserID            int                `json:"userID"`
-	AddressID         int                `json:"addressID"`
-	PaymentMethodID   int                `json:"paymentMethodID"`
+	UserId            int                `json:"userId"`
+	AddressId         int                `json:"addressId"`
+	PaymentMethodId   int                `json:"paymentMethodId"`
 	Notes             string             `json:"notes"`
 	PurchasedProducts []purchasedProduct `json:"purchasedProducts"`
 }

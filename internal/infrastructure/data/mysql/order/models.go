@@ -6,10 +6,10 @@ import (
 )
 
 type Model struct {
-	ID                int             `db:"ID"`
-	UserID            int             `db:"UserID"`
-	ShippingAddressID int             `db:"ShippingAddressID"`
-	PaymentMethodID   int             `db:"PaymentMethodID"`
+	Id                int             `db:"Id"`
+	UserId            int             `db:"UserId"`
+	ShippingAddressId int             `db:"ShippingAddressId"`
+	PaymentMethodId   int             `db:"PaymentMethodId"`
 	Notes             sql.NullString  `db:"Notes"`
 	TotalAmount       sql.NullFloat64 `db:"TotalAmount"`
 	OrderedAt         time.Time       `db:"OrderedAt"`
@@ -19,9 +19,9 @@ type Model struct {
 }
 
 type ProductInOrderModel struct {
-	ID        int       `db:"ID"`
-	OrderID   int       `db:"OrderID"`
-	ProductID int       `db:"ProductID"`
+	Id        int       `db:"Id"`
+	OrderId   int       `db:"OrderId"`
+	ProductId int       `db:"ProductId"`
 	Quantity  int       `db:"Quantity"`
 	CreatedAt time.Time `db:"CreatedAt"`
 	UpdatedAt time.Time `db:"UpdatedAt"`

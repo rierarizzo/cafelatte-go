@@ -6,11 +6,11 @@ import (
 )
 
 type Model struct {
-	ID         sql.NullInt64 `db:"ID"`
+	Id         sql.NullInt64 `db:"Id"`
 	Type       string        `db:"Type"`
-	UserID     int           `db:"UserID"`
-	ProvinceID int           `db:"ProvinceID"`
-	CityID     int           `db:"CityID"`
+	UserId     int           `db:"UserId"`
+	ProvinceId int           `db:"ProvinceId"`
+	CityId     int           `db:"CityId"`
 	PostalCode string        `db:"PostalCode"`
 	Detail     string        `db:"Detail"`
 	Status     bool          `db:"Status"`

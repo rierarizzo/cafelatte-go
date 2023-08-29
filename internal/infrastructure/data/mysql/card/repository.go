@@ -12,23 +12,23 @@ import (
 )
 
 var (
-	selectCardError = errors.New("select payment card error")
-	insertCardError = errors.New("insert payment card error")
+	selectCardError = errors.New("select card error")
+	insertCardError = errors.New("insert card error")
 )
 
 type Repository struct {
 	db *sqlx.DB
 }
 
-func (repository Repository) SelectCardsByUserID(userId int) (
+func (repository Repository) SelectCardsByUserId(userId int) (
 	[]domain.PaymentCard,
 	*domain.AppError,
 ) {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var cardsModel []Model
 
-	query := "select * from UserPaymentCard where UserID=? and Status=true"
+	query := "select * from UserPaymentCard where UserId=? and Status=true"
 	err := repository.db.Select(&cardsModel, query, userId)
 	if err != nil {
 		log.Error(err)
@@ -49,7 +49,7 @@ func (repository Repository) InsertUserCard(
 	card domain.PaymentCard,
 ) (*domain.PaymentCard, *domain.AppError) {
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
-		logrus.WithField(misc.RequestIDKey, request.ID()).Error(err)
+		logrus.WithField(misc.RequestIdKey, request.Id()).Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return domain.NewAppErrorWithType(domain.NotFoundError)
 		}
@@ -60,24 +60,18 @@ func (repository Repository) InsertUserCard(
 	tx, _ := repository.db.Beginx()
 
 	cardModel := fromCardToModel(card)
-	result, err := tx.Exec(`insert into UserPaymentCard (
-                             Type, 
-                             UserID, 
-                             Company, 
-                             HolderName, 
-                             Number, 
-                             ExpirationYear, 
-                             ExpirationMonth, 
-                             CVV) values (?,?,?,?,?,?,?,?)`, cardModel.Type,
-		userId,
-		cardModel.Company, cardModel.HolderName, cardModel.Number,
-		cardModel.ExpirationYear, cardModel.ExpirationMonth, cardModel.CVV)
+	query := `insert into UserPaymentCard (Type, UserId, Company, HolderName, Number, 
+        ExpirationYear, ExpirationMonth, CVV) values (?,?,?,?,?,?,?,?)`
+
+	result, err := tx.Exec(query, cardModel.Type, userId, cardModel.Company,
+		cardModel.HolderName, cardModel.Number, cardModel.ExpirationYear,
+		cardModel.ExpirationMonth, cardModel.CVV)
 	if err != nil {
 		return nil, rollbackAndError(tx, err)
 	}
 
-	cardID, _ := result.LastInsertId()
-	card.ID = int(cardID)
+	cardId, _ := result.LastInsertId()
+	card.Id = int(cardId)
 
 	_ = tx.Commit()
 

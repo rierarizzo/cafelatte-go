@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	selectProductError         = errors.New("select productmanager error")
-	selectProductCategoryError = errors.New("select productmanager category error")
+	selectProductError         = errors.New("select product error")
+	selectProductCategoryError = errors.New("select product category error")
 )
 
 type Repository struct {
@@ -40,7 +40,7 @@ func selectProducts(
 	db *sqlx.DB, query string,
 	args ...interface{},
 ) ([]domain.Product, *domain.AppError) {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var model []Model
 
@@ -69,7 +69,7 @@ func (repository Repository) SelectProductCategories() (
 	[]domain.ProductCategory,
 	*domain.AppError,
 ) {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var model []CategoryModel
 

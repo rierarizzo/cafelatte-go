@@ -13,7 +13,7 @@ create table UserRole
 
 create table User
 (
-    ID          int auto_increment,
+    Id          int auto_increment,
     Username    varchar(30)  not null unique,
     Name        varchar(50)  not null,
     Surname     varchar(50)  not null,
@@ -24,7 +24,7 @@ create table User
     Status      bool     default true,
     CreatedAt   datetime default current_timestamp,
     UpdatedAt   datetime default current_timestamp on update current_timestamp,
-    primary key (ID),
+    primary key (Id),
     foreign key (RoleCode) references UserRole (Code),
     index IdxUsername (Username), -- Índice en Username para búsquedas por nombre de usuario
     index IdxEmail (Email),       -- Índice en Email para búsquedas por correo electrónico
@@ -33,18 +33,18 @@ create table User
 
 create table Province
 (
-    ID   int         not null,
+    Id   int         not null,
     Name varchar(50) not null,
-    primary key (ID)
+    primary key (Id)
 );
 
 create table City
 (
-    ID         int         not null,
-    ProvinceID int         not null,
+    Id         int         not null,
+    ProvinceId int         not null,
     Name       varchar(50) not null,
-    primary key (ID, ProvinceID),
-    foreign key (ProvinceID) references Province (ID)
+    primary key (Id, ProvinceId),
+    foreign key (ProvinceId) references Province (Id)
 );
 
 create table AddressType
@@ -56,29 +56,29 @@ create table AddressType
 
 create table UserAddress
 (
-    ID         int auto_increment,
+    Id         int auto_increment,
     Type       char         not null,
-    UserID     int          not null,
-    ProvinceID int          not null,
-    CityID     int          not null,
+    UserId     int          not null,
+    ProvinceId int          not null,
+    CityId     int          not null,
     PostalCode varchar(10),
     Detail     varchar(150) not null,
     Status     bool     default true,
     CreatedAt  datetime default current_timestamp,
     UpdatedAt  datetime default current_timestamp on update current_timestamp,
-    primary key (ID, UserID),
+    primary key (Id, UserId),
     foreign key (Type) references AddressType (Code),
-    foreign key (UserID) references User (ID),
-    foreign key (ProvinceID) references Province (ID),
-    foreign key (CityID) references City (ID),
+    foreign key (UserId) references User (Id),
+    foreign key (ProvinceId) references Province (Id),
+    foreign key (CityId) references City (Id),
     index IdxStatus (Status) -- Índice en Status para búsquedas por estado
 );
 
 create table CardCompany
 (
-    ID   int auto_increment,
+    Id   int auto_increment,
     Name varchar(50),
-    primary key (ID)
+    primary key (Id)
 );
 
 create table CardType
@@ -90,9 +90,9 @@ create table CardType
 
 create table UserPaymentCard
 (
-    ID              int auto_increment,
+    Id              int auto_increment,
     Type            char         not null,
-    UserID          int          not null,
+    UserId          int          not null,
     Company         int          not null,
     HolderName      varchar(100) not null,
     Number          varchar(100) not null,
@@ -102,10 +102,10 @@ create table UserPaymentCard
     Status          bool     default true,
     CreatedAt       datetime default current_timestamp,
     UpdatedAt       datetime default current_timestamp on update current_timestamp,
-    primary key (ID),
+    primary key (Id),
     foreign key (Type) references CardType (Code),
-    foreign key (UserID) references User (ID),
-    foreign key (Company) references CardCompany (ID),
+    foreign key (UserId) references User (Id),
+    foreign key (Company) references CardCompany (Id),
     index IdxStatus (Status) -- Índice en Status para búsquedas por estado
 );
 
@@ -118,17 +118,17 @@ create table ProductCategory
 
 create table Product
 (
-    ID           int auto_increment,
+    Id           int auto_increment,
     Name         varchar(50)    not null,
     Description  varchar(150)   not null,
-    ImageURL     varchar(400),
+    ImageUrl     varchar(400),
     Price        decimal(10, 2) not null,
     CategoryCode varchar(6)     not null,
     Stock        int            not null,
     Status       bool     default true,
     CreatedAt    datetime default current_timestamp,
     UpdatedAt    datetime default current_timestamp on update current_timestamp,
-    primary key (ID),
+    primary key (Id),
     foreign key (CategoryCode) references ProductCategory (Code)
 );
 
@@ -141,36 +141,36 @@ create table PurchaseOrderStatus
 
 create table PurchaseOrder
 (
-    ID                int auto_increment,
-    UserID            int not null,
-    ShippingAddressID int not null,
-    PaymentMethodID   int not null,
+    Id                int auto_increment,
+    UserId            int not null,
+    ShippingAddressId int not null,
+    PaymentMethodId   int not null,
     Notes             varchar(200),
     TotalAmount       decimal(10, 2) default 0.00,
     OrderedAt         datetime       default current_timestamp,
     OrderStatus       char(2)        default 'PE',
     CreatedAt         datetime       default current_timestamp,
     UpdatedAt         datetime       default current_timestamp on update current_timestamp,
-    primary key (ID),
-    foreign key (userID) references User (ID),
-    foreign key (ShippingAddressID) references UserAddress (ID),
-    foreign key (PaymentMethodID) references UserPaymentCard (ID),
+    primary key (Id),
+    foreign key (userId) references User (Id),
+    foreign key (ShippingAddressId) references UserAddress (Id),
+    foreign key (PaymentMethodId) references UserPaymentCard (Id),
     foreign key (OrderStatus) references PurchaseOrderStatus (Code),
-    index IdxUserID (UserID),          -- Índice en UserID para búsquedas por usuario
+    index IdxUserId (UserId),          -- Índice en UserId para búsquedas por usuario
     index IdxOrderedAt (OrderedAt),    -- Índice en OrderedAt para búsquedas por fecha de orden
     index IdxOrderStatus (OrderStatus) -- Índice en OrderStatus para búsquedas por estado
 );
 
 create table ProductInOrder
 (
-    ID        int auto_increment,
-    OrderID   int not null,
-    ProductID int not null,
+    Id        int auto_increment,
+    OrderId   int not null,
+    ProductId int not null,
     Quantity  int not null,
     CreatedAt datetime default current_timestamp,
     UpdatedAt datetime default current_timestamp on update current_timestamp,
-    primary key (ID),
-    foreign key (OrderID) references PurchaseOrder (ID),
-    foreign key (ProductID) references Product (ID),
-    index IdxOrderID (OrderID) -- Índice en OrderID para búsquedas por orden
+    primary key (Id),
+    foreign key (OrderId) references PurchaseOrder (Id),
+    foreign key (ProductId) references Product (Id),
+    index IdxOrderId (OrderId) -- Índice en OrderId para búsquedas por orden
 );

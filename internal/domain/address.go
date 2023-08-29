@@ -1,10 +1,10 @@
 package domain
 
 type Address struct {
-	ID         int
+	Id         int
 	Type       string
-	ProvinceID int
-	CityID     int
+	ProvinceId int
+	CityId     int
 	PostalCode string
 	Detail     string
 }

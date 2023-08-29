@@ -8,7 +8,7 @@ import (
 
 func fromUserToResponse(user domain.User) Response {
 	return Response{
-		ID:           user.ID,
+		Id:           user.Id,
 		CompleteName: strings.Join([]string{user.Name, user.Surname}, " "),
 		PhoneNumber:  user.PhoneNumber,
 		Username:     user.Username,

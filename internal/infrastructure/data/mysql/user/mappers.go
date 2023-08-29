@@ -6,7 +6,7 @@ import (
 
 func fromModelToUser(model Model) domain.User {
 	return domain.User{
-		ID:          model.ID,
+		Id:          model.Id,
 		Username:    model.Username,
 		Name:        model.Name,
 		Surname:     model.Surname,
@@ -28,7 +28,7 @@ func fromModelsToUsers(models []Model) []domain.User {
 
 func fromUserToModel(user domain.User) Model {
 	return Model{
-		ID:          user.ID,
+		Id:          user.Id,
 		Username:    user.Username,
 		Name:        user.Name,
 		Surname:     user.Surname,

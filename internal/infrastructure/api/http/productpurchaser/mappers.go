@@ -8,15 +8,15 @@ func fromRequestToOrder(req CreateOrderRequest) domain.Order {
 	products := make([]domain.ProductInOrder, 0)
 	for _, v := range req.PurchasedProducts {
 		products = append(products, domain.ProductInOrder{
-			ProductID: v.ProductID,
+			ProductId: v.ProductId,
 			Quantity:  v.Quantity,
 		})
 	}
 
 	return domain.Order{
-		UserID:            req.UserID,
-		ShippingAddressID: req.AddressID,
-		PaymentMethodID:   req.PaymentMethodID,
+		UserId:            req.UserId,
+		ShippingAddressId: req.AddressId,
+		PaymentMethodId:   req.PaymentMethodId,
 		Notes:             req.Notes,
 		Products:          products,
 	}

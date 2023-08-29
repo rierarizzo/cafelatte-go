@@ -13,7 +13,7 @@ import (
 var invalidAddressPostalCodeError = errors.New("invalid postal code")
 
 func validateAddress(address *domain.Address) *domain.AppError {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	if appErr := validateAddressPostalCode(address); appErr != nil {
 		log.Error(appErr)

@@ -41,7 +41,7 @@ func (handler *Handler) AddAddress(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	if err := c.Bind(&req); err != nil {
+	if err = c.Bind(&req); err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 

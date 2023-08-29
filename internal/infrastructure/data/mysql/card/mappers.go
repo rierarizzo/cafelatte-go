@@ -8,7 +8,7 @@ import (
 
 func fromCardToModel(card domain.PaymentCard) Model {
 	return Model{
-		ID:              sql.NullInt64{Int64: int64(card.ID)},
+		Id:              sql.NullInt64{Int64: int64(card.Id)},
 		Type:            card.Type,
 		Company:         card.Company,
 		HolderName:      card.HolderName,
@@ -21,7 +21,7 @@ func fromCardToModel(card domain.PaymentCard) Model {
 
 func fromModelToCard(model Model) domain.PaymentCard {
 	return domain.PaymentCard{
-		ID:              int(model.ID.Int64),
+		Id:              int(model.Id.Int64),
 		Type:            model.Type,
 		Company:         model.Company,
 		HolderName:      model.HolderName,

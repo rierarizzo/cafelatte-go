@@ -1,7 +1,7 @@
 package domain
 
 type PaymentCard struct {
-	ID int
+	Id int
 	/* C: Crédito, D: Débito */
 	Type            string
 	Company         int

@@ -22,7 +22,7 @@ func Router(group *echo.Group) func(productManagerHandler *Handler) {
 }
 
 func (handler Handler) GetProducts(c echo.Context) error {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var category = c.QueryParam("category")
 

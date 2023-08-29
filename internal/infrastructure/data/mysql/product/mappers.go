@@ -6,10 +6,10 @@ import (
 
 func fromModelToProduct(model Model) domain.Product {
 	return domain.Product{
-		ID:           model.ID,
+		Id:           model.Id,
 		Name:         model.Name,
 		Description:  model.Description,
-		ImageURL:     model.ImageURL,
+		ImageUrl:     model.ImageUrl,
 		Price:        model.Price,
 		CategoryCode: model.CategoryCode,
 		Stock:        model.Stock,

@@ -21,12 +21,12 @@ var (
 )
 
 func CreateJWTToken(user domain.User) (string, *domain.AppError) {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	secret := []byte(os.Getenv(env.SecretKey))
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &UserClaims{
-		ID:       user.ID,
+		Id:       user.Id,
 		Username: user.Username,
 		Name:     user.Name,
 		Surname:  user.Surname,
@@ -54,7 +54,7 @@ func CreateJWTToken(user domain.User) (string, *domain.AppError) {
 }
 
 func VerifyJWTToken(tokenString string) (*UserClaims, error) {
-	log := logrus.WithField(misc.RequestIDKey, request.ID())
+	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	secret := []byte(os.Getenv(env.SecretKey))
 

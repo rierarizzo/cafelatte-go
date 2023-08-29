@@ -1,10 +1,10 @@
 package productmanager
 
 type Response struct {
-	ID           int     `json:"id"`
+	Id           int     `json:"id"`
 	Name         string  `json:"name"`
 	Description  string  `json:"description"`
-	ImageURL     string  `json:"imageUrl"`
+	ImageUrl     string  `json:"imageUrl"`
 	Price        float64 `json:"price"`
 	CategoryCode string  `json:"categoryCode"`
 	Stock        int     `json:"stock"`
