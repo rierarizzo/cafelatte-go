@@ -1,20 +1,24 @@
 package order
 
 import (
+	"sync"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
-	"sync"
-	"time"
 )
 
 type Repository struct {
 	db *sqlx.DB
 }
 
-func (repository *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppError) {
+func (repository *Repository) InsertPurchaseOrder(order domain.Order) (
+	int,
+	*domain.AppError,
+) {
 	tx, _ := repository.db.Beginx()
 
 	orderID, appErr := generatePurchaseOrderID(tx, order)
@@ -67,7 +71,10 @@ func (repository *Repository) InsertPurchaseOrder(order domain.Order) (int, *dom
 	return orderID, nil
 }
 
-func generatePurchaseOrderID(tx *sqlx.Tx, order domain.Order) (int, *domain.AppError) {
+func generatePurchaseOrderID(tx *sqlx.Tx, order domain.Order) (
+	int,
+	*domain.AppError,
+) {
 	model := fromOrderToModel(order)
 	query := `insert into PurchaseOrder (UserID, ShippingAddressID, PaymentMethodID, 
         Notes, OrderedAt) values (?,?,?,?,?)`

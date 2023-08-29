@@ -8,7 +8,10 @@ type DefaultManager struct {
 	productRepository ProductRepository
 }
 
-func (manager DefaultManager) GetProducts() ([]domain.Product, *domain.AppError) {
+func (manager DefaultManager) GetProducts() (
+	[]domain.Product,
+	*domain.AppError,
+) {
 	products, appErr := manager.productRepository.SelectProducts()
 	if appErr != nil {
 		return nil, appErr
@@ -17,7 +20,10 @@ func (manager DefaultManager) GetProducts() ([]domain.Product, *domain.AppError)
 	return products, nil
 }
 
-func (manager DefaultManager) GetProductsByCategory(categoryCode string) ([]domain.Product, *domain.AppError) {
+func (manager DefaultManager) GetProductsByCategory(categoryCode string) (
+	[]domain.Product,
+	*domain.AppError,
+) {
 	products, appErr := manager.productRepository.SelectProductsByCategory(categoryCode)
 	if appErr != nil {
 		return nil, appErr
@@ -26,7 +32,10 @@ func (manager DefaultManager) GetProductsByCategory(categoryCode string) ([]doma
 	return products, nil
 }
 
-func (manager DefaultManager) GetProductCategories() ([]domain.ProductCategory, *domain.AppError) {
+func (manager DefaultManager) GetProductCategories() (
+	[]domain.ProductCategory,
+	*domain.AppError,
+) {
 	categories, appErr := manager.productRepository.SelectProductCategories()
 	if appErr != nil {
 		return nil, appErr

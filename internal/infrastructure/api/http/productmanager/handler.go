@@ -1,12 +1,13 @@
 package productmanager
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain/productmanager"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 type Handler struct {

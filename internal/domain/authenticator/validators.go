@@ -2,12 +2,13 @@ package authenticator
 
 import (
 	"errors"
+	"slices"
+	"strings"
+
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
-	"slices"
-	"strings"
 )
 
 func validateUser(user *domain.User) *domain.AppError {

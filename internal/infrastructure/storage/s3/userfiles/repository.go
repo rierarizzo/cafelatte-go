@@ -2,11 +2,12 @@ package userfiles
 
 import (
 	"fmt"
+	"mime/multipart"
+	"os"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/rierarizzo/cafelatte/internal/domain"
-	"mime/multipart"
-	"os"
 )
 
 type Repository struct {
@@ -15,8 +16,10 @@ type Repository struct {
 
 const ACL = "public-read"
 
-func (repository *Repository) UpdateProfilePicById(userID int,
-	pic *multipart.FileHeader, picName string) (string, *domain.AppError) {
+func (repository *Repository) UpdateProfilePicById(
+	userID int,
+	pic *multipart.FileHeader, picName string,
+) (string, *domain.AppError) {
 	file, err := pic.Open()
 	if err != nil {
 		return "", domain.NewAppErrorWithType(domain.RepositoryError)

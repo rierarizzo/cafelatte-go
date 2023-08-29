@@ -1,10 +1,11 @@
 package authenticator
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/authenticator"
-	"net/http"
 )
 
 type Handler struct {

@@ -1,11 +1,12 @@
 package addressmanager
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/addressmanager"
-	"net/http"
-	"strconv"
 )
 
 type Handler struct {

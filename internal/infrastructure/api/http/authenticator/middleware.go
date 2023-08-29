@@ -1,10 +1,11 @@
 package authenticator
 
 import (
+	"strings"
+
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/security/jsonwebtoken"
-	"strings"
 )
 
 func Middleware(next echo.HandlerFunc) echo.HandlerFunc {

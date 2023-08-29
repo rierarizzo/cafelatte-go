@@ -11,7 +11,10 @@ type DefaultAuthenticator struct {
 	userRepository usermanager.UserRepository
 }
 
-func (authenticator DefaultAuthenticator) SignUp(user domain.User) (*domain.AuthorizedUser, *domain.AppError) {
+func (authenticator DefaultAuthenticator) SignUp(user domain.User) (
+	*domain.AuthorizedUser,
+	*domain.AppError,
+) {
 	if appErr := validateUser(&user); appErr != nil {
 		return nil, appErr
 	}
@@ -35,7 +38,10 @@ func (authenticator DefaultAuthenticator) SignUp(user domain.User) (*domain.Auth
 	return authorized, nil
 }
 
-func (authenticator DefaultAuthenticator) SignIn(email, password string) (*domain.AuthorizedUser, *domain.AppError) {
+func (authenticator DefaultAuthenticator) SignIn(email, password string) (
+	*domain.AuthorizedUser,
+	*domain.AppError,
+) {
 	returnedUser, appErr := authenticator.userRepository.SelectUserByEmail(email)
 	if appErr != nil {
 		if appErr.Type == domain.NotFoundError {
@@ -57,7 +63,10 @@ func (authenticator DefaultAuthenticator) SignIn(email, password string) (*domai
 	return authorized, nil
 }
 
-func AuthorizeUser(user domain.User) (*domain.AuthorizedUser, *domain.AppError) {
+func AuthorizeUser(user domain.User) (
+	*domain.AuthorizedUser,
+	*domain.AppError,
+) {
 	token, appErr := jsonwebtoken.CreateJWTToken(user)
 	if appErr != nil {
 		return nil, appErr

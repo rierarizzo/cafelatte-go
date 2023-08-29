@@ -1,11 +1,12 @@
 package cardmanager
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/cardmanager"
-	"net/http"
-	"strconv"
 )
 
 type Handler struct {
@@ -44,7 +45,8 @@ func (handler *Handler) AddCard(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	card, appErr := handler.cardManager.AddUserCard(userId, fromRequestToCard(req))
+	card, appErr := handler.cardManager.AddUserCard(userId,
+		fromRequestToCard(req))
 	if appErr != nil {
 		return appErr
 	}

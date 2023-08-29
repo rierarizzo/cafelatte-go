@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+
 	"github.com/rierarizzo/cafelatte/internal/domain/addressmanager"
 	"github.com/rierarizzo/cafelatte/internal/domain/authenticator"
 	"github.com/rierarizzo/cafelatte/internal/domain/cardmanager"

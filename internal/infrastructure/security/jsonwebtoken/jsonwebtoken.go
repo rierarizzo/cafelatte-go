@@ -2,14 +2,15 @@ package jsonwebtoken
 
 import (
 	"errors"
+	"os"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/env"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
-	"os"
-	"time"
 )
 
 var (

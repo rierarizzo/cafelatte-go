@@ -3,6 +3,7 @@ package address
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
@@ -19,7 +20,10 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (repository Repository) SelectAddressesByUserId(userId int) ([]domain.Address, *domain.AppError) {
+func (repository Repository) SelectAddressesByUserId(userId int) (
+	[]domain.Address,
+	*domain.AppError,
+) {
 	var addressesModel []Model
 
 	var query = "select * from UserAddress where UserID=? and Status=true"
@@ -38,8 +42,10 @@ func (repository Repository) SelectAddressesByUserId(userId int) ([]domain.Addre
 	return fromModelsToAddresses(addressesModel), nil
 }
 
-func (repository Repository) InsertUserAddress(userId int,
-	address domain.Address) (*domain.Address, *domain.AppError) {
+func (repository Repository) InsertUserAddress(
+	userId int,
+	address domain.Address,
+) (*domain.Address, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
@@ -84,7 +90,10 @@ func (repository Repository) InsertUserAddress(userId int,
 	return &address, nil
 }
 
-func (repository Repository) SelectCityNameById(id int) (string, *domain.AppError) {
+func (repository Repository) SelectCityNameById(id int) (
+	string,
+	*domain.AppError,
+) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var cityName string
@@ -104,7 +113,10 @@ func (repository Repository) SelectCityNameById(id int) (string, *domain.AppErro
 	return cityName, nil
 }
 
-func (repository Repository) SelectProvinceNameById(id int) (string, *domain.AppError) {
+func (repository Repository) SelectProvinceNameById(id int) (
+	string,
+	*domain.AppError,
+) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var provinceName string

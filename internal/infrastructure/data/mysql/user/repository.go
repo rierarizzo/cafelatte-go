@@ -3,6 +3,7 @@ package user
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
@@ -46,7 +47,10 @@ func (repository *Repository) SelectUsers() ([]domain.User, *domain.AppError) {
 // SelectUserById retrieves a usermanager from the database based on the provided
 // usermanager ID and returns the usermanager if found, along with any error encountered
 // during the process.
-func (repository *Repository) SelectUserById(userID int) (*domain.User, *domain.AppError) {
+func (repository *Repository) SelectUserById(userID int) (
+	*domain.User,
+	*domain.AppError,
+) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var userModel Model
@@ -69,7 +73,10 @@ func (repository *Repository) SelectUserById(userID int) (*domain.User, *domain.
 // SelectUserByEmail retrieves a usermanager from the database based on the
 // provided email and returns the usermanager if found, along with any error
 // encountered during the process.
-func (repository *Repository) SelectUserByEmail(email string) (*domain.User, *domain.AppError) {
+func (repository *Repository) SelectUserByEmail(email string) (
+	*domain.User,
+	*domain.AppError,
+) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var userModel Model
@@ -91,7 +98,10 @@ func (repository *Repository) SelectUserByEmail(email string) (*domain.User, *do
 
 // InsertUser inserts a new usermanager into the database and returns the inserted
 // usermanager if successful, along with any error encountered during the process.
-func (repository *Repository) InsertUser(user domain.User) (*domain.User, *domain.AppError) {
+func (repository *Repository) InsertUser(user domain.User) (
+	*domain.User,
+	*domain.AppError,
+) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var userModel = fromUserToModel(user)
@@ -124,8 +134,10 @@ func (repository *Repository) InsertUser(user domain.User) (*domain.User, *domai
 // UpdateUserById updates the details of a usermanager in the database based on the
 // provided usermanager ID and usermanager object and returns an error, if any,
 // encountered during the process.
-func (repository *Repository) UpdateUserById(userID int,
-	user domain.User) *domain.AppError {
+func (repository *Repository) UpdateUserById(
+	userID int,
+	user domain.User,
+) *domain.AppError {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var userModel = fromUserToModel(user)

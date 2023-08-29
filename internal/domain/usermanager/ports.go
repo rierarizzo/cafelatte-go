@@ -1,8 +1,9 @@
 package usermanager
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/domain"
 	"mime/multipart"
+
+	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
 type Manager interface {
@@ -11,7 +12,10 @@ type Manager interface {
 	FindUserByEmail(email string) (*domain.User, *domain.AppError)
 	UpdateUserById(id int, user domain.User) *domain.AppError
 	DeleteUserById(id int) *domain.AppError
-	UpdateProfilePicById(id int, pic *multipart.FileHeader) (string, *domain.AppError)
+	UpdateProfilePicById(id int, pic *multipart.FileHeader) (
+		string,
+		*domain.AppError,
+	)
 }
 
 type UserRepository interface {
@@ -24,6 +28,8 @@ type UserRepository interface {
 }
 
 type UserFilesRepository interface {
-	UpdateProfilePicById(id int, pic *multipart.FileHeader,
-		picname string) (string, *domain.AppError)
+	UpdateProfilePicById(
+		id int, pic *multipart.FileHeader,
+		picname string,
+	) (string, *domain.AppError)
 }

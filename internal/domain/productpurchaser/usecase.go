@@ -8,7 +8,10 @@ type DefaultPurchaser struct {
 	orderRepository OrderRepository
 }
 
-func (purchaser *DefaultPurchaser) Purchase(order domain.Order) (int, *domain.AppError) {
+func (purchaser *DefaultPurchaser) Purchase(order domain.Order) (
+	int,
+	*domain.AppError,
+) {
 	orderID, appErr := purchaser.orderRepository.InsertPurchaseOrder(order)
 	if appErr != nil {
 		return 0, appErr

@@ -2,12 +2,13 @@ package usermanager
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/usermanager"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
-	"net/http"
-	"strconv"
 )
 
 type Handler struct {

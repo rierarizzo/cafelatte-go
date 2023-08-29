@@ -2,6 +2,7 @@ package order
 
 import (
 	"database/sql"
+
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 

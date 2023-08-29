@@ -1,9 +1,10 @@
 package crypt_test
 
 import (
+	"testing"
+
 	"github.com/rierarizzo/cafelatte/pkg/utils/crypt"
 	"golang.org/x/crypto/bcrypt"
-	"testing"
 )
 
 func TestHashText(t *testing.T) {

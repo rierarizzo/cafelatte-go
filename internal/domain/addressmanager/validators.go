@@ -2,11 +2,12 @@ package addressmanager
 
 import (
 	"errors"
+	"regexp"
+
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
 	"github.com/rierarizzo/cafelatte/pkg/params/request"
 	"github.com/sirupsen/logrus"
-	"regexp"
 )
 
 var invalidAddressPostalCodeError = errors.New("invalid postal code")

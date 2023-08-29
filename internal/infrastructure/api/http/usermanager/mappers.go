@@ -1,8 +1,9 @@
 package usermanager
 
 import (
-	"github.com/rierarizzo/cafelatte/internal/domain"
 	"strings"
+
+	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
 func fromUserToResponse(user domain.User) Response {

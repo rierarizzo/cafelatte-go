@@ -3,6 +3,7 @@ package card
 import (
 	"database/sql"
 	"errors"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
@@ -19,7 +20,10 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (repository Repository) SelectCardsByUserID(userId int) ([]domain.PaymentCard, *domain.AppError) {
+func (repository Repository) SelectCardsByUserID(userId int) (
+	[]domain.PaymentCard,
+	*domain.AppError,
+) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var cardsModel []Model
@@ -40,8 +44,10 @@ func (repository Repository) SelectCardsByUserID(userId int) ([]domain.PaymentCa
 	return fromModelsToCards(cardsModel), nil
 }
 
-func (repository Repository) InsertUserCard(userId int,
-	card domain.PaymentCard) (*domain.PaymentCard, *domain.AppError) {
+func (repository Repository) InsertUserCard(
+	userId int,
+	card domain.PaymentCard,
+) (*domain.PaymentCard, *domain.AppError) {
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
 		logrus.WithField(misc.RequestIDKey, request.ID()).Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
@@ -62,7 +68,8 @@ func (repository Repository) InsertUserCard(userId int,
                              Number, 
                              ExpirationYear, 
                              ExpirationMonth, 
-                             CVV) values (?,?,?,?,?,?,?,?)`, cardModel.Type, userId,
+                             CVV) values (?,?,?,?,?,?,?,?)`, cardModel.Type,
+		userId,
 		cardModel.Company, cardModel.HolderName, cardModel.Number,
 		cardModel.ExpirationYear, cardModel.ExpirationMonth, cardModel.CVV)
 	if err != nil {

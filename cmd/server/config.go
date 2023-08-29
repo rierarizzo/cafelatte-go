@@ -1,9 +1,10 @@
 package server
 
 import (
+	"os"
+
 	"github.com/rierarizzo/cafelatte/pkg/constants/env"
 	"github.com/sirupsen/logrus"
-	"os"
 )
 
 type Config struct {

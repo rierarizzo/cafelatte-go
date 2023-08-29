@@ -2,6 +2,7 @@ package product
 
 import (
 	"errors"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
@@ -18,18 +19,27 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (repository Repository) SelectProducts() ([]domain.Product, *domain.AppError) {
-	return selectProducts(repository.db, "select * from Product where Status=true")
+func (repository Repository) SelectProducts() (
+	[]domain.Product,
+	*domain.AppError,
+) {
+	return selectProducts(repository.db,
+		"select * from Product where Status=true")
 }
 
-func (repository Repository) SelectProductsByCategory(categoryCode string) ([]domain.Product, *domain.AppError) {
+func (repository Repository) SelectProductsByCategory(categoryCode string) (
+	[]domain.Product,
+	*domain.AppError,
+) {
 	return selectProducts(repository.db,
 		"select * from Product where CategoryCode=? and Status=true",
 		categoryCode)
 }
 
-func selectProducts(db *sqlx.DB, query string,
-	args ...interface{}) ([]domain.Product, *domain.AppError) {
+func selectProducts(
+	db *sqlx.DB, query string,
+	args ...interface{},
+) ([]domain.Product, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var model []Model
@@ -55,7 +65,10 @@ func selectProducts(db *sqlx.DB, query string,
 	return fromModelsToProducts(model), nil
 }
 
-func (repository Repository) SelectProductCategories() ([]domain.ProductCategory, *domain.AppError) {
+func (repository Repository) SelectProductCategories() (
+	[]domain.ProductCategory,
+	*domain.AppError,
+) {
 	log := logrus.WithField(misc.RequestIDKey, request.ID())
 
 	var model []CategoryModel

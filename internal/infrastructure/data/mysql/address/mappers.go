@@ -2,6 +2,7 @@ package address
 
 import (
 	"database/sql"
+
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
