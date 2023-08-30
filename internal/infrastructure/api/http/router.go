@@ -13,9 +13,10 @@ import (
 	authenticatorHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
 	cardmanagerHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/cardmanager"
 	errorHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/error"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/logger"
 	productmanagerHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/productmanager"
 	productpurchaserHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/productpurchaser"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/saverequestid"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/requestid"
 	usermanagerHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/usermanager"
 )
 
@@ -32,12 +33,9 @@ func Router(
 	/* Middlewares */
 	e.HTTPErrorHandler = errorHttp.CustomHttpErrorHandler
 
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}, id=${id}, latency=${latency}\n",
-	}))
 	e.Use(middleware.CORS())
-	e.Use(middleware.RequestID())
-	e.Use(saverequestid.Middleware)
+	e.Use(logger.CustomMiddleware())
+	e.Use(requestid.CustomMiddleware())
 
 	/* Groups */
 	auth := e.Group("/auth")
