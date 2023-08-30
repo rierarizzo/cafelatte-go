@@ -20,15 +20,13 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (repository Repository) SelectAddressesByUserId(userId int) (
-	[]domain.Address,
-	*domain.AppError,
-) {
+func (r Repository) SelectAddressesByUserId(userId int) ([]domain.Address,
+	*domain.AppError) {
 	var addressesModel []Model
 
 	var query = "select * from UserAddress where UserId=? and Status=true"
 
-	err := repository.db.Select(&addressesModel, query, userId)
+	err := r.db.Select(&addressesModel, query, userId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			appErr := domain.NewAppErrorWithType(domain.NotFoundError)
@@ -42,10 +40,8 @@ func (repository Repository) SelectAddressesByUserId(userId int) (
 	return fromModelsToAddresses(addressesModel), nil
 }
 
-func (repository Repository) InsertUserAddress(
-	userId int,
-	address domain.Address,
-) (*domain.Address, *domain.AppError) {
+func (r Repository) InsertUserAddress(userId int,
+	address domain.Address) (*domain.Address, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
@@ -59,7 +55,7 @@ func (repository Repository) InsertUserAddress(
 		return domain.NewAppError(insertAddressError, domain.RepositoryError)
 	}
 
-	tx, err := repository.db.Beginx()
+	tx, err := r.db.Beginx()
 	if err != nil {
 		return nil, rollbackAndError(tx, err)
 	}
@@ -86,16 +82,13 @@ func (repository Repository) InsertUserAddress(
 	return &address, nil
 }
 
-func (repository Repository) SelectCityNameById(id int) (
-	string,
-	*domain.AppError,
-) {
+func (r Repository) SelectCityNameById(id int) (string, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var cityName string
 	var query = "select Name from City where Id=?"
 
-	err := repository.db.Get(&cityName, query, id)
+	err := r.db.Get(&cityName, query, id)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
@@ -109,16 +102,13 @@ func (repository Repository) SelectCityNameById(id int) (
 	return cityName, nil
 }
 
-func (repository Repository) SelectProvinceNameById(id int) (
-	string,
-	*domain.AppError,
-) {
+func (r Repository) SelectProvinceNameById(id int) (string, *domain.AppError) {
 	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var provinceName string
 	var query = "select Name from Province where Id=?"
 
-	err := repository.db.Get(&provinceName, query, id)
+	err := r.db.Get(&provinceName, query, id)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {

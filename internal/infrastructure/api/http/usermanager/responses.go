@@ -1,6 +1,6 @@
 package usermanager
 
-type Response struct {
+type UserResponse struct {
 	Id           int    `json:"id"`
 	CompleteName string `json:"completeName"`
 	Username     string `json:"username"`

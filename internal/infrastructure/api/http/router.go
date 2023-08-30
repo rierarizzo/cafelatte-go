@@ -20,14 +20,12 @@ import (
 	usermanagerHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/usermanager"
 )
 
-func Router(
-	userManager usermanagerDomain.Manager,
+func Router(userManager usermanagerDomain.Manager,
 	authenticator authenticatorDomain.Authenticator,
 	addressManager addressmanagerDomain.Manager,
 	cardManager cardmanagerDomain.Manager,
 	productManager productmanagerDomain.Manager,
-	purchaser productpurchaserDomain.Purchaser,
-) *echo.Echo {
+	purchaser productpurchaserDomain.Purchaser) *echo.Echo {
 	e := echo.New()
 
 	/* Middlewares */

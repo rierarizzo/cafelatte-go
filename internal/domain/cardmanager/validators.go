@@ -44,8 +44,7 @@ func validateCardExpiration(card *domain.PaymentCard) *domain.AppError {
 	}
 
 	expirationDate := time.Date(card.ExpirationYear,
-		time.Month(card.ExpirationMonth),
-		0, 0, 0, 0, 0, time.UTC)
+		time.Month(card.ExpirationMonth), 0, 0, 0, 0, 0, time.UTC)
 
 	if expirationDate.Before(time.Now()) {
 		log.Error(expiredCardError)

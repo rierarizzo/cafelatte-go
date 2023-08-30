@@ -5,6 +5,6 @@ import (
 )
 
 type Authenticator interface {
-	SignUp(user domain.User) (*domain.AuthorizedUser, *domain.AppError)
-	SignIn(email, password string) (*domain.AuthorizedUser, *domain.AppError)
+	SignUp(user domain.User) (*domain.AuthenticatedUser, *domain.AppError)
+	SignIn(email, password string) (*domain.AuthenticatedUser, *domain.AppError)
 }

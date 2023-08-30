@@ -1,6 +1,6 @@
 package usermanager
 
-type UpdateUserRequest struct {
+type UserUpdate struct {
 	Username    string `json:"username"`
 	Name        string `json:"name"`
 	Surname     string `json:"surname"`

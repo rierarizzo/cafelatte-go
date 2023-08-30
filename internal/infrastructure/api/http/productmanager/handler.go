@@ -15,28 +15,30 @@ type Handler struct {
 }
 
 func Router(group *echo.Group) func(productManagerHandler *Handler) {
-	return func(handler *Handler) {
-		group.GET("/find", handler.GetProducts)
-		group.GET("/find/categories", handler.GetProductCategories)
+	return func(h *Handler) {
+		group.GET("/find", h.GetProducts)
+		group.GET("/find/categories", h.GetProductCategories)
 	}
 }
 
-func (handler Handler) GetProducts(c echo.Context) error {
+func (h Handler) GetProducts(c echo.Context) error {
 	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var category = c.QueryParam("category")
 
 	if category == "" {
-		products, appErr := handler.productManager.GetProducts()
+		log.Debug("Getting all products")
+
+		products, appErr := h.productManager.GetProducts()
 		if appErr != nil {
 			return appErr
 		}
 
 		return c.JSON(http.StatusOK, fromProductsToResponse(products))
 	} else {
-		log.Debugf("Executing with query: %s", category)
+		log.Debugf("Getting all products with query: %s", category)
 
-		products, appErr := handler.productManager.GetProductsByCategory(category)
+		products, appErr := h.productManager.GetProductsByCategory(category)
 		if appErr != nil {
 			return appErr
 		}
@@ -45,8 +47,8 @@ func (handler Handler) GetProducts(c echo.Context) error {
 	}
 }
 
-func (handler Handler) GetProductCategories(c echo.Context) error {
-	categories, appErr := handler.productManager.GetProductCategories()
+func (h Handler) GetProductCategories(c echo.Context) error {
+	categories, appErr := h.productManager.GetProductCategories()
 	if appErr != nil {
 		return appErr
 	}

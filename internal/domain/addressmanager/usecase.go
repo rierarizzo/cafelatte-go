@@ -8,11 +8,9 @@ type DefaultManager struct {
 	addressRepository AddressRepository
 }
 
-func (manager DefaultManager) GetAddressesByUserId(userId int) (
-	[]domain.Address,
-	*domain.AppError,
-) {
-	addresses, appErr := manager.addressRepository.SelectAddressesByUserId(userId)
+func (m DefaultManager) GetAddressesByUserId(userId int) ([]domain.Address,
+	*domain.AppError) {
+	addresses, appErr := m.addressRepository.SelectAddressesByUserId(userId)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
@@ -24,15 +22,13 @@ func (manager DefaultManager) GetAddressesByUserId(userId int) (
 	return addresses, nil
 }
 
-func (manager DefaultManager) AddUserAddress(
-	userId int,
-	address domain.Address,
-) (*domain.Address, *domain.AppError) {
+func (m DefaultManager) AddUserAddress(userId int,
+	address domain.Address) (*domain.Address, *domain.AppError) {
 	if appErr := validateAddress(&address); appErr != nil {
 		return nil, appErr
 	}
 
-	data, appErr := manager.addressRepository.InsertUserAddress(userId, address)
+	data, appErr := m.addressRepository.InsertUserAddress(userId, address)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)

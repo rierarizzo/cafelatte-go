@@ -15,11 +15,9 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (repository *Repository) InsertPurchaseOrder(order domain.Order) (
-	int,
-	*domain.AppError,
-) {
-	tx, _ := repository.db.Beginx()
+func (r *Repository) InsertPurchaseOrder(order domain.Order) (int,
+	*domain.AppError) {
+	tx, _ := r.db.Beginx()
 
 	orderId, appErr := generatePurchaseOrderId(tx, order)
 	if appErr != nil {
@@ -71,10 +69,8 @@ func (repository *Repository) InsertPurchaseOrder(order domain.Order) (
 	return orderId, nil
 }
 
-func generatePurchaseOrderId(tx *sqlx.Tx, order domain.Order) (
-	int,
-	*domain.AppError,
-) {
+func generatePurchaseOrderId(tx *sqlx.Tx, order domain.Order) (int,
+	*domain.AppError) {
 	model := fromOrderToModel(order)
 	query := `insert into PurchaseOrder (UserId, ShippingAddressId, PaymentMethodId, 
         Notes, OrderedAt) values (?,?,?,?,?)`

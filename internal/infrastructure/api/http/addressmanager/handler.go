@@ -14,19 +14,19 @@ type Handler struct {
 }
 
 func Router(group *echo.Group) func(addressManagerHandler *Handler) {
-	return func(handler *Handler) {
-		group.GET("/address/find/:userId", handler.GetAddressesByUserId)
-		group.POST("/address/register/:userId", handler.AddAddress)
+	return func(h *Handler) {
+		group.GET("/address/find/:userId", h.GetAddressesByUserId)
+		group.POST("/address/register/:userId", h.AddAddress)
 	}
 }
 
-func (handler *Handler) GetAddressesByUserId(c echo.Context) error {
+func (h *Handler) GetAddressesByUserId(c echo.Context) error {
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	addresses, appErr := handler.addressManager.GetAddressesByUserId(userId)
+	addresses, appErr := h.addressManager.GetAddressesByUserId(userId)
 	if appErr != nil {
 		return appErr
 	}
@@ -34,8 +34,8 @@ func (handler *Handler) GetAddressesByUserId(c echo.Context) error {
 	return c.JSON(http.StatusOK, fromAddressesToResponse(addresses))
 }
 
-func (handler *Handler) AddAddress(c echo.Context) error {
-	var req RegisterAddressRequest
+func (h *Handler) AddAddress(c echo.Context) error {
+	var req AddressCreate
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
@@ -45,7 +45,7 @@ func (handler *Handler) AddAddress(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	address, appErr := handler.addressManager.AddUserAddress(userId,
+	address, appErr := h.addressManager.AddUserAddress(userId,
 		fromRequestToAddress(req))
 	if appErr != nil {
 		return appErr
@@ -54,6 +54,6 @@ func (handler *Handler) AddAddress(c echo.Context) error {
 	return c.JSON(http.StatusCreated, fromAddressToResponse(address))
 }
 
-func New(addressService addressmanager.Manager) *Handler {
-	return &Handler{addressService}
+func New(addressManager addressmanager.Manager) *Handler {
+	return &Handler{addressManager}
 }

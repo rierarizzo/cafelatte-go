@@ -16,8 +16,7 @@ func (u *User) SetPassword(password string) {
 	u.Password = password
 }
 
-// AuthorizedUser represents an user with authorization tokens
-type AuthorizedUser struct {
+type AuthenticatedUser struct {
 	User        User
 	AccessToken string
 }

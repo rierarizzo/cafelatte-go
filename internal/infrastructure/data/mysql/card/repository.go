@@ -20,16 +20,14 @@ type Repository struct {
 	db *sqlx.DB
 }
 
-func (repository Repository) SelectCardsByUserId(userId int) (
-	[]domain.PaymentCard,
-	*domain.AppError,
-) {
+func (r Repository) SelectCardsByUserId(userId int) ([]domain.PaymentCard,
+	*domain.AppError) {
 	log := logrus.WithField(misc.RequestIdKey, request.Id())
 
 	var cardsModel []Model
 
 	query := "select * from UserPaymentCard where UserId=? and Status=true"
-	err := repository.db.Select(&cardsModel, query, userId)
+	err := r.db.Select(&cardsModel, query, userId)
 	if err != nil {
 		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
@@ -44,10 +42,8 @@ func (repository Repository) SelectCardsByUserId(userId int) (
 	return fromModelsToCards(cardsModel), nil
 }
 
-func (repository Repository) InsertUserCard(
-	userId int,
-	card domain.PaymentCard,
-) (*domain.PaymentCard, *domain.AppError) {
+func (r Repository) InsertUserCard(userId int,
+	card domain.PaymentCard) (*domain.PaymentCard, *domain.AppError) {
 	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
 		logrus.WithField(misc.RequestIdKey, request.Id()).Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
@@ -57,7 +53,7 @@ func (repository Repository) InsertUserCard(
 		return domain.NewAppError(insertCardError, domain.RepositoryError)
 	}
 
-	tx, _ := repository.db.Beginx()
+	tx, _ := r.db.Beginx()
 
 	cardModel := fromCardToModel(card)
 	query := `insert into UserPaymentCard (Type, UserId, Company, HolderName, Number, 

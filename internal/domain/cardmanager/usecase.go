@@ -9,11 +9,9 @@ type DefaultManager struct {
 	cardRepository CardRepository
 }
 
-func (manager DefaultManager) GetCardsByUserId(userId int) (
-	[]domain.PaymentCard,
-	*domain.AppError,
-) {
-	cards, appErr := manager.cardRepository.SelectCardsByUserId(userId)
+func (m DefaultManager) GetCardsByUserId(userId int) ([]domain.PaymentCard,
+	*domain.AppError) {
+	cards, appErr := m.cardRepository.SelectCardsByUserId(userId)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)
@@ -25,10 +23,8 @@ func (manager DefaultManager) GetCardsByUserId(userId int) (
 	return cards, nil
 }
 
-func (manager DefaultManager) AddUserCard(
-	userId int,
-	card domain.PaymentCard,
-) (*domain.PaymentCard, *domain.AppError) {
+func (m DefaultManager) AddUserCard(userId int,
+	card domain.PaymentCard) (*domain.PaymentCard, *domain.AppError) {
 	if appErr := validateCard(&card); appErr != nil {
 		return nil, appErr
 	}
@@ -45,7 +41,7 @@ func (manager DefaultManager) AddUserCard(
 	}
 	card.CVV = hash
 
-	data, appErr := manager.cardRepository.InsertUserCard(userId, card)
+	data, appErr := m.cardRepository.InsertUserCard(userId, card)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
 			return nil, domain.NewAppError(appErr, domain.UnexpectedError)

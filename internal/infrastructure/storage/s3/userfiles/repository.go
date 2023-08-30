@@ -16,10 +16,8 @@ type Repository struct {
 
 const ACL = "public-read"
 
-func (repository *Repository) UpdateProfilePicById(
-	userId int,
-	pic *multipart.FileHeader, picName string,
-) (string, *domain.AppError) {
+func (r *Repository) UpdateProfilePicById(userId int, pic *multipart.FileHeader,
+	picName string) (string, *domain.AppError) {
 	file, err := pic.Open()
 	if err != nil {
 		return "", domain.NewAppErrorWithType(domain.RepositoryError)
@@ -34,7 +32,7 @@ func (repository *Repository) UpdateProfilePicById(
 		ACL:    aws.String(ACL),
 	}
 
-	_, err = repository.s3Client.PutObject(params)
+	_, err = r.s3Client.PutObject(params)
 	if err != nil {
 		return "", domain.NewAppErrorWithType(domain.RepositoryError)
 	}

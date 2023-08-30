@@ -10,14 +10,10 @@ import (
 func CustomMiddleware() echo.MiddlewareFunc {
 	return middleware.RequestIDWithConfig(middleware.RequestIDConfig{
 		Generator: func() string {
-			return generateRequestId()
+			id := uuid.New()
+			request.SetRequestId(id.String())
+
+			return id.String()
 		},
 	})
-}
-
-func generateRequestId() string {
-	id := uuid.New()
-	request.SetRequestId(id.String())
-
-	return id.String()
 }

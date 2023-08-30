@@ -4,7 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func fromRequestToAddress(req RegisterAddressRequest) domain.Address {
+func fromRequestToAddress(req AddressCreate) domain.Address {
 	return domain.Address{
 		Type:       req.Type,
 		ProvinceId: req.ProvinceId,
@@ -14,8 +14,8 @@ func fromRequestToAddress(req RegisterAddressRequest) domain.Address {
 	}
 }
 
-func fromAddressToResponse(address *domain.Address) Response {
-	return Response{
+func fromAddressToResponse(address *domain.Address) AddressResponse {
+	return AddressResponse{
 		Type:       address.Type,
 		ProvinceId: address.ProvinceId,
 		CityId:     address.CityId,
@@ -23,8 +23,8 @@ func fromAddressToResponse(address *domain.Address) Response {
 	}
 }
 
-func fromAddressesToResponse(addresses []domain.Address) []Response {
-	res := make([]Response, 0)
+func fromAddressesToResponse(addresses []domain.Address) []AddressResponse {
+	res := make([]AddressResponse, 0)
 	for _, v := range addresses {
 		res = append(res, fromAddressToResponse(&v))
 	}

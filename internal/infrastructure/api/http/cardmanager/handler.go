@@ -14,19 +14,19 @@ type Handler struct {
 }
 
 func Router(group *echo.Group) func(cardManagerHandler *Handler) {
-	return func(handler *Handler) {
-		group.GET("/card/find/:userId", handler.GetCardsByUserId)
-		group.POST("/card/register/:userId", handler.AddCard)
+	return func(h *Handler) {
+		group.GET("/card/find/:userId", h.GetCardsByUserId)
+		group.POST("/card/register/:userId", h.AddCard)
 	}
 }
 
-func (handler *Handler) GetCardsByUserId(c echo.Context) error {
+func (h *Handler) GetCardsByUserId(c echo.Context) error {
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	cards, appErr := handler.cardManager.GetCardsByUserId(userId)
+	cards, appErr := h.cardManager.GetCardsByUserId(userId)
 	if appErr != nil {
 		return appErr
 	}
@@ -34,8 +34,8 @@ func (handler *Handler) GetCardsByUserId(c echo.Context) error {
 	return c.JSON(http.StatusOK, fromCardsToResponse(cards))
 }
 
-func (handler *Handler) AddCard(c echo.Context) error {
-	var req RegisterCardRequest
+func (h *Handler) AddCard(c echo.Context) error {
+	var req CardCreate
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
@@ -45,8 +45,7 @@ func (handler *Handler) AddCard(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	card, appErr := handler.cardManager.AddUserCard(userId,
-		fromRequestToCard(req))
+	card, appErr := h.cardManager.AddUserCard(userId, fromRequestToCard(req))
 	if appErr != nil {
 		return appErr
 	}
@@ -54,6 +53,6 @@ func (handler *Handler) AddCard(c echo.Context) error {
 	return c.JSON(http.StatusCreated, fromCardToResponse(card))
 }
 
-func New(paymentCardService cardmanager.Manager) *Handler {
-	return &Handler{paymentCardService}
+func New(cardManager cardmanager.Manager) *Handler {
+	return &Handler{cardManager}
 }

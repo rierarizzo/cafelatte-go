@@ -13,19 +13,19 @@ type Handler struct {
 }
 
 func Router(group *echo.Group) func(authenticatorHandler *Handler) {
-	return func(handler *Handler) {
-		group.POST("/signup", handler.SignUp)
-		group.POST("/signin", handler.SignIn)
+	return func(h *Handler) {
+		group.POST("/signup", h.SignUp)
+		group.POST("/signin", h.SignIn)
 	}
 }
 
-func (handler *Handler) SignUp(c echo.Context) error {
-	var req SignUpRequest
+func (h *Handler) SignUp(c echo.Context) error {
+	var req UserSignup
 	if err := c.Bind(&req); err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	authorized, appErr := handler.authenticator.SignUp(fromRequestToUser(req))
+	authorized, appErr := h.authenticator.SignUp(fromRequestToUser(req))
 	if appErr != nil {
 		return appErr
 	}
@@ -33,13 +33,13 @@ func (handler *Handler) SignUp(c echo.Context) error {
 	return c.JSON(http.StatusCreated, fromAuthUserToResponse(*authorized))
 }
 
-func (handler *Handler) SignIn(c echo.Context) error {
-	var req SignInRequest
+func (h *Handler) SignIn(c echo.Context) error {
+	var req UserSignin
 	if err := c.Bind(&req); err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	authorized, appErr := handler.authenticator.SignIn(req.Email, req.Password)
+	authorized, appErr := h.authenticator.SignIn(req.Email, req.Password)
 	if appErr != nil {
 		return appErr
 	}

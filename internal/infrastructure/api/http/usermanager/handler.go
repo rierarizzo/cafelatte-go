@@ -16,18 +16,18 @@ type Handler struct {
 }
 
 func Router(group *echo.Group) func(userManagerHandler *Handler) {
-	return func(handler *Handler) {
+	return func(h *Handler) {
 		group.Use(authenticator.Middleware)
 
-		group.GET("/find", handler.GetUsers)
-		group.GET("/find/:userId", handler.FindUserById)
-		group.PUT("/update/:userId", handler.UpdateUserById)
-		group.DELETE("/delete/:userId", handler.DeleteUserById)
+		group.GET("/find", h.GetUsers)
+		group.GET("/find/:userId", h.FindUserById)
+		group.PUT("/update/:userId", h.UpdateUserById)
+		group.DELETE("/delete/:userId", h.DeleteUserById)
 	}
 }
 
-func (handler *Handler) GetUsers(c echo.Context) error {
-	users, appErr := handler.userManager.GetUsers()
+func (h *Handler) GetUsers(c echo.Context) error {
+	users, appErr := h.userManager.GetUsers()
 	if appErr != nil {
 		return appErr
 	}
@@ -35,13 +35,13 @@ func (handler *Handler) GetUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, fromUsersToResponse(users))
 }
 
-func (handler *Handler) FindUserById(c echo.Context) error {
+func (h *Handler) FindUserById(c echo.Context) error {
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	user, appErr := handler.userManager.FindUserById(userId)
+	user, appErr := h.userManager.FindUserById(userId)
 	if appErr != nil {
 		return appErr
 	}
@@ -49,8 +49,8 @@ func (handler *Handler) FindUserById(c echo.Context) error {
 	return c.JSON(http.StatusOK, fromUserToResponse(*user))
 }
 
-func (handler *Handler) UpdateUserById(c echo.Context) error {
-	var req UpdateUserRequest
+func (h *Handler) UpdateUserById(c echo.Context) error {
+	var req UserUpdate
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
@@ -60,7 +60,7 @@ func (handler *Handler) UpdateUserById(c echo.Context) error {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	if appErr := handler.userManager.UpdateUserById(userId,
+	if appErr := h.userManager.UpdateUserById(userId,
 		fromRequestToUser(req)); appErr != nil {
 		return appErr
 	}
@@ -68,13 +68,13 @@ func (handler *Handler) UpdateUserById(c echo.Context) error {
 	return c.JSON(http.StatusOK, fmt.Sprintf("User %v updated", userId))
 }
 
-func (handler *Handler) DeleteUserById(c echo.Context) error {
+func (h *Handler) DeleteUserById(c echo.Context) error {
 	userId, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		return domain.NewAppError(err, domain.BadRequestError)
 	}
 
-	if appErr := handler.userManager.DeleteUserById(userId); appErr != nil {
+	if appErr := h.userManager.DeleteUserById(userId); appErr != nil {
 		return appErr
 	}
 

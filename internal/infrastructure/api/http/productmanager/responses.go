@@ -1,6 +1,6 @@
 package productmanager
 
-type Response struct {
+type ProductResponse struct {
 	Id           int     `json:"id"`
 	Name         string  `json:"name"`
 	Description  string  `json:"description"`
@@ -10,7 +10,7 @@ type Response struct {
 	Stock        int     `json:"stock"`
 }
 
-type CategoryResponse struct {
+type ProductCategoryResponse struct {
 	Code        string `json:"code"`
 	Description string `json:"description"`
 }
