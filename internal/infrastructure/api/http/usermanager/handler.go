@@ -8,79 +8,86 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/usermanager"
-	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
 )
 
-type Handler struct {
-	userManager usermanager.Manager
-}
-
-func Router(group *echo.Group) func(userManagerHandler *Handler) {
-	return func(h *Handler) {
-		group.Use(authenticator.Middleware)
-
-		group.GET("/find", h.GetUsers)
-		group.GET("/find/:userId", h.FindUserById)
-		group.PUT("/update/:userId", h.UpdateUserById)
-		group.DELETE("/delete/:userId", h.DeleteUserById)
+func ConfigureRouting(g *echo.Group) func(m usermanager.Manager) {
+	return func(m usermanager.Manager) {
+		g.GET("/find", getAllUsers(m))
+		g.GET("/find/:userId", findUserById(m))
+		g.PUT("/update/:userId", updateUserById(m))
+		g.DELETE("/delete/:userId", deleteUserById(m))
 	}
 }
 
-func (h *Handler) GetUsers(c echo.Context) error {
-	users, appErr := h.userManager.GetUsers()
-	if appErr != nil {
-		return appErr
-	}
+func getAllUsers(m usermanager.Manager) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		users, appErr := m.GetUsers()
+		if appErr != nil {
+			return appErr
+		}
 
-	return c.JSON(http.StatusOK, fromUsersToResponse(users))
+		response := fromUsersToResponse(users)
+		return c.JSON(http.StatusOK, response)
+	}
 }
 
-func (h *Handler) FindUserById(c echo.Context) error {
-	userId, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
-	}
+func findUserById(m usermanager.Manager) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, err := strconv.Atoi(c.Param("userId"))
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
 
-	user, appErr := h.userManager.FindUserById(userId)
-	if appErr != nil {
-		return appErr
-	}
+		user, appErr := m.FindUserById(userId)
+		if appErr != nil {
+			return appErr
+		}
 
-	return c.JSON(http.StatusOK, fromUserToResponse(*user))
+		response := fromUserToResponse(user)
+		return c.JSON(http.StatusOK, response)
+	}
 }
 
-func (h *Handler) UpdateUserById(c echo.Context) error {
-	var req UserUpdate
-	userId, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
-	}
+func updateUserById(m usermanager.Manager) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, err := strconv.Atoi(c.Param("userId"))
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
 
-	if err = c.Bind(&req); err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
-	}
+		var request UserUpdate
+		err = c.Bind(&request)
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
 
-	if appErr := h.userManager.UpdateUserById(userId,
-		fromRequestToUser(req)); appErr != nil {
-		return appErr
-	}
+		appErr := m.UpdateUserById(userId, fromRequestToUser(request))
+		if appErr != nil {
+			return appErr
+		}
 
-	return c.JSON(http.StatusOK, fmt.Sprintf("User %v updated", userId))
+		response := fmt.Sprintf("User %v updated", userId)
+		return c.JSON(http.StatusOK, response)
+	}
 }
 
-func (h *Handler) DeleteUserById(c echo.Context) error {
-	userId, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
+func deleteUserById(m usermanager.Manager) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, err := strconv.Atoi(c.Param("userId"))
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
+
+		appErr := m.DeleteUserById(userId)
+		if appErr != nil {
+			return appErr
+		}
+
+		response := fmt.Sprintf("User %v deleted", userId)
+		return c.JSON(http.StatusOK, response)
 	}
-
-	if appErr := h.userManager.DeleteUserById(userId); appErr != nil {
-		return appErr
-	}
-
-	return c.JSON(http.StatusOK, fmt.Sprintf("User %v deleted", userId))
-}
-
-func New(userManager usermanager.Manager) *Handler {
-	return &Handler{userManager}
 }

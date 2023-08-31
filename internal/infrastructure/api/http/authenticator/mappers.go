@@ -4,7 +4,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func fromAuthUserToResponse(authorizedUser domain.AuthenticatedUser) AuthenticatedResponse {
+func fromAuthUserToResponse(authorizedUser *domain.AuthenticatedUser) AuthenticatedResponse {
 	return AuthenticatedResponse{
 		User: struct {
 			Id       int    `json:"id"`

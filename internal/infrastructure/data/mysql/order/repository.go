@@ -1,34 +1,42 @@
 package order
 
 import (
+	sqlUtil "github.com/rierarizzo/cafelatte/pkg/utils/sql"
 	"sync"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain"
-	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
-	"github.com/rierarizzo/cafelatte/pkg/params/request"
-	"github.com/sirupsen/logrus"
 )
 
 type Repository struct {
 	db *sqlx.DB
 }
 
-func (r *Repository) InsertPurchaseOrder(order domain.Order) (int,
-	*domain.AppError) {
-	tx, _ := r.db.Beginx()
+func New(db *sqlx.DB) *Repository {
+	return &Repository{db}
+}
+
+func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppError) {
+	tx, appErr := sqlUtil.StartTransaction(r.db)
+	if appErr != nil {
+		return 0, appErr
+	}
+
+	defer sqlUtil.RollbackIfPanic(tx)
 
 	orderId, appErr := generatePurchaseOrderId(tx, order)
 	if appErr != nil {
 		return 0, appErr
 	}
 
-	query := "insert into ProductInOrder (OrderId, ProductId, Quantity) values (?,?,?)"
-
+	query := `
+		INSERT INTO ProductInOrder (OrderId, ProductId, Quantity) VALUES (?,?,?)
+	`
 	insertProductStmnt, err := tx.Prepare(query)
 	if err != nil {
-		return 0, rollbackAndError(tx, err)
+		appErr = domain.NewAppError(err, domain.RepositoryError)
+		return 0, appErr
 	}
 
 	var sem = make(chan struct{}, 5)
@@ -46,7 +54,8 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int,
 			}()
 
 			product := fromProductInOrderToModel(entity)
-			_, err = insertProductStmnt.Exec(orderId, product.ProductId,
+			_, err = insertProductStmnt.Exec(orderId,
+				product.ProductId,
 				product.Quantity)
 			if err != nil {
 				errCh <- err
@@ -58,10 +67,42 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int,
 	wg.Wait()
 	close(errCh)
 	for err = range errCh {
-		return 0, rollbackAndError(tx, err)
+		appErr = domain.NewAppError(err, domain.RepositoryError)
+		return 0, appErr
 	}
 
-	appErr = updateOrderAmount(tx, orderId)
+	if appErr = updateOrderAmount(tx, orderId); appErr != nil {
+		return 0, appErr
+	}
+
+	if appErr = sqlUtil.CommitTransaction(tx); appErr != nil {
+		return 0, appErr
+	}
+
+	return orderId, nil
+}
+
+func generatePurchaseOrderId(tx *sqlx.Tx,
+	order domain.Order) (int, *domain.AppError) {
+	model := fromOrderToModel(order)
+
+	query := `
+		INSERT INTO PurchaseOrder 
+		    (UserId, ShippingAddressId, PaymentMethodId, Notes, OrderedAt) 
+		VALUES (?,?,?,?,?)
+	`
+	result, appErr := sqlUtil.ExecWithTransaction(tx,
+		query,
+		model.UserId,
+		model.ShippingAddressId,
+		model.PaymentMethodId,
+		model.Notes.String,
+		time.Now())
+	if appErr != nil {
+		return 0, appErr
+	}
+
+	orderId, appErr := sqlUtil.GetLastInsertedId(result)
 	if appErr != nil {
 		return 0, appErr
 	}
@@ -69,53 +110,27 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int,
 	return orderId, nil
 }
 
-func generatePurchaseOrderId(tx *sqlx.Tx, order domain.Order) (int,
-	*domain.AppError) {
-	model := fromOrderToModel(order)
-	query := `insert into PurchaseOrder (UserId, ShippingAddressId, PaymentMethodId, 
-        Notes, OrderedAt) values (?,?,?,?,?)`
-
-	res, err := tx.Exec(query, model.UserId, model.ShippingAddressId,
-		model.PaymentMethodId, model.Notes.String, time.Now())
-	if err != nil {
-		return 0, rollbackAndError(tx, err)
-	}
-	orderId, _ := res.LastInsertId()
-
-	return int(orderId), nil
-}
-
 func updateOrderAmount(tx *sqlx.Tx, orderId int) *domain.AppError {
 	var total float64
 
-	query := `select sum(pp.Quantity * p.Price) from ProductInOrder pp 
-    	inner join Product p on pp.ProductId = p.Id where OrderId=?`
+	query := `
+		SELECT SUM(pp.Quantity * p.Price) FROM ProductInOrder pp 
+    	INNER JOIN Product p ON pp.ProductId = p.Id WHERE OrderId=?
+	`
 	err := tx.Get(&total, query, orderId)
 	if err != nil {
-		return rollbackAndError(tx, err)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
+		return appErr
 	}
 
-	query = "update PurchaseOrder set TotalAmount=? where Id=?"
+	query = `
+		UPDATE PurchaseOrder SET TotalAmount=? WHERE Id=?
+	`
 	_, err = tx.Exec(query, total, orderId)
 	if err != nil {
-		return rollbackAndError(tx, err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return rollbackAndError(tx, err)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
+		return appErr
 	}
 
 	return nil
-}
-
-func rollbackAndError(tx *sqlx.Tx, err error) *domain.AppError {
-	_ = tx.Rollback()
-	logrus.WithField(misc.RequestIdKey, request.Id()).Error(err)
-
-	return domain.NewAppError(err, domain.RepositoryError)
-}
-
-func New(db *sqlx.DB) *Repository {
-	return &Repository{db}
 }

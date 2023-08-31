@@ -1,59 +1,62 @@
 package addressmanager
 
 import (
-	"net/http"
-	"strconv"
-
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/domain/addressmanager"
+	"net/http"
+	"strconv"
 )
 
-type Handler struct {
-	addressManager addressmanager.Manager
-}
+func ConfigureRouting(g *echo.Group) func(m addressmanager.Manager) {
+	addressGroup := g.Group("/address")
 
-func Router(group *echo.Group) func(addressManagerHandler *Handler) {
-	return func(h *Handler) {
-		group.GET("/address/find/:userId", h.GetAddressesByUserId)
-		group.POST("/address/register/:userId", h.AddAddress)
+	return func(m addressmanager.Manager) {
+		addressGroup.GET("/find/:userId", findAddressByUserId(m))
+		addressGroup.POST("/register/:userId", registerAddressByUserId(m))
 	}
 }
 
-func (h *Handler) GetAddressesByUserId(c echo.Context) error {
-	userId, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
-	}
+func findAddressByUserId(m addressmanager.Manager) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, err := strconv.Atoi(c.Param("userId"))
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
 
-	addresses, appErr := h.addressManager.GetAddressesByUserId(userId)
-	if appErr != nil {
-		return appErr
-	}
+		addresses, appErr := m.GetAddressesByUserId(userId)
+		if appErr != nil {
+			return appErr
+		}
 
-	return c.JSON(http.StatusOK, fromAddressesToResponse(addresses))
+		response := fromAddressesToResponse(addresses)
+		return c.JSON(http.StatusOK, response)
+	}
 }
 
-func (h *Handler) AddAddress(c echo.Context) error {
-	var req AddressCreate
-	userId, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
+func registerAddressByUserId(m addressmanager.Manager) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var request AddressCreate
+		userId, err := strconv.Atoi(c.Param("userId"))
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
+
+		err = c.Bind(&request)
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
+
+		address, appErr := m.AddUserAddress(userId,
+			fromRequestToAddress(request))
+		if appErr != nil {
+			return appErr
+		}
+
+		response := fromAddressToResponse(address)
+		return c.JSON(http.StatusCreated, response)
 	}
-
-	if err = c.Bind(&req); err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
-	}
-
-	address, appErr := h.addressManager.AddUserAddress(userId,
-		fromRequestToAddress(req))
-	if appErr != nil {
-		return appErr
-	}
-
-	return c.JSON(http.StatusCreated, fromAddressToResponse(address))
-}
-
-func New(addressManager addressmanager.Manager) *Handler {
-	return &Handler{addressManager}
 }

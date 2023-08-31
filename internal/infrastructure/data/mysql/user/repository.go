@@ -3,162 +3,155 @@ package user
 import (
 	"database/sql"
 	"errors"
+	sqlUtil "github.com/rierarizzo/cafelatte/pkg/utils/sql"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain"
-	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
-	"github.com/rierarizzo/cafelatte/pkg/params/request"
-	"github.com/sirupsen/logrus"
 )
 
-var (
-	insertUserError = errors.New("insert user error")
-	selectUserError = errors.New("select user error")
-	updateUserError = errors.New("update user error")
-	deleteUserError = errors.New("delete user error")
-)
+const NotFoundMsg = "user not found"
 
 type Repository struct {
 	db *sqlx.DB
 }
 
-// SelectUsers retrieves a list of users from the database and returns the
-// list of users if successful, along with any error encountered during the
-// process.
+func New(db *sqlx.DB) *Repository {
+	return &Repository{db}
+}
+
 func (r *Repository) SelectUsers() ([]domain.User, *domain.AppError) {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
-
 	var usersModel []Model
-	var query = "select * from User where Status=true"
 
+	var query = `
+		SELECT * FROM User WHERE Status=TRUE
+	`
 	err := r.db.Select(&usersModel, query)
 	if err != nil {
-		log.Error(err)
-		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
+		return nil, appErr
 	}
 
 	if usersModel == nil {
-		return nil, domain.NewAppErrorWithType(domain.NotFoundError)
+		return []domain.User{}, nil
 	}
 
-	return fromModelsToUsers(usersModel), nil
+	users := fromModelsToUsers(usersModel)
+	return users, nil
 }
 
-// SelectUserById retrieves a usermanager from the database based on the provided
-// usermanager Id and returns the usermanager if found, along with any error encountered
-// during the process.
-func (r *Repository) SelectUserById(userId int) (*domain.User,
-	*domain.AppError) {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
-
+func (r *Repository) SelectUserById(userId int) (*domain.User, *domain.AppError) {
 	var userModel Model
-	var query = "select * from User u where u.Status=true and u.Id=?"
 
+	var query = `
+		SELECT * FROM User u WHERE u.Id=? AND u.Status=TRUE
+	`
 	err := r.db.Get(&userModel, query, userId)
 	if err != nil {
-		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
+			appErr := domain.NewAppError(NotFoundMsg, domain.NotFoundError)
+			return nil, appErr
 		}
 
-		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
+		return nil, appErr
 	}
 
 	user := fromModelToUser(userModel)
 	return &user, nil
 }
 
-// SelectUserByEmail retrieves a usermanager from the database based on the
-// provided email and returns the usermanager if found, along with any error
-// encountered during the process.
-func (r *Repository) SelectUserByEmail(email string) (*domain.User,
-	*domain.AppError) {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
-
+func (r *Repository) SelectUserByEmail(email string) (*domain.User, *domain.AppError) {
 	var userModel Model
-	var query = "select * from User u where u.Status=true and u.Email=?"
 
+	var query = `
+		SELECT * FROM User u WHERE u.Email=? AND u.Status=TRUE
+	`
 	err := r.db.Get(&userModel, query, email)
 	if err != nil {
-		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domain.NewAppErrorWithType(domain.NotFoundError)
+			appErr := domain.NewAppError(NotFoundMsg, domain.NotFoundError)
+			return nil, appErr
 		}
 
-		return nil, domain.NewAppError(selectUserError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
+		return nil, appErr
 	}
 
 	user := fromModelToUser(userModel)
 	return &user, nil
 }
 
-// InsertUser inserts a new usermanager into the database and returns the inserted
-// usermanager if successful, along with any error encountered during the process.
-func (r *Repository) InsertUser(user domain.User) (*domain.User,
-	*domain.AppError) {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
+func (r *Repository) InsertUser(user domain.User) (*domain.User, *domain.AppError) {
+	var model = fromUserToModel(user)
 
-	var userModel = fromUserToModel(user)
-	var query = `insert into User (Username, Name, Surname, PhoneNumber, Email, 
-        Password, RoleCode) values (?,?,?,?,?,?,?)`
-
-	result, err := r.db.Exec(query, userModel.Username, userModel.Name,
-		userModel.Surname, userModel.PhoneNumber, userModel.Email,
-		userModel.Password, userModel.RoleCode)
+	var query = `
+		INSERT INTO User (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
+		VALUES (?,?,?,?,?,?,?)
+	`
+	result, err := r.db.Exec(query,
+		model.Username,
+		model.Name,
+		model.Surname,
+		model.PhoneNumber,
+		model.Email,
+		model.Password,
+		model.RoleCode)
 	if err != nil {
-		log.Error(err)
-		return nil, domain.NewAppError(insertUserError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
+		return nil, appErr
 	}
 
-	lastUserId, _ := result.LastInsertId()
-	userModel.Id = int(lastUserId)
+	userId, appErr := sqlUtil.GetLastInsertedId(result)
+	if appErr != nil {
+		return nil, appErr
+	}
+	model.Id = userId
 
-	u := fromModelToUser(userModel)
+	u := fromModelToUser(model)
 	userToReturn := &u
 	return userToReturn, nil
 }
 
-// UpdateUserById updates the details of a usermanager in the database based on the
-// provided usermanager Id and usermanager object and returns an error, if any,
-// encountered during the process.
 func (r *Repository) UpdateUserById(userId int,
 	user domain.User) *domain.AppError {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
+	var model = fromUserToModel(user)
 
-	var userModel = fromUserToModel(user)
-	var query = `update User set Username=?, Name=?, Surname=?, PhoneNumber=? where Id=?`
-	_, err := r.db.Exec(query, userModel.Username, userModel.Name,
-		userModel.Surname, userModel.PhoneNumber, userId)
+	var query = `
+		UPDATE User SET Username=?, Name=?, Surname=?, PhoneNumber=? WHERE Id=?
+	`
+	_, err := r.db.Exec(query,
+		model.Username,
+		model.Name,
+		model.Surname,
+		model.PhoneNumber,
+		userId)
 	if err != nil {
-		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
-			return domain.NewAppErrorWithType(domain.NotFoundError)
+			appErr := domain.NewAppError(NotFoundMsg, domain.NotFoundError)
+			return appErr
 		}
 
-		return domain.NewAppError(updateUserError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
+		return appErr
 	}
 
 	return nil
 }
 
 func (r *Repository) DeleteUserById(userId int) *domain.AppError {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
-
-	var query = `update User set Status=false where Id=?`
-
+	var query = `
+		UPDATE User SET Status=FALSE WHERE Id=?
+	`
 	_, err := r.db.Exec(query, userId)
 	if err != nil {
-		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
-			return domain.NewAppErrorWithType(domain.NotFoundError)
+			appErr := domain.NewAppError(NotFoundMsg, domain.NotFoundError)
+			return appErr
 		}
 
-		return domain.NewAppError(deleteUserError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
+		return appErr
 	}
 
 	return nil
-}
-
-func New(db *sqlx.DB) *Repository {
-	return &Repository{db}
 }

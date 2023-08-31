@@ -1,39 +1,34 @@
 package product
 
 import (
-	"errors"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain"
-	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
-	"github.com/rierarizzo/cafelatte/pkg/params/request"
-	"github.com/sirupsen/logrus"
-)
-
-var (
-	selectProductError         = errors.New("select product error")
-	selectProductCategoryError = errors.New("select product category error")
 )
 
 type Repository struct {
 	db *sqlx.DB
 }
 
-func (r Repository) SelectProducts() ([]domain.Product, *domain.AppError) {
-	return selectProducts(r.db, "select * from Product where Status=true")
+func New(db *sqlx.DB) *Repository {
+	return &Repository{db}
 }
 
-func (r Repository) SelectProductsByCategory(categoryCode string) ([]domain.Product,
-	*domain.AppError) {
-	return selectProducts(r.db,
-		"select * from Product where CategoryCode=? and Status=true",
-		categoryCode)
+func (r Repository) SelectProducts() ([]domain.Product, *domain.AppError) {
+	query := `
+		SELECT * FROM Product WHERE Status=TRUE
+	`
+	return selectProducts(r.db, query)
+}
+
+func (r Repository) SelectProductsByCategory(categoryCode string) ([]domain.Product, *domain.AppError) {
+	query := `
+		SELECT * FROM Product WHERE CategoryCode=? AND Status=TRUE
+	`
+	return selectProducts(r.db, query, categoryCode)
 }
 
 func selectProducts(db *sqlx.DB, query string,
 	args ...interface{}) ([]domain.Product, *domain.AppError) {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
-
 	var model []Model
 
 	var err error
@@ -44,41 +39,34 @@ func selectProducts(db *sqlx.DB, query string,
 	}
 
 	if err != nil {
-		log.Errorf("Error in selectProducts: %v", err)
-		appErr := domain.NewAppError(selectProductError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
 		return nil, appErr
 	}
 
 	if model == nil {
-		log.Debug("productsModel is empty")
 		return []domain.Product{}, nil
 	}
 
-	return fromModelsToProducts(model), nil
+	products := fromModelsToProducts(model)
+	return products, nil
 }
 
-func (r Repository) SelectProductCategories() ([]domain.ProductCategory,
-	*domain.AppError) {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
-
+func (r Repository) SelectProductCategories() ([]domain.ProductCategory, *domain.AppError) {
 	var model []CategoryModel
 
-	err := r.db.Select(&model, "select * from ProductCategory")
+	query := `
+		SELECT * FROM ProductCategory
+	`
+	err := r.db.Select(&model, query)
 	if err != nil {
-		log.Errorf("Error in SelectProductCategories: %v", err)
-		appErr := domain.NewAppError(selectProductCategoryError,
-			domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
 		return nil, appErr
 	}
 
 	if model == nil {
-		log.Debug("productCategoriesModel is empty")
 		return []domain.ProductCategory{}, nil
 	}
 
-	return fromCategoryModelsToCategories(model), nil
-}
-
-func New(db *sqlx.DB) *Repository {
-	return &Repository{db}
+	categories := fromCategoryModelsToCategories(model)
+	return categories, nil
 }

@@ -8,45 +8,45 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/authenticator"
 )
 
-type Handler struct {
-	authenticator authenticator.Authenticator
-}
-
-func Router(group *echo.Group) func(authenticatorHandler *Handler) {
-	return func(h *Handler) {
-		group.POST("/signup", h.SignUp)
-		group.POST("/signin", h.SignIn)
+func ConfigureRouting(group *echo.Group) func(a authenticator.Authenticator) {
+	return func(a authenticator.Authenticator) {
+		group.POST("/signup", signUp(a))
+		group.POST("/signin", signIn(a))
 	}
 }
 
-func (h *Handler) SignUp(c echo.Context) error {
-	var req UserSignup
-	if err := c.Bind(&req); err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
-	}
+func signUp(a authenticator.Authenticator) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var req UserSignup
+		if err := c.Bind(&req); err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
 
-	authorized, appErr := h.authenticator.SignUp(fromRequestToUser(req))
-	if appErr != nil {
-		return appErr
-	}
+		authorized, appErr := a.SignUp(fromRequestToUser(req))
+		if appErr != nil {
+			return appErr
+		}
 
-	return c.JSON(http.StatusCreated, fromAuthUserToResponse(*authorized))
+		response := fromAuthUserToResponse(authorized)
+		return c.JSON(http.StatusCreated, response)
+	}
 }
 
-func (h *Handler) SignIn(c echo.Context) error {
-	var req UserSignin
-	if err := c.Bind(&req); err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
+func signIn(a authenticator.Authenticator) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var req UserSignin
+		if err := c.Bind(&req); err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
+
+		authorized, appErr := a.SignIn(req.Email, req.Password)
+		if appErr != nil {
+			return appErr
+		}
+
+		response := fromAuthUserToResponse(authorized)
+		return c.JSON(http.StatusOK, response)
 	}
-
-	authorized, appErr := h.authenticator.SignIn(req.Email, req.Password)
-	if appErr != nil {
-		return appErr
-	}
-
-	return c.JSON(http.StatusOK, fromAuthUserToResponse(*authorized))
-}
-
-func New(authenticator authenticator.Authenticator) *Handler {
-	return &Handler{authenticator}
 }

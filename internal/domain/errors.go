@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -48,9 +49,20 @@ type AppError struct {
 }
 
 // NewAppError returns an AppError with its type and message.
-func NewAppError(err error, errType string) *AppError {
+func NewAppError(err interface{}, errType string) *AppError {
+	var actualErr error
+
+	switch e := err.(type) {
+	case string:
+		actualErr = errors.New(e)
+	case error:
+		actualErr = e
+	}
+
+	logrus.Error(actualErr)
+
 	return &AppError{
-		Err:  err,
+		Err:  actualErr,
 		Type: errType,
 	}
 }

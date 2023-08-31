@@ -9,50 +9,54 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/cardmanager"
 )
 
-type Handler struct {
-	cardManager cardmanager.Manager
-}
+func ConfigureRouting(g *echo.Group) func(m cardmanager.Manager) {
+	cardsGroup := g.Group("/card")
 
-func Router(group *echo.Group) func(cardManagerHandler *Handler) {
-	return func(h *Handler) {
-		group.GET("/card/find/:userId", h.GetCardsByUserId)
-		group.POST("/card/register/:userId", h.AddCard)
+	return func(m cardmanager.Manager) {
+		cardsGroup.GET("/card/find/:userId", getCardsByUserId(m))
+		cardsGroup.POST("/card/register/:userId", addNewCard(m))
 	}
 }
 
-func (h *Handler) GetCardsByUserId(c echo.Context) error {
-	userId, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
-	}
+func getCardsByUserId(m cardmanager.Manager) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, err := strconv.Atoi(c.Param("userId"))
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
 
-	cards, appErr := h.cardManager.GetCardsByUserId(userId)
-	if appErr != nil {
-		return appErr
-	}
+		cards, appErr := m.GetCardsByUserId(userId)
+		if appErr != nil {
+			return appErr
+		}
 
-	return c.JSON(http.StatusOK, fromCardsToResponse(cards))
+		response := fromCardsToResponse(cards)
+		return c.JSON(http.StatusOK, response)
+	}
 }
 
-func (h *Handler) AddCard(c echo.Context) error {
-	var req CardCreate
-	userId, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
+func addNewCard(m cardmanager.Manager) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userId, err := strconv.Atoi(c.Param("userId"))
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
+
+		var request CardCreate
+		err = c.Bind(&request)
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
+
+		card, appErr := m.AddUserCard(userId, fromRequestToCard(request))
+		if appErr != nil {
+			return appErr
+		}
+
+		response := fromCardToResponse(card)
+		return c.JSON(http.StatusCreated, response)
 	}
-
-	if err = c.Bind(&req); err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
-	}
-
-	card, appErr := h.cardManager.AddUserCard(userId, fromRequestToCard(req))
-	if appErr != nil {
-		return appErr
-	}
-
-	return c.JSON(http.StatusCreated, fromCardToResponse(card))
-}
-
-func New(cardManager cardmanager.Manager) *Handler {
-	return &Handler{cardManager}
 }

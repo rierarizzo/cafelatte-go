@@ -9,31 +9,27 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain/productpurchaser"
 )
 
-type Handler struct {
-	purchaser productpurchaser.Purchaser
-}
-
-func Router(group *echo.Group) func(purchaserHandler *Handler) {
-	return func(h *Handler) {
-		group.POST("/", h.Purchase)
+func ConfigureRouting(g *echo.Group) func(p productpurchaser.Purchaser) {
+	return func(p productpurchaser.Purchaser) {
+		g.POST("/", purchase(p))
 	}
 }
 
-func (h *Handler) Purchase(c echo.Context) error {
-	var req OrderCreate
-	if err := c.Bind(&req); err != nil {
-		return domain.NewAppError(err, domain.BadRequestError)
+func purchase(p productpurchaser.Purchaser) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var request OrderCreate
+		err := c.Bind(&request)
+		if err != nil {
+			appErr := domain.NewAppError(err, domain.BadRequestError)
+			return appErr
+		}
+
+		orderId, appErr := p.Purchase(fromRequestToOrder(request))
+		if appErr != nil {
+			return appErr
+		}
+
+		return c.JSON(http.StatusCreated,
+			fmt.Sprintf("Order with id %v created", orderId))
 	}
-
-	orderId, appErr := h.purchaser.Purchase(fromRequestToOrder(req))
-	if appErr != nil {
-		return appErr
-	}
-
-	return c.JSON(http.StatusCreated,
-		fmt.Sprintf("Order with id %v created", orderId))
-}
-
-func New(productPurchaser productpurchaser.Purchaser) *Handler {
-	return &Handler{productPurchaser}
 }

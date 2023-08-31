@@ -6,7 +6,7 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func fromUserToResponse(user domain.User) UserResponse {
+func fromUserToResponse(user *domain.User) UserResponse {
 	return UserResponse{
 		Id:           user.Id,
 		CompleteName: strings.Join([]string{user.Name, user.Surname}, " "),
@@ -20,7 +20,7 @@ func fromUserToResponse(user domain.User) UserResponse {
 func fromUsersToResponse(users []domain.User) []UserResponse {
 	var res = make([]UserResponse, 0)
 	for _, v := range users {
-		res = append(res, fromUserToResponse(v))
+		res = append(res, fromUserToResponse(&v))
 	}
 
 	return res

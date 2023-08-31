@@ -3,99 +3,94 @@ package address
 import (
 	"database/sql"
 	"errors"
+	sqlUtil "github.com/rierarizzo/cafelatte/pkg/utils/sql"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/rierarizzo/cafelatte/internal/domain"
-	"github.com/rierarizzo/cafelatte/pkg/constants/misc"
-	"github.com/rierarizzo/cafelatte/pkg/params/request"
-	"github.com/sirupsen/logrus"
-)
-
-var (
-	selectAddressError = errors.New("select address error")
-	insertAddressError = errors.New("insert address error")
 )
 
 type Repository struct {
 	db *sqlx.DB
 }
 
-func (r Repository) SelectAddressesByUserId(userId int) ([]domain.Address,
-	*domain.AppError) {
+func New(db *sqlx.DB) *Repository {
+	return &Repository{db}
+}
+
+func (r Repository) SelectAddressesByUserId(userId int) ([]domain.Address, *domain.AppError) {
 	var addressesModel []Model
 
-	var query = "select * from UserAddress where UserId=? and Status=true"
-
+	query := `
+		SELECT * FROM UserAddress WHERE UserId=? AND Status=TRUE
+	`
 	err := r.db.Select(&addressesModel, query, userId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			appErr := domain.NewAppErrorWithType(domain.NotFoundError)
-			return nil, appErr
+			return []domain.Address{}, nil
 		}
 
-		appErr := domain.NewAppError(selectAddressError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
 		return nil, appErr
 	}
 
-	return fromModelsToAddresses(addressesModel), nil
+	addresses := fromModelsToAddresses(addressesModel)
+	return addresses, nil
 }
 
 func (r Repository) InsertUserAddress(userId int,
 	address domain.Address) (*domain.Address, *domain.AppError) {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
-
-	rollbackAndError := func(tx *sqlx.Tx, err error) *domain.AppError {
-		_ = tx.Rollback()
-
-		log.Error(err)
-		if errors.Is(err, sql.ErrNoRows) {
-			return domain.NewAppErrorWithType(domain.NotFoundError)
-		}
-
-		return domain.NewAppError(insertAddressError, domain.RepositoryError)
+	tx, appErr := sqlUtil.StartTransaction(r.db)
+	if appErr != nil {
+		return nil, appErr
 	}
 
-	tx, err := r.db.Beginx()
-	if err != nil {
-		return nil, rollbackAndError(tx, err)
+	defer sqlUtil.RollbackIfPanic(tx)
+
+	model := fromAddressToModel(address)
+
+	query := `
+		INSERT INTO UserAddress (Type, UserId, ProvinceId, CityId, PostalCode, Detail) 
+		VALUES (?,?,?,?,?,?)
+	`
+	result, appErr := sqlUtil.ExecWithTransaction(tx,
+		query,
+		model.Type,
+		userId,
+		model.ProvinceId,
+		model.CityId,
+		model.PostalCode,
+		model.Detail)
+	if appErr != nil {
+		return nil, appErr
 	}
 
-	addressModel := fromAddressToModel(address)
-	query := `insert into UserAddress (Type, UserId, ProvinceId, CityId, PostalCode, 
-        Detail) values (?,?,?,?,?,?)`
-
-	result, err := tx.Exec(query, addressModel.Type, userId,
-		addressModel.ProvinceId, addressModel.CityId, addressModel.PostalCode,
-		addressModel.Detail)
-	if err != nil {
-		return nil, rollbackAndError(tx, err)
+	addressId, appErr := sqlUtil.GetLastInsertedId(result)
+	if appErr != nil {
+		return nil, appErr
 	}
+	address.Id = addressId
 
-	addressId, _ := result.LastInsertId()
-	address.Id = int(addressId)
-
-	err = tx.Commit()
-	if err != nil {
-		return nil, rollbackAndError(tx, err)
+	if appErr = sqlUtil.CommitTransaction(tx); appErr != nil {
+		return nil, appErr
 	}
 
 	return &address, nil
 }
 
 func (r Repository) SelectCityNameById(id int) (string, *domain.AppError) {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
-
 	var cityName string
-	var query = "select Name from City where Id=?"
 
+	query := `
+		SELECT Name FROM City WHERE Id=?
+	`
 	err := r.db.Get(&cityName, query, id)
 	if err != nil {
-		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", domain.NewAppErrorWithType(domain.NotFoundError)
+			appErr := domain.NewAppError("city not found", domain.NotFoundError)
+			return "", appErr
 		}
 
-		appErr := domain.NewAppError(selectAddressError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
 		return "", appErr
 	}
 
@@ -103,25 +98,22 @@ func (r Repository) SelectCityNameById(id int) (string, *domain.AppError) {
 }
 
 func (r Repository) SelectProvinceNameById(id int) (string, *domain.AppError) {
-	log := logrus.WithField(misc.RequestIdKey, request.Id())
-
 	var provinceName string
-	var query = "select Name from Province where Id=?"
 
+	query := `
+		SELECT Name FROM Province WHERE Id=?
+	`
 	err := r.db.Get(&provinceName, query, id)
 	if err != nil {
-		log.Error(err)
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", domain.NewAppErrorWithType(domain.NotFoundError)
+			appErr := domain.NewAppError("province not found",
+				domain.NotFoundError)
+			return "", appErr
 		}
 
-		appErr := domain.NewAppError(selectAddressError, domain.RepositoryError)
+		appErr := domain.NewAppError(err, domain.RepositoryError)
 		return "", appErr
 	}
 
 	return provinceName, nil
-}
-
-func New(db *sqlx.DB) *Repository {
-	return &Repository{db}
 }

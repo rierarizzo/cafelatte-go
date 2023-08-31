@@ -2,7 +2,6 @@ package http
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	addressmanagerDomain "github.com/rierarizzo/cafelatte/internal/domain/addressmanager"
 	authenticatorDomain "github.com/rierarizzo/cafelatte/internal/domain/authenticator"
 	cardmanagerDomain "github.com/rierarizzo/cafelatte/internal/domain/cardmanager"
@@ -12,6 +11,7 @@ import (
 	addressmanagerHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/addressmanager"
 	authenticatorHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/authenticator"
 	cardmanagerHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/cardmanager"
+	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/cors"
 	errorHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/error"
 	"github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/logger"
 	productmanagerHttp "github.com/rierarizzo/cafelatte/internal/infrastructure/api/http/productmanager"
@@ -31,7 +31,7 @@ func Router(userManager usermanagerDomain.Manager,
 	/* Middlewares */
 	e.HTTPErrorHandler = errorHttp.CustomHttpErrorHandler
 
-	e.Use(middleware.CORS())
+	e.Use(cors.CustomMiddleware())
 	e.Use(logger.CustomMiddleware())
 	e.Use(requestid.CustomMiddleware())
 
@@ -42,12 +42,12 @@ func Router(userManager usermanagerDomain.Manager,
 	purchase := e.Group("/purchase", authenticatorHttp.Middleware)
 
 	/* Routers */
-	authenticatorHttp.Router(auth)(authenticatorHttp.New(authenticator))
-	usermanagerHttp.Router(users)(usermanagerHttp.New(userManager))
-	cardmanagerHttp.Router(users)(cardmanagerHttp.New(cardManager))
-	addressmanagerHttp.Router(users)(addressmanagerHttp.New(addressManager))
-	productmanagerHttp.Router(products)(productmanagerHttp.New(productManager))
-	productpurchaserHttp.Router(purchase)(productpurchaserHttp.New(purchaser))
+	authenticatorHttp.ConfigureRouting(auth)(authenticator)
+	usermanagerHttp.ConfigureRouting(users)(userManager)
+	cardmanagerHttp.ConfigureRouting(users)(cardManager)
+	addressmanagerHttp.ConfigureRouting(users)(addressManager)
+	productmanagerHttp.ConfigureRouting(products)(productManager)
+	productpurchaserHttp.ConfigureRouting(purchase)(purchaser)
 
 	return e
 }
