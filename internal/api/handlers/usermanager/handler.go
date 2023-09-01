@@ -3,6 +3,7 @@ package usermanager
 import (
 	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/usecases/usermanager"
+	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"net/http"
 	"strconv"
 
@@ -27,7 +28,7 @@ func getAllUsers(m usermanager.Manager) echo.HandlerFunc {
 		}
 
 		response := fromUsersToResponse(users)
-		return c.JSON(http.StatusOK, response)
+		return httpUtil.RespondWithJSON(c, http.StatusOK, response)
 	}
 }
 
@@ -45,7 +46,7 @@ func findUserById(m usermanager.Manager) echo.HandlerFunc {
 		}
 
 		response := fromUserToResponse(user)
-		return c.JSON(http.StatusOK, response)
+		return httpUtil.RespondWithJSON(c, http.StatusOK, response)
 	}
 }
 
@@ -70,7 +71,7 @@ func updateUserById(m usermanager.Manager) echo.HandlerFunc {
 		}
 
 		response := fmt.Sprintf("User %v updated", userId)
-		return c.JSON(http.StatusOK, response)
+		return httpUtil.RespondWithJSON(c, http.StatusOK, response)
 	}
 }
 
@@ -88,6 +89,6 @@ func deleteUserById(m usermanager.Manager) echo.HandlerFunc {
 		}
 
 		response := fmt.Sprintf("User %v deleted", userId)
-		return c.JSON(http.StatusOK, response)
+		return httpUtil.RespondWithJSON(c, http.StatusOK, response)
 	}
 }

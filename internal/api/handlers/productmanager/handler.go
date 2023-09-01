@@ -3,6 +3,7 @@ package productmanager
 import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/usecases/productmanager"
+	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -39,7 +40,7 @@ func getAllProducts(m productmanager.Manager) echo.HandlerFunc {
 		}
 
 		response := fromProductsToResponse(products)
-		return c.JSON(http.StatusOK, response)
+		return httpUtil.RespondWithJSON(c, http.StatusOK, response)
 	}
 }
 
@@ -51,6 +52,6 @@ func getProductCategories(m productmanager.Manager) echo.HandlerFunc {
 		}
 
 		response := fromProductCategoriesToResponse(categories)
-		return c.JSON(http.StatusOK, response)
+		return httpUtil.RespondWithJSON(c, http.StatusOK, response)
 	}
 }

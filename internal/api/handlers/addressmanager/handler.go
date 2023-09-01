@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/rierarizzo/cafelatte/internal/domain"
 	"github.com/rierarizzo/cafelatte/internal/usecases/addressmanager"
+	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"net/http"
 	"strconv"
 )
@@ -31,7 +32,7 @@ func findAddressByUserId(m addressmanager.Manager) echo.HandlerFunc {
 		}
 
 		response := fromAddressesToResponse(addresses)
-		return c.JSON(http.StatusOK, response)
+		return httpUtil.RespondWithJSON(c, http.StatusOK, response)
 	}
 }
 
@@ -56,13 +57,14 @@ func registerAddressByUserId(m addressmanager.Manager) echo.HandlerFunc {
 			return appErr
 		}
 
-		address, appErr := m.AddUserAddress(userId,
-			fromRequestToAddress(request))
+		address, appErr := m.AddUserAddress(
+			userId, fromRequestToAddress(request),
+		)
 		if appErr != nil {
 			return appErr
 		}
 
 		response := fromAddressToResponse(address)
-		return c.JSON(http.StatusCreated, response)
+		return httpUtil.RespondWithJSON(c, http.StatusCreated, response)
 	}
 }

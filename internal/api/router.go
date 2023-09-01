@@ -32,9 +32,9 @@ func Router(userManager usermanagerDomain.Manager,
 	/* Middlewares */
 	e.HTTPErrorHandler = errorHttp.CustomHttpErrorHandler
 
+	e.Use(requestid.CustomMiddleware())
 	e.Use(cors.CustomMiddleware())
 	e.Use(logger.CustomMiddleware())
-	e.Use(requestid.CustomMiddleware())
 
 	/* Groups */
 	auth := e.Group("/auth")

@@ -14,7 +14,7 @@ type CardCreate struct {
 	CVV             string `json:"cvv"`
 }
 
-func (dto *CardCreate) Validate() error {
+func (dto CardCreate) Validate() error {
 	return validation.ValidateStruct(
 		&dto,
 		validation.Field(

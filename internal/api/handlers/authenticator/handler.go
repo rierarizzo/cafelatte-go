@@ -2,6 +2,7 @@ package authenticator
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/usecases/authenticator"
+	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -36,7 +37,7 @@ func signUp(a authenticator.Authenticator) echo.HandlerFunc {
 		}
 
 		response := fromAuthUserToResponse(authorized)
-		return c.JSON(http.StatusCreated, response)
+		return httpUtil.RespondWithJSON(c, http.StatusCreated, response)
 	}
 }
 
@@ -61,6 +62,6 @@ func signIn(a authenticator.Authenticator) echo.HandlerFunc {
 		}
 
 		response := fromAuthUserToResponse(authorized)
-		return c.JSON(http.StatusOK, response)
+		return httpUtil.RespondWithJSON(c, http.StatusOK, response)
 	}
 }

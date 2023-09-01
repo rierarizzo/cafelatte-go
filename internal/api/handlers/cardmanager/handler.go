@@ -2,6 +2,7 @@ package cardmanager
 
 import (
 	"github.com/rierarizzo/cafelatte/internal/usecases/cardmanager"
+	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"net/http"
 	"strconv"
 
@@ -32,7 +33,7 @@ func getCardsByUserId(m cardmanager.Manager) echo.HandlerFunc {
 		}
 
 		response := fromCardsToResponse(cards)
-		return c.JSON(http.StatusOK, response)
+		return httpUtil.RespondWithJSON(c, http.StatusOK, response)
 	}
 }
 
@@ -63,6 +64,6 @@ func addNewCard(m cardmanager.Manager) echo.HandlerFunc {
 		}
 
 		response := fromCardToResponse(card)
-		return c.JSON(http.StatusCreated, response)
+		return httpUtil.RespondWithJSON(c, http.StatusCreated, response)
 	}
 }

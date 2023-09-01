@@ -3,7 +3,7 @@ module github.com/rierarizzo/cafelatte
 go 1.20
 
 require (
-	github.com/aws/aws-sdk-go v1.44.333
+	github.com/aws/aws-sdk-go v1.45.1
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/go-ozzo/ozzo-validation v3.6.0+incompatible // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/uuid v1.3.1 // indirect

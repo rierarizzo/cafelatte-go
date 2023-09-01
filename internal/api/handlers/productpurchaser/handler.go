@@ -3,6 +3,7 @@ package productpurchaser
 import (
 	"fmt"
 	"github.com/rierarizzo/cafelatte/internal/usecases/productpurchaser"
+	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -29,7 +30,7 @@ func purchase(p productpurchaser.Purchaser) echo.HandlerFunc {
 			return appErr
 		}
 
-		return c.JSON(http.StatusCreated,
-			fmt.Sprintf("Order with id %v created", orderId))
+		response := fmt.Sprintf("Order with id %v created", orderId)
+		return httpUtil.RespondWithJSON(c, http.StatusCreated, response)
 	}
 }

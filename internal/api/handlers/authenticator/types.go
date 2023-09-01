@@ -15,7 +15,7 @@ type UserSignup struct {
 	RoleCode    string `json:"role"`
 }
 
-func (dto *UserSignup) Validate() error {
+func (dto UserSignup) Validate() error {
 	return validation.ValidateStruct(
 		&dto,
 		validation.Field(
@@ -36,7 +36,7 @@ type UserSignin struct {
 	Password string `json:"password"`
 }
 
-func (dto *UserSignin) Validate() error {
+func (dto UserSignin) Validate() error {
 	return validation.ValidateStruct(
 		&dto,
 		validation.Field(&dto.Email, validation.Required, is.Email),

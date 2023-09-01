@@ -2,6 +2,7 @@ package error
 
 import (
 	"errors"
+	httpUtil "github.com/rierarizzo/cafelatte/pkg/utils/http"
 	"net/http"
 	"time"
 
@@ -9,12 +10,10 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-type Response struct {
-	Status    int       `json:"status"`
+type Body struct {
 	ErrorType string    `json:"errorType"`
 	ErrorMsg  string    `json:"errorMsg"`
 	IssuedAt  time.Time `json:"issuedAt"`
-	RequestId any       `json:"requestId"`
 }
 
 func CustomHttpErrorHandler(err error, c echo.Context) {
@@ -23,15 +22,13 @@ func CustomHttpErrorHandler(err error, c echo.Context) {
 
 	if ok {
 		statusCode := getStatusCode(appErr.Type)
-		errorResponse := Response{
-			Status:    statusCode,
+		errorBody := Body{
 			ErrorType: appErr.Type,
 			ErrorMsg:  appErr.Err.Error(),
 			IssuedAt:  time.Now(),
-			RequestId: c.Request().Header.Get("X-Request-ID"),
 		}
 
-		_ = c.JSON(statusCode, errorResponse)
+		_ = httpUtil.RespondWithError(c, statusCode, errorBody)
 	}
 }
 
