@@ -45,14 +45,12 @@ func registerAddressByUserId(m addressmanager.Manager) echo.HandlerFunc {
 			return appErr
 		}
 
-		err = c.Bind(&request)
-		if err != nil {
+		if err = c.Bind(&request); err != nil {
 			appErr := domain.NewAppError(err, domain.BadRequestError)
 			return appErr
 		}
 
-		err = request.Validate()
-		if err != nil {
+		if err = request.Validate(); err != nil {
 			appErr := domain.NewAppError(err, domain.BadRequestError)
 			return appErr
 		}
