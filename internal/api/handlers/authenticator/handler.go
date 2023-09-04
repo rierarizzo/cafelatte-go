@@ -9,13 +9,6 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func ConfigureRouting(group *echo.Group) func(a authenticator.Authenticator) {
-	return func(a authenticator.Authenticator) {
-		group.POST("/signup", signUp(a))
-		group.POST("/signin", signIn(a))
-	}
-}
-
 func signUp(a authenticator.Authenticator) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var request UserSignup

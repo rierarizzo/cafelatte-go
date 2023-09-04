@@ -10,21 +10,11 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func ConfigureRouting(g *echo.Group) func(m cardmanager.Manager) {
-	cardsGroup := g.Group("/card")
-
-	return func(m cardmanager.Manager) {
-		cardsGroup.GET("/card/find/:userId", getCardsByUserId(m))
-		cardsGroup.POST("/card/register/:userId", addNewCard(m))
-	}
-}
-
 func getCardsByUserId(m cardmanager.Manager) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := strconv.Atoi(c.Param("userId"))
 		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		cards, appErr := m.GetCardsByUserId(userId)
@@ -41,21 +31,16 @@ func addNewCard(m cardmanager.Manager) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := strconv.Atoi(c.Param("userId"))
 		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		var request CardCreate
-		err = c.Bind(&request)
-		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+		if err = c.Bind(&request); err != nil {
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
-		err = request.Validate()
-		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+		if err = request.Validate(); err != nil {
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		card, appErr := m.AddUserCard(userId, fromRequestToCard(request))

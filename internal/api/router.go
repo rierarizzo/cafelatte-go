@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/labstack/echo/v4"
 	addressmanagerHttp "github.com/rierarizzo/cafelatte/internal/api/handlers/addressmanager"
-	authenticator2 "github.com/rierarizzo/cafelatte/internal/api/handlers/authenticator"
+	authenticatorHttp "github.com/rierarizzo/cafelatte/internal/api/handlers/authenticator"
 	cardmanagerHttp "github.com/rierarizzo/cafelatte/internal/api/handlers/cardmanager"
 	productmanagerHttp "github.com/rierarizzo/cafelatte/internal/api/handlers/productmanager"
 	productpurchaserHttp "github.com/rierarizzo/cafelatte/internal/api/handlers/productpurchaser"
@@ -21,12 +21,9 @@ import (
 	usermanagerDomain "github.com/rierarizzo/cafelatte/internal/usecases/usermanager"
 )
 
-func Router(userManager usermanagerDomain.Manager,
-	authenticator authenticatorDomain.Authenticator,
-	addressManager addressmanagerDomain.Manager,
-	cardManager cardmanagerDomain.Manager,
-	productManager productmanagerDomain.Manager,
-	purchaser productpurchaserDomain.Purchaser) *echo.Echo {
+func Router(userManager usermanagerDomain.Manager, authenticator authenticatorDomain.Authenticator,
+	addressManager addressmanagerDomain.Manager, cardManager cardmanagerDomain.Manager,
+	productManager productmanagerDomain.Manager, purchaser productpurchaserDomain.Purchaser) *echo.Echo {
 	e := echo.New()
 
 	/* Middlewares */
@@ -43,12 +40,12 @@ func Router(userManager usermanagerDomain.Manager,
 	purchase := e.Group("/purchase", authenticator3.Middleware)
 
 	/* Routers */
-	authenticator2.ConfigureRouting(auth)(authenticator)
-	usermanagerHttp.ConfigureRouting(users)(userManager)
-	cardmanagerHttp.ConfigureRouting(users)(cardManager)
-	addressmanagerHttp.ConfigureRouting(users)(addressManager)
-	productmanagerHttp.ConfigureRouting(products)(productManager)
-	productpurchaserHttp.ConfigureRouting(purchase)(purchaser)
+	authenticatorHttp.Routes(auth)(authenticator)
+	usermanagerHttp.Routes(users)(userManager)
+	cardmanagerHttp.Routes(users)(cardManager)
+	addressmanagerHttp.Routes(users)(addressManager)
+	productmanagerHttp.Routes(products)(productManager)
+	productpurchaserHttp.Routes(purchase)(purchaser)
 
 	return e
 }

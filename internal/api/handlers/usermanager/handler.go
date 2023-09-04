@@ -11,15 +11,6 @@ import (
 	"github.com/rierarizzo/cafelatte/internal/domain"
 )
 
-func ConfigureRouting(g *echo.Group) func(m usermanager.Manager) {
-	return func(m usermanager.Manager) {
-		g.GET("/find", getAllUsers(m))
-		g.GET("/find/:userId", findUserById(m))
-		g.PUT("/update/:userId", updateUserById(m))
-		g.DELETE("/delete/:userId", deleteUserById(m))
-	}
-}
-
 func getAllUsers(m usermanager.Manager) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		users, appErr := m.GetUsers()
@@ -36,8 +27,7 @@ func findUserById(m usermanager.Manager) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := strconv.Atoi(c.Param("userId"))
 		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		user, appErr := m.FindUserById(userId)
@@ -54,15 +44,12 @@ func updateUserById(m usermanager.Manager) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := strconv.Atoi(c.Param("userId"))
 		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		var request UserUpdate
-		err = c.Bind(&request)
-		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+		if err = c.Bind(&request); err != nil {
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		appErr := m.UpdateUserById(userId, fromRequestToUser(request))
@@ -79,12 +66,10 @@ func deleteUserById(m usermanager.Manager) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		userId, err := strconv.Atoi(c.Param("userId"))
 		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
-		appErr := m.DeleteUserById(userId)
-		if appErr != nil {
+		if appErr := m.DeleteUserById(userId); appErr != nil {
 			return appErr
 		}
 

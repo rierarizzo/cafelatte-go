@@ -10,13 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func ConfigureRouting(g *echo.Group) func(m productmanager.Manager) {
-	return func(m productmanager.Manager) {
-		g.GET("/find", getAllProducts(m))
-		g.GET("/find/categories", getProductCategories(m))
-	}
-}
-
 func getAllProducts(m productmanager.Manager) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var products []domain.Product
