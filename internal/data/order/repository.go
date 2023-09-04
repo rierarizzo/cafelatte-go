@@ -17,7 +17,8 @@ func New(db *sqlx.DB) *Repository {
 	return &Repository{db}
 }
 
-func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppError) {
+func (r *Repository) InsertPurchaseOrder(order domain.Order) (int,
+	*domain.AppError) {
 	tx, appErr := sqlUtil.StartTransaction(r.db)
 	if appErr != nil {
 		return 0, appErr
@@ -119,8 +120,7 @@ func updateOrderAmount(tx *sqlx.Tx, orderId int) *domain.AppError {
 	`
 	err := tx.Get(&total, query, orderId)
 	if err != nil {
-		appErr := domain.NewAppError(err, domain.RepositoryError)
-		return appErr
+		return domain.NewAppError(err, domain.RepositoryError)
 	}
 
 	query = `
@@ -128,8 +128,7 @@ func updateOrderAmount(tx *sqlx.Tx, orderId int) *domain.AppError {
 	`
 	_, err = tx.Exec(query, total, orderId)
 	if err != nil {
-		appErr := domain.NewAppError(err, domain.RepositoryError)
-		return appErr
+		return domain.NewAppError(err, domain.RepositoryError)
 	}
 
 	return nil

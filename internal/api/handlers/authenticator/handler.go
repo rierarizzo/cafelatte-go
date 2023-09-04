@@ -21,14 +21,12 @@ func signUp(a authenticator.Authenticator) echo.HandlerFunc {
 		var request UserSignup
 		err := c.Bind(&request)
 		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		err = request.Validate()
 		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		authorized, appErr := a.SignUp(fromRequestToUser(request))
@@ -46,14 +44,12 @@ func signIn(a authenticator.Authenticator) echo.HandlerFunc {
 		var request UserSignin
 		err := c.Bind(&request)
 		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		err = request.Validate()
 		if err != nil {
-			appErr := domain.NewAppError(err, domain.BadRequestError)
-			return appErr
+			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
 		authorized, appErr := a.SignIn(request.Email, request.Password)
