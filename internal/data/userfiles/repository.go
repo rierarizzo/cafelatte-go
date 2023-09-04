@@ -20,8 +20,7 @@ func New(s3Client *s3.S3) *Repository {
 	return &Repository{s3Client}
 }
 
-func (r *Repository) UpdateProfilePicById(userId int, pic *multipart.FileHeader,
-	picName string) (string, *domain.AppError) {
+func (r *Repository) UpdateProfilePicById(userId int, pic *multipart.FileHeader, picName string) (string, *domain.AppError) {
 	file, err := pic.Open()
 	if err != nil {
 		return "", domain.NewAppErrorWithType(domain.RepositoryError)
@@ -42,9 +41,7 @@ func (r *Repository) UpdateProfilePicById(userId int, pic *multipart.FileHeader,
 	}
 
 	photoURL := fmt.Sprintf("https://%s.s3.amazonaws.com/uploads/user%d/%s",
-		bucketName,
-		userId,
-		pic.Filename)
+		bucketName, userId, pic.Filename)
 
 	err = file.Close()
 	if err != nil {

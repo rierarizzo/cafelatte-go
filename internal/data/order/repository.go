@@ -17,8 +17,7 @@ func New(db *sqlx.DB) *Repository {
 	return &Repository{db}
 }
 
-func (r *Repository) InsertPurchaseOrder(order domain.Order) (int,
-	*domain.AppError) {
+func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppError) {
 	tx, appErr := sqlUtil.StartTransaction(r.db)
 	if appErr != nil {
 		return 0, appErr
@@ -55,8 +54,7 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int,
 			}()
 
 			product := fromProductInOrderToModel(entity)
-			_, err = insertProductStmnt.Exec(orderId,
-				product.ProductId,
+			_, err = insertProductStmnt.Exec(orderId, product.ProductId,
 				product.Quantity)
 			if err != nil {
 				errCh <- err
@@ -83,8 +81,7 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int,
 	return orderId, nil
 }
 
-func generatePurchaseOrderId(tx *sqlx.Tx,
-	order domain.Order) (int, *domain.AppError) {
+func generatePurchaseOrderId(tx *sqlx.Tx, order domain.Order) (int, *domain.AppError) {
 	model := fromOrderToModel(order)
 
 	query := `
@@ -92,12 +89,8 @@ func generatePurchaseOrderId(tx *sqlx.Tx,
 		    (UserId, ShippingAddressId, PaymentMethodId, Notes, OrderedAt) 
 		VALUES (?,?,?,?,?)
 	`
-	result, appErr := sqlUtil.ExecWithTransaction(tx,
-		query,
-		model.UserId,
-		model.ShippingAddressId,
-		model.PaymentMethodId,
-		model.Notes.String,
+	result, appErr := sqlUtil.ExecWithTransaction(tx, query, model.UserId,
+		model.ShippingAddressId, model.PaymentMethodId, model.Notes.String,
 		time.Now())
 	if appErr != nil {
 		return 0, appErr
