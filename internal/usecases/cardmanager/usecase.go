@@ -13,8 +13,7 @@ func New(cardRepository CardRepository) *DefaultManager {
 	return &DefaultManager{cardRepository}
 }
 
-func (m DefaultManager) GetCardsByUserId(userId int) ([]domain.PaymentCard,
-	*domain.AppError) {
+func (m DefaultManager) GetCardsByUserId(userId int) ([]domain.PaymentCard, *domain.AppError) {
 	cards, appErr := m.cardRepository.SelectCardsByUserId(userId)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
@@ -27,8 +26,7 @@ func (m DefaultManager) GetCardsByUserId(userId int) ([]domain.PaymentCard,
 	return cards, nil
 }
 
-func (m DefaultManager) AddUserCard(userId int,
-	card domain.PaymentCard) (*domain.PaymentCard, *domain.AppError) {
+func (m DefaultManager) AddUserCard(userId int, card domain.PaymentCard) (*domain.PaymentCard, *domain.AppError) {
 	hash, appErr := crypt.HashText(card.Number)
 	if appErr != nil {
 		return nil, appErr

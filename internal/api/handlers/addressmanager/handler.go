@@ -42,8 +42,7 @@ func registerAddressByUserId(m addressmanager.Manager) echo.HandlerFunc {
 			return domain.NewAppError(err, domain.BadRequestError)
 		}
 
-		address, appErr := m.AddUserAddress(userId,
-			fromRequestToAddress(request))
+		address, appErr := m.AddUserAddress(userId, fromRequestToAddress(request))
 		if appErr != nil {
 			return appErr
 		}

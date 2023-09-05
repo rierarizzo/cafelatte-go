@@ -33,7 +33,7 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppEr
 	query := `
 		INSERT INTO ProductInOrder (OrderId, ProductId, Quantity) VALUES (?,?,?)
 	`
-	insertProductStmnt, err := tx.Prepare(query)
+	insertProductStatement, err := tx.Prepare(query)
 	if err != nil {
 		appErr = domain.NewAppError(err, domain.RepositoryError)
 		return 0, appErr
@@ -54,8 +54,7 @@ func (r *Repository) InsertPurchaseOrder(order domain.Order) (int, *domain.AppEr
 			}()
 
 			product := fromProductInOrderToModel(entity)
-			_, err = insertProductStmnt.Exec(orderId, product.ProductId,
-				product.Quantity)
+			_, err = insertProductStatement.Exec(orderId, product.ProductId, product.Quantity)
 			if err != nil {
 				errCh <- err
 				return
@@ -89,9 +88,8 @@ func generatePurchaseOrderId(tx *sqlx.Tx, order domain.Order) (int, *domain.AppE
 		    (UserId, ShippingAddressId, PaymentMethodId, Notes, OrderedAt) 
 		VALUES (?,?,?,?,?)
 	`
-	result, appErr := sqlUtil.ExecWithTransaction(tx, query, model.UserId,
-		model.ShippingAddressId, model.PaymentMethodId, model.Notes.String,
-		time.Now())
+	result, appErr := sqlUtil.ExecWithTransaction(tx, query, model.UserId, model.ShippingAddressId,
+		model.PaymentMethodId, model.Notes.String, time.Now())
 	if appErr != nil {
 		return 0, appErr
 	}

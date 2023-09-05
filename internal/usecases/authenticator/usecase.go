@@ -15,7 +15,8 @@ func New(userRepository usermanager.UserRepository) *DefaultAuthenticator {
 	return &DefaultAuthenticator{userRepository}
 }
 
-func (a DefaultAuthenticator) SignUp(user domain.User) (*domain.AuthenticatedUser, *domain.AppError) {
+func (a DefaultAuthenticator) SignUp(user domain.User) (*domain.AuthenticatedUser,
+	*domain.AppError) {
 	hashedPass, appErr := crypt.HashText(user.Password)
 	if appErr != nil {
 		return nil, appErr
@@ -35,7 +36,8 @@ func (a DefaultAuthenticator) SignUp(user domain.User) (*domain.AuthenticatedUse
 	return authorized, nil
 }
 
-func (a DefaultAuthenticator) SignIn(email, password string) (*domain.AuthenticatedUser, *domain.AppError) {
+func (a DefaultAuthenticator) SignIn(email, password string) (*domain.AuthenticatedUser,
+	*domain.AppError) {
 	returnedUser, appErr := a.userRepository.SelectUserByEmail(email)
 	if appErr != nil {
 		if appErr.Type == domain.NotFoundError {
@@ -57,7 +59,8 @@ func (a DefaultAuthenticator) SignIn(email, password string) (*domain.Authentica
 	return authorized, nil
 }
 
-func AuthorizeUser(user domain.User) (*domain.AuthenticatedUser, *domain.AppError) {
+func AuthorizeUser(user domain.User) (*domain.AuthenticatedUser,
+	*domain.AppError) {
 	token, appErr := jsonwebtoken.CreateJWTToken(user)
 	if appErr != nil {
 		return nil, appErr
