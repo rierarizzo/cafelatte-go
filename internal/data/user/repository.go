@@ -88,14 +88,8 @@ func (r *Repository) InsertUser(user domain.User) (*domain.User, *domain.AppErro
 		INSERT INTO User (Username, Name, Surname, PhoneNumber, Email, Password, RoleCode) 
 		VALUES (?,?,?,?,?,?,?)
 	`
-	result, err := r.db.Exec(query,
-		model.Username,
-		model.Name,
-		model.Surname,
-		model.PhoneNumber,
-		model.Email,
-		model.Password,
-		model.RoleCode)
+	result, err := r.db.Exec(query, model.Username, model.Name, model.Surname, model.PhoneNumber, model.Email,
+		model.Password, model.RoleCode)
 	if err != nil {
 		appErr := domain.NewAppError(err, domain.RepositoryError)
 		return nil, appErr
@@ -112,19 +106,13 @@ func (r *Repository) InsertUser(user domain.User) (*domain.User, *domain.AppErro
 	return userToReturn, nil
 }
 
-func (r *Repository) UpdateUserById(userId int,
-	user domain.User) *domain.AppError {
+func (r *Repository) UpdateUserById(userId int, user domain.User) *domain.AppError {
 	var model = fromUserToModel(user)
 
 	var query = `
 		UPDATE User SET Username=?, Name=?, Surname=?, PhoneNumber=? WHERE Id=?
 	`
-	_, err := r.db.Exec(query,
-		model.Username,
-		model.Name,
-		model.Surname,
-		model.PhoneNumber,
-		userId)
+	_, err := r.db.Exec(query, model.Username, model.Name, model.Surname, model.PhoneNumber, userId)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			appErr := domain.NewAppError(NotFoundMsg, domain.NotFoundError)

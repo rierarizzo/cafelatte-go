@@ -32,8 +32,7 @@ func (m *DefaultManager) GetUsers() ([]domain.User, *domain.AppError) {
 // FindUserByEmail retrieves a usermanager from the system based on the
 // provided email and returns the usermanager if found, along with any error
 // encountered during the process.
-func (m *DefaultManager) FindUserByEmail(email string) (*domain.User,
-	*domain.AppError) {
+func (m *DefaultManager) FindUserByEmail(email string) (*domain.User, *domain.AppError) {
 	user, appErr := m.userRepository.SelectUserByEmail(email)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
@@ -65,8 +64,7 @@ func (m *DefaultManager) FindUserById(id int) (*domain.User, *domain.AppError) {
 // UpdateUserById updates the details of a usermanager in the system based on the
 // provided usermanager Id and usermanager object and returns an error, if any,
 // encountered during the process.
-func (m *DefaultManager) UpdateUserById(userId int,
-	user domain.User) *domain.AppError {
+func (m *DefaultManager) UpdateUserById(userId int, user domain.User) *domain.AppError {
 	appErr := m.userRepository.UpdateUserById(userId, user)
 	if appErr != nil {
 		if appErr.Type != domain.NotFoundError {
@@ -79,13 +77,11 @@ func (m *DefaultManager) UpdateUserById(userId int,
 	return nil
 }
 
-func (m *DefaultManager) UpdateProfilePicById(userId int,
-	pic *multipart.FileHeader) (string, *domain.AppError) {
+func (m *DefaultManager) UpdateProfilePicById(userId int, pic *multipart.FileHeader) (string, *domain.AppError) {
 	currentTimeInNano := time.Now().UnixNano()
 	picName := fmt.Sprintf("%v-%v", userId, currentTimeInNano)
 
-	picLink, appErr := m.userFilesStorage.UpdateProfilePicById(userId, pic,
-		picName)
+	picLink, appErr := m.userFilesStorage.UpdateProfilePicById(userId, pic, picName)
 	if appErr != nil {
 		return "", domain.NewAppError(appErr, domain.UnexpectedError)
 	}
@@ -106,8 +102,7 @@ func (m *DefaultManager) DeleteUserById(userId int) *domain.AppError {
 	return nil
 }
 
-func New(userRepository UserRepository,
-	userFilesStorage UserFilesRepository) *DefaultManager {
+func New(userRepository UserRepository, userFilesStorage UserFilesRepository) *DefaultManager {
 	return &DefaultManager{
 		userRepository:   userRepository,
 		userFilesStorage: userFilesStorage,
